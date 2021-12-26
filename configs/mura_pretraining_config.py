@@ -8,7 +8,6 @@ mura_config = {
         "image_height": 224,
         "image_width": 224,
         "image_channel": 3,
-        "num_classes": 2,
     },
     "train": {
         "augmentation": False,
