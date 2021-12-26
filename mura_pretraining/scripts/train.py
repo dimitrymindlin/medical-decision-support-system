@@ -12,7 +12,7 @@ import sys
 # set cli arguments
 for arg in sys.argv:
     if arg == "--use_class_weights":
-        mura_config["train"]["train_base"] = True
+        mura_config["train"]["use_class_weights"] = True
     elif arg == "--augmentation":
         mura_config["train"]["augmentation"] = True
 
