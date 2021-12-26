@@ -1,0 +1,11 @@
+name: medical-decision-support-system
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pandas
+  - pip
+  - pip:
+      - tensorflow
+      - tensorflow-datasets==4.4.0
+      - kaggle
