@@ -6,4 +6,4 @@
 #SBATCH --mail-user=dmindlin@techfak.uni-bielefeld.de
 #SBATCH --mail-type=END
 
-srun load_dataset.job.sh
+srun load_mura_dataset.job.sh
