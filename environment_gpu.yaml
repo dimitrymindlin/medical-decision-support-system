@@ -5,6 +5,7 @@ channels:
 dependencies:
   - pandas
   - pip
+  - tensorboard
   - pip:
       - tensorflow
       - tensorflow-datasets==4.4.0
