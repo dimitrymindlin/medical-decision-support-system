@@ -10,4 +10,4 @@ dependencies:
       - tensorflow
       - tensorflow-datasets==4.4.0
       - kaggle
-      - tensorflow-addons
+      - tensorflow-addons[tensorflow]
