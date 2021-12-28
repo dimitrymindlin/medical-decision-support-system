@@ -57,14 +57,15 @@ class MuraDataset():
         return {0: weight_for_0, 1: weight_for_1}
 
     def preprocess(self, image, label):
-
         height = self.config['data']['image_height']
         width = self.config['data']['image_width']
-        image = tf.image.resize(image, [height, width])
-        return tf.cast(image, tf.float32) / 255., label
+        image = tf.image.resize_with_pad(image, [height, width])
+        return tf.cast(image, tf.float32) / 255., label  # normalize pixel values
     
     def augment_data(self, image, label):
         image = tf.image.random_flip_left_right(image)
+        image = tf.image.random_flip_up_down(image)
+        image = tf.image.random_brightness(image, max_delta=0.2)
         return image, label
 
     def benchmark(self):
