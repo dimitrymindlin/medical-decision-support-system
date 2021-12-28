@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-#import tensorflow_addons as tfa # TODO INCLUDE f1 score on machine
+import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.mura_pretraining_config import mura_config
@@ -31,13 +31,12 @@ optimizer = tf.keras.optimizers.Adam(mura_config["train"]["learn_rate"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC',multi_label=True, num_labels=len(mura_config["data"]["class_names"]), from_logits=False)
 metric_bin_accuracy= tf.keras.metrics.BinaryAccuracy()
-metric_accuracy = tf.keras.metrics.Accuracy()
-#metric_f1 = tfa.metrics.F1Score(num_classes=len(mura_config["data"]["class_names"]), threshold=mura_config["test"]["F1_threshold"], average='macro')
+metric_f1 = tfa.metrics.F1Score(num_classes=len(mura_config["data"]["class_names"]), threshold=mura_config["test"]["F1_threshold"], average='macro')
 
 model.compile(
     optimizer=optimizer,
     loss=loss,
-    metrics=[metric_auc, metric_bin_accuracy, metric_accuracy], # metric_f1
+    metrics=[metric_auc, metric_bin_accuracy, metric_f1],
 )
 
 # Tensorboard Callback and config logging
