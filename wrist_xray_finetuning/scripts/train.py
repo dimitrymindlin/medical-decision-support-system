@@ -5,8 +5,8 @@ import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.wrist_xray_config import wrist_xray_config
-from writs_xray_finetuning.dataloader import WristXrayDataset
-from writs_xray_finetuning.model.wrist_xray_model import WristXrayDenseNet
+from wrist_xray_finetuning.dataloader import WristXrayDataset
+from wrist_xray_finetuning.model.wrist_xray_model import WristXrayDenseNet
 import sys
 
 config = wrist_xray_config

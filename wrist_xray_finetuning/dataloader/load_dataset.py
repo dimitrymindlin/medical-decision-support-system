@@ -1,8 +1,8 @@
 from configs.wrist_xray_config import wrist_xray_config
 import tensorflow_datasets as tfds
 
-from writs_xray_finetuning.dataloader.wrist_xray_dataset import WristXrayDataset
-from writs_xray_finetuning.dataloader.wrist_xray_tfds import WristXrayImages
+from wrist_xray_finetuning.dataloader.wrist_xray_dataset import WristXrayDataset
+from wrist_xray_finetuning.dataloader.wrist_xray_tfds import WristXrayImages
 
 wrist_xray_config["dataset"]["download"] = True
 
