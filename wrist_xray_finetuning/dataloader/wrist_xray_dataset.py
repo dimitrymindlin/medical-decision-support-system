@@ -9,7 +9,7 @@ class WristXrayDataset():
         self.config = config
 
         (train, validation, test), info = tfds.load(
-            'XrayWristImages',
+            'WristXrayImages',
             split=['train[:70%]', 'train[70%:90%]', 'train[:10%]'],
             shuffle_files=True,
             as_supervised=True,

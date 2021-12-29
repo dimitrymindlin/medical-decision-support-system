@@ -7,11 +7,11 @@ from wrist_xray_finetuning.dataloader.wrist_xray_tfds import WristXrayImages
 wrist_xray_config["dataset"]["download"] = True
 
 """(train, validation, test), info = tfds.load(
-            'XrayWristImages',
+            'WristXrayImages',
             split=['train[:70%]', 'train[70%:90%]', 'train[:10%]'],
             shuffle_files=True,
             as_supervised=True,
-            download=xray_wrist_config["dataset"]["download"],
+            download=wrist_xray_config["dataset"]["download"],
             with_info=True,
         )
 
