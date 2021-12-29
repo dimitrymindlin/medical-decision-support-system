@@ -1,4 +1,4 @@
-xray_wrist_config = {
+wrist_xray_config = {
     "dataset": {
         "download": False,
     },
@@ -10,14 +10,16 @@ xray_wrist_config = {
         "image_channel": 3,
     },
     "train": {
+        "train_base": True,
         "augmentation": False,
         "batch_size": 16,
         "learn_rate": 0.0001,
-        "epochs": 100,
+        "epochs": 2,
         "patience_learning_rate": 2,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8,
-        "use_class_weights": False
+        "use_class_weights": False,
+        "use_mura_weights": False
     },
     "test": {
         "batch_size": 16,
