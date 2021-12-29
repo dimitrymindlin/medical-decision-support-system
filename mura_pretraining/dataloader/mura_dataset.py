@@ -13,11 +13,10 @@ class MuraDataset():
             split=['train[:80%]', 'train[80%:]', 'test'],
             shuffle_files=True,
             as_supervised=True,
-            download=config["dataset"]["download"],
+            download=self.config["dataset"]["download"],
             with_info=True,
         )
         self.ds_info = info
-        #self.class_weights = info.metadata["class_weights"] # TODO: Calc class weights
 
         self.train_classweights = self._calc_class_weights_for_ds(train)
         self.ds_train = self._build_train_pipeline(train)
