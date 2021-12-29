@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-# import tensorflow_addons as tfa
+import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.wrist_xray_config import wrist_xray_config
 from writs_xray_finetuning.dataloader import WristXrayDataset
 from writs_xray_finetuning.model.wrist_xray_model import WristXrayDenseNet
 import sys
-
 
 config = wrist_xray_config
 # set cli arguments
@@ -17,7 +16,6 @@ for arg in sys.argv:
         config["train"]["use_class_weights"] = True
     elif arg == "--augmentation":
         config["train"]["augmentation"] = True
-
 
 input_shape = (None,
                config['data']['image_height'],
@@ -30,7 +28,7 @@ dataset = WristXrayDataset(config)
 train_base = config['train']['train_base']
 model = WristXrayDenseNet(config, train_base=train_base).model()
 if config['train']['use_mura_weights']:
-    model.load_weights("checkpoint/chexnet/best/cp.ckpt") # TODO: Adapt weights path
+    model.load_weights("checkpoint/chexnet/best/cp.ckpt")  # TODO: Adapt weights path
 
 # TODO: Check if you want HPARAMS with Optimizer and LR
 """optimizer_name = hparams[HP_OPTIMIZER]
@@ -45,16 +43,16 @@ loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
-# metric_f1 = tfa.metrics.F1Score(num_classes=len(mura_config["data"]["class_names"]), threshold=mura_config["test"]["F1_threshold"], average='macro')
+metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]), threshold=config["test"]["F1_threshold"], average='macro')
 
 model.compile(
     optimizer=optimizer,
     loss=loss,
-    metrics=[metric_auc, metric_bin_accuracy],  # metric_f1
+    metrics=[metric_auc, metric_bin_accuracy, metric_f1],  #
 )
 
 # Tensorboard Callback and config logging
-log_dir = 'logs/wrist_xray_training/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
+log_dir = '../../logs/wrist_xray/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
 config_matrix = [[k, str(w)] for k, w in config["train"].items()]
