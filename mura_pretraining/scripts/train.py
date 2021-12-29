@@ -25,7 +25,8 @@ dataset = MuraDataset(mura_config)
 
 
 # Model Definition
-model = MuraDenseNet(mura_config).model()
+train_base = mura_config['train']['train_base']
+model = MuraDenseNet(mura_config, train_base=train_base).model()
 
 #TODO: Check if you want HPARAMS with Optimizer and LR
 """optimizer_name = hparams[HP_OPTIMIZER]

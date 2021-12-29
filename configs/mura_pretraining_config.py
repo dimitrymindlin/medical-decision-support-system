@@ -1,6 +1,6 @@
 mura_config = {
     "dataset": {
-        "download": True,
+        "download": False,
     },
     "data": {
         "class_names": ["positive"],
@@ -10,6 +10,7 @@ mura_config = {
         "image_channel": 3,
     },
     "train": {
+        "train_base": True,
         "augmentation": False,
         "batch_size": 64,
         "learn_rate": 0.0001,
