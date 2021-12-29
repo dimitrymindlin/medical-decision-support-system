@@ -14,7 +14,7 @@ wrist_xray_config = {
         "augmentation": False,
         "batch_size": 16,
         "learn_rate": 0.0001,
-        "epochs": 2,
+        "epochs": 100,
         "patience_learning_rate": 2,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8,
