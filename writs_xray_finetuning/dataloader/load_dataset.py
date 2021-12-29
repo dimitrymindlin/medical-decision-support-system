@@ -1,10 +1,10 @@
-from configs.wrist_xray_config import xray_wrist_config
+from configs.wrist_xray_config import wrist_xray_config
 import tensorflow_datasets as tfds
 
 from writs_xray_finetuning.dataloader.wrist_xray_dataset import WristXrayDataset
 from writs_xray_finetuning.dataloader.wrist_xray_tfds import WristXrayImages
 
-xray_wrist_config["dataset"]["download"] = True
+wrist_xray_config["dataset"]["download"] = True
 
 """(train, validation, test), info = tfds.load(
             'XrayWristImages',
@@ -17,6 +17,6 @@ xray_wrist_config["dataset"]["download"] = True
 
 fig = tfds.visualization.show_examples(train, info)"""
 
-dataset = WristXrayDataset(xray_wrist_config)
+dataset = WristXrayDataset(wrist_xray_config)
 
 #dataset.benchmark()
