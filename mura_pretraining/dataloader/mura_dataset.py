@@ -59,7 +59,7 @@ class MuraDataset():
     def preprocess(self, image, label):
         height = self.config['data']['image_height']
         width = self.config['data']['image_width']
-        image = tf.image.resize_with_pad(image, [height, width])
+        image = tf.image.resize_with_pad(image, height, width)
         return tf.cast(image, tf.float32) / 255., label  # normalize pixel values
     
     def augment_data(self, image, label):

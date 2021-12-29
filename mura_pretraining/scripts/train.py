@@ -27,10 +27,19 @@ dataset = MuraDataset(mura_config)
 # Model Definition
 model = MuraDenseNet(mura_config).model()
 
+#TODO: Check if you want HPARAMS with Optimizer and LR
+"""optimizer_name = hparams[HP_OPTIMIZER]
+learning_rate = hparams[HP_L_RATE]
+if optimizer_name == "adam":
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+elif optimizer_name == "sgd":
+    optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate)"""
+
+
 optimizer = tf.keras.optimizers.Adam(mura_config["train"]["learn_rate"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC',multi_label=True, num_labels=len(mura_config["data"]["class_names"]), from_logits=False)
-metric_bin_accuracy= tf.keras.metrics.BinaryAccuracy()
+metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
 metric_f1 = tfa.metrics.F1Score(num_classes=len(mura_config["data"]["class_names"]), threshold=mura_config["test"]["F1_threshold"], average='macro')
 
 model.compile(
