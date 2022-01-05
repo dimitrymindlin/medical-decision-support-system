@@ -14,12 +14,12 @@ wrist_xray_config = {
         "augmentation": False,
         "batch_size": 16,
         "learn_rate": 0.0001,
-        "epochs": 100,
+        "epochs": 5,
         "patience_learning_rate": 2,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8,
         "use_class_weights": False,
-        "use_mura_weights": False
+        "use_mura_weights": True
     },
     "test": {
         "batch_size": 16,
