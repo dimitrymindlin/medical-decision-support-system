@@ -11,3 +11,4 @@ dependencies:
       - tensorflow-macos
       - tensorflow-datasets==4.4.0
       - kaggle
+      - keras-tuner
