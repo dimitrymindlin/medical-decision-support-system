@@ -46,7 +46,7 @@ def build_model(hp):
 
 tuner = kt.Hyperband(
     build_model,
-    objective='val_accuracy',
+    objective='val_binary_accuracy',
     max_epochs=30,
     directory=LOG_DIR)
 
