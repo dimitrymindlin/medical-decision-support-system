@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-import tensorflow_addons as tfa
+#import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.wrist_xray_config import wrist_xray_config
@@ -14,8 +14,10 @@ config = wrist_xray_config
 for arg in sys.argv:
     if arg == "--use_class_weights":
         config["train"]["use_class_weights"] = True
+        print("Using class weights...")
     elif arg == "--augmentation":
         config["train"]["augmentation"] = True
+        print("Using augmentation...")
 
 input_shape = (None,
                config['data']['image_height'],
@@ -28,7 +30,8 @@ dataset = WristXrayDataset(config)
 train_base = config['train']['train_base']
 model = WristXrayDenseNet(config, train_base=train_base).model()
 if config['train']['use_mura_weights']:
-    model.load_weights("checkpoint/chexnet/best/cp.ckpt")  # TODO: Adapt weights path
+    print("Using best mura weights...")
+    model.load_weights("../../checkpoints/mura/best/cp.ckpt")
 
 # TODO: Check if you want HPARAMS with Optimizer and LR
 """optimizer_name = hparams[HP_OPTIMIZER]
@@ -43,12 +46,12 @@ loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
-metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]), threshold=config["test"]["F1_threshold"], average='macro')
+#metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]), threshold=config["test"]["F1_threshold"], average='macro')
 
 model.compile(
     optimizer=optimizer,
     loss=loss,
-    metrics=[metric_auc, metric_bin_accuracy, metric_f1],  #
+    metrics=[metric_auc, metric_bin_accuracy],  #metric_f1
 )
 
 # Tensorboard Callback and config logging

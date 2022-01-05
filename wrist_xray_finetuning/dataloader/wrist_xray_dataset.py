@@ -2,9 +2,10 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 import numpy as np
 
+from wrist_xray_finetuning.dataloader.wrist_xray_tfds import WristXrayImages
+
 
 class WristXrayDataset():
-
     def __init__(self, config):
         self.config = config
 
@@ -22,6 +23,7 @@ class WristXrayDataset():
         self.ds_train = self._build_train_pipeline(train)
         self.ds_val = self._build_test_pipeline(validation)
         self.ds_test = self._build_test_pipeline(test)
+        self.test = test
 
     def _build_train_pipeline(self, ds):
         ds = ds.map(self.preprocess, num_parallel_calls=tf.data.AUTOTUNE)
@@ -35,7 +37,7 @@ class WristXrayDataset():
     def _build_test_pipeline(self, ds):
         ds = ds.map(
             self.preprocess, num_parallel_calls=tf.data.AUTOTUNE)
-        ds = ds.batch(self.config['test']['batch_size'])
+        #ds = ds.batch(self.config['test']['batch_size'])
         ds = ds.prefetch(tf.data.AUTOTUNE)
         return ds
 
