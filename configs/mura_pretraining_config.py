@@ -14,7 +14,7 @@ mura_config = {
         "augmentation": True,
         "batch_size": 64,
         "learn_rate": 0.0001,
-        "epochs": 100,
+        "epochs": 60,
         "patience_learning_rate": 2,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8,
