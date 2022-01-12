@@ -6,29 +6,27 @@ from datetime import datetime
 
 from configs.mura_pretraining_config import mura_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from mura_pretraining.model.mura_model import MuraDenseNet
+from mura_pretraining.model.mura_model import WristPredictNet
 import sys
 
 config = mura_config
+
 # set cli arguments
 for arg in sys.argv:
-    if arg == "--use_class_weights":
-        config["train"]["use_class_weights"] = True
-    elif arg == "--augmentation":
-        config["train"]["augmentation"] = True
-
-input_shape = (None,
-    config['data']['image_height'],
-    config['data']['image_width'],
-    config['data']['image_channel'])
-
-dataset = MuraDataset(config)
-
+    if arg == "--densenet":
+        config["model"]["name"] = "densenet"
+    elif arg == "--vgg":
+        config["model"]["name"] = "vgg"
+    elif arg == "--resnet":
+        config["model"]["name"] = "resnet"
+    elif arg == "--inception":
+        config["model"]["name"] = "inception"
 
 # Model Definition
 train_base = config['train']['train_base']
-model = MuraDenseNet(config, train_base=train_base).model()
+model = WristPredictNet(config, train_base=train_base).model()
 
+# Training Params
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC',multi_label=True, num_labels=len(config["data"]["class_names"]), from_logits=False)
@@ -68,11 +66,14 @@ early_stopping = tf.keras.callbacks.EarlyStopping(
 # Dynamic Learning Rate
 dyn_lr = tf.keras.callbacks.ReduceLROnPlateau(
     monitor="val_loss",
-    factor=0.1,
+    factor=config['train']['factor_learning_rate'],
     patience=config['train']['patience_learning_rate'],
     mode="min",
     min_lr=config['train']['min_learning_rate'],
 )
+
+# Get Dataset
+dataset = MuraDataset(config)
 
 # Class weights for training underrepresented classes
 class_weight = None
