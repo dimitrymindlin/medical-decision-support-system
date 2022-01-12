@@ -4,6 +4,7 @@
 # external
 import tensorflow as tf
 
+
 class WristPredictNet(tf.keras.Model):
     """MuraDenseNet Model Class with various base models"""
 
@@ -38,10 +39,17 @@ class WristPredictNet(tf.keras.Model):
         self.base_model.trainable = train_base
 
         self.img_input = tf.keras.Input(shape=self._input_shape)
-        self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid", name="predictions")
+        self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
+                                                name="predictions")
+
+        # Augmentation layers
+        self.random_flipping_aug = tf.keras.layers.RandomFlip(mode="vertical")
+        self.random_rotation_aug = tf.keras.layers.experimental.preprocessing.RandomRotation(0.3)
 
     def call(self, inputs):
         x = self.preprocessing_layer(inputs)
+        x = self.random_flipping_aug(x)
+        x = self.random_rotation_aug(x)
         x = self.base_model(x)
         return self.classifier(x)
 
