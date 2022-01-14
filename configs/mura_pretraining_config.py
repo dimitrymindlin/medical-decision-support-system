@@ -1,6 +1,6 @@
 mura_config = {
     "dataset": {
-        "download": False,
+        "download": True,
     },
     "data": {
         "class_names": ["positive"],

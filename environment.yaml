@@ -8,7 +8,7 @@ dependencies:
   - pandas
   - pip
   - pip:
-      - tensorflow-macos
+      - tensorflow-macos==2.7
       - tensorflow-datasets==4.4.0
       - kaggle
       - keras-tuner

@@ -17,6 +17,6 @@ fig = tfds.visualization.show_examples(train, info)"""
 
 dataset = MuraDataset(mura_config)
 
-dataset.benchmark()
+#dataset.benchmark()
 
 get_num_of_samples(dataset)

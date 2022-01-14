@@ -1,13 +1,13 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import numpy as np
-
+from mura_pretraining.dataloader.mura_tfds import MuraImages
 
 class MuraDataset():
 
     def __init__(self, config):
         self.config = config
-
+        print(self.config["dataset"]["download"])
         (train, validation, test), info = tfds.load(
             'MuraImages',
             split=['train[:80%]', 'train[80%:]', 'test'],
