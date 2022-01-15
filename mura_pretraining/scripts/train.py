@@ -10,6 +10,11 @@ from mura_pretraining.model.mura_model import WristPredictNet
 import sys
 
 config = mura_config
+print(f"Tensorflow version: {tf.VERSION}")
+if tf.test.gpu_device_name():
+    print('Default GPU Device:{}'.format(tf.test.gpu_device_name()))
+else:
+   print("Please install GPU version of TF")
 
 # set cli arguments
 for arg in sys.argv:
