@@ -19,6 +19,7 @@ class WristPredictNet(tf.keras.Model):
 
         self.img_input = tf.keras.Input(shape=self._input_shape)
 
+        print(f"Model name: {model_name}")
         if model_name == "densenet":
             self.preprocessing_layer = tf.keras.applications.densenet.preprocess_input
             self.base_model = tf.keras.applications.DenseNet169(include_top=False,
@@ -52,7 +53,6 @@ class WristPredictNet(tf.keras.Model):
                                                                 weights=weigths,
                                                                 pooling=config['model']['pooling'],
                                                                 classes=len(config['data']['class_names']))
-
 
         self.base_model.trainable = train_base
 
