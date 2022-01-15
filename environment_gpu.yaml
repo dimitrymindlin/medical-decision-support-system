@@ -6,6 +6,7 @@ dependencies:
   - pandas
   - pip
   - tensorboard
+  - cudnn=8.1
   - pip:
       - tensorflow-gpu==2.6.0
       - tensorflow-datasets==4.4.0
