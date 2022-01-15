@@ -17,28 +17,45 @@ class WristPredictNet(tf.keras.Model):
             self.config['data']['image_channel']
         )
 
-        if model_name == "densenet":
-            self.base_model = tf.keras.applications.DenseNet169()
-            self.preprocessing_layer = tf.keras.applications.densenet.preprocess_input
-        elif model_name == "vgg":
-            self.base_model = tf.keras.applications.VGG19()
-            self.preprocessing_layer = tf.keras.applications.vgg19.preprocess_input
-        elif model_name == "resnet":
-            self.base_model = tf.keras.applications.ResNet50()
-            self.preprocessing_layer = tf.keras.applications.resnet50.preprocess_input
-        elif model_name == "inception":
-            self.base_model = tf.keras.applications.InceptionV3()
-            self.preprocessing_layer = tf.keras.applications.inception_v3.preprocess_input
+        self.img_input = tf.keras.Input(shape=self._input_shape)
 
-        self.base_model.include_top = False,
-        self.base_model.input_tensor = self.img_input,
-        self.base_model.input_shape = self._input_shape,
-        self.base_model.weights = weigths,
-        self.base_model.pooling = config['model']['pooling'],
-        self.base_model.classes = len(config['data']['class_names'])
+        if model_name == "densenet":
+            self.preprocessing_layer = tf.keras.applications.densenet.preprocess_input
+            self.base_model = tf.keras.applications.DenseNet169(include_top=False,
+                                                                input_tensor=self.img_input,
+                                                                input_shape=self._input_shape,
+                                                                weights=weigths,
+                                                                pooling=config['model']['pooling'],
+                                                                classes=len(config['data']['class_names']))
+        elif model_name == "vgg":
+            self.preprocessing_layer = tf.keras.applications.vgg19.preprocess_input
+            self.base_model = tf.keras.applications.VGG19(include_top=False,
+                                                          input_tensor=self.img_input,
+                                                          input_shape=self._input_shape,
+                                                          weights=weigths,
+                                                          pooling=config['model']['pooling'],
+                                                          classes=len(config['data']['class_names']))
+        elif model_name == "resnet":
+            self.preprocessing_layer = tf.keras.applications.resnet50.preprocess_input
+            self.base_model = tf.keras.applications.ResNet50(include_top=False,
+                                                             input_tensor=self.img_input,
+                                                             input_shape=self._input_shape,
+                                                             weights=weigths,
+                                                             pooling=config['model']['pooling'],
+                                                             classes=len(config['data']['class_names']))
+
+        elif model_name == "inception":
+            self.preprocessing_layer = tf.keras.applications.inception_v3.preprocess_input
+            self.base_model = tf.keras.applications.InceptionV3(include_top=False,
+                                                                input_tensor=self.img_input,
+                                                                input_shape=self._input_shape,
+                                                                weights=weigths,
+                                                                pooling=config['model']['pooling'],
+                                                                classes=len(config['data']['class_names']))
+
+
         self.base_model.trainable = train_base
 
-        self.img_input = tf.keras.Input(shape=self._input_shape)
         self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
                                                 name="predictions")
 
