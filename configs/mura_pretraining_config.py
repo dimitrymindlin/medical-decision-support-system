@@ -17,7 +17,7 @@ mura_config = {
         "epochs": 60,
         "learn_rate": 0.0001,
         "patience_learning_rate": 1,
-        "factor_learning_rate": 10,
+        "factor_learning_rate": 0.1,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8
     },
