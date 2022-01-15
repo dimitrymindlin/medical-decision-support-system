@@ -6,8 +6,8 @@ dependencies:
   - pandas
   - pip
   - tensorboard
-  - tensorflow-gpu=2.7.0
   - pip:
+      - tensorflow-gpu==2.6.0
       - tensorflow-datasets==4.4.0
       - kaggle
       - tensorflow-addons[tensorflow]
