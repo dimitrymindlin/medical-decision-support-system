@@ -10,7 +10,7 @@ from mura_pretraining.model.mura_model import WristPredictNet
 import sys
 
 config = mura_config
-print(f"Tensorflow version: {tf.VERSION}")
+print(f"Tensorflow version: {tf.version.VERSION}")
 if tf.test.gpu_device_name():
     print('Default GPU Device:{}'.format(tf.test.gpu_device_name()))
 else:
