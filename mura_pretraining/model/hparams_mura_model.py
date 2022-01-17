@@ -4,11 +4,11 @@
 # external
 import tensorflow as tf
 
-class HparamsModel(tf.keras.Model):
-    """HparamsModel Model Class for parameter optimisation"""
+class HparamsMuraModel(tf.keras.Model):
+    """HparamsMuraModel Model Class for parameter optimisation"""
 
     def __init__(self, model_name, config, hp=None):
-        super(HparamsModel, self).__init__(name='HparamsModel')
+        super(HparamsMuraModel, self).__init__(name='HparamsMuraModel')
         self.config = config
         self._input_shape = (
             self.config['data']['image_height'],
