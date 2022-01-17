@@ -28,5 +28,6 @@ wrist_xray_config = {
     "model": {
         "pretrained": True,
         "pooling": "avg",
+        "name": "densenet"
     }
 }
