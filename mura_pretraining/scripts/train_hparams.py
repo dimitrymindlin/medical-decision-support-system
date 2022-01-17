@@ -6,7 +6,7 @@ from datetime import datetime
 
 from configs.mura_pretraining_config import mura_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from mura_pretraining.model.hparams_model_construct import HparamsModel
+from mura_pretraining.model.hparams_mura_model import HparamsMuraModel
 import keras_tuner as kt
 
 MODEL_NAME = "DenseNet121"
@@ -19,7 +19,7 @@ dataset = MuraDataset(config)
 # Model Definition
 def build_model(hp):
     config['train_base'] = hp.Boolean("train_base")
-    model = HparamsModel(MODEL_NAME, config, hp).model()
+    model = HparamsMuraModel(MODEL_NAME, config, hp).model()
 
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
