@@ -36,7 +36,7 @@ model.compile(
 )
 
 # Tensorboard Callback and config logging
-log_dir = 'logs/wrist_xray/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
+log_dir = 'logs_wrist_xray/'+ datetime.now().strftime("%Y-%m-%d--%H.%M")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
 config_matrix = [[k, str(w)] for k, w in config["train"].items()]

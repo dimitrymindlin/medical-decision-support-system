@@ -16,7 +16,7 @@ config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
 
-LOG_DIR = f'logs/wrist_xray_tuning_{config["model"]["name"]}_' + datetime.now().strftime("%Y-%m-%d--%H.%M")
+LOG_DIR = f'logs_wrist_xray/{config["model"]["name"]}_' + datetime.now().strftime("%Y-%m-%d--%H.%M")
 config = wrist_xray_config
 
 dataset = WristXrayDataset(config)
