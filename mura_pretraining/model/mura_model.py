@@ -10,10 +10,9 @@ from utils.model_utils import get_model_by_name
 class MuraNet(tf.keras.Model):
     """MuraDenseNet Model Class with various base models"""
 
-    def __init__(self, config, weigths='imagenet', train_base=False):
+    def __init__(self, config, weights='imagenet', train_base=False):
         super(MuraNet, self).__init__(name='WristPredictNet')
         self.config = config
-        self.weights = weigths
         self._input_shape = (
             self.config['data']['image_height'],
             self.config['data']['image_width'],
@@ -23,7 +22,7 @@ class MuraNet(tf.keras.Model):
         self.img_input = tf.keras.Input(shape=self._input_shape)
 
         self.preprocessing_layer, self.base_layer = get_model_by_name(config, self.img_input, self._input_shape,
-                                                                      self.weights)
+                                                                      weights)
         self.base_model.trainable = train_base
 
         self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",

@@ -13,14 +13,13 @@ class HparamsWristXrayModel(tf.keras.Model):
     def __init__(self, config, hp=None, weights='imagenet'):
         super(HparamsWristXrayModel, self).__init__(name='HparamsWristXrayModel')
         self.config = config
-        self.weights = weights
         self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)
 
         self.base_model.trainable = hp.Boolean("train_base")
 
         self.preprocessing_layer, self.base_layer = get_model_by_name(config, self.img_input, self._input_shape,
-                                                                      self.weights)
+                                                                      weights)
 
         self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
                                                 name="predictions")

@@ -10,7 +10,7 @@ from utils.model_utils import get_model_by_name
 class HparamsMuraModel(tf.keras.Model):
     """HparamsMuraModel Model Class for parameter optimisation"""
 
-    def __init__(self, config, hp=None):
+    def __init__(self, config, hp=None, weights='imagenet'):
         super(HparamsMuraModel, self).__init__(name='HparamsMuraModel')
         self.config = config
         self._input_shape = (
@@ -21,7 +21,7 @@ class HparamsMuraModel(tf.keras.Model):
         self.img_input = tf.keras.Input(shape=self._input_shape)
 
         self.preprocessing_layer, self.base_layer = get_model_by_name(config, self.img_input, self._input_shape,
-                                                                      self.weights)
+                                                                      weights)
 
         self.base_model.trainable = hp.Boolean("train_base")
 
