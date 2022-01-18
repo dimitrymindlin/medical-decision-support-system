@@ -21,7 +21,7 @@ class MuraNet(tf.keras.Model):
 
         self.img_input = tf.keras.Input(shape=self._input_shape)
 
-        self.preprocessing_layer, self.base_layer = get_model_by_name(config, self.img_input, self._input_shape,
+        self.preprocessing_layer, self.base_model = get_model_by_name(config, self.img_input, self._input_shape,
                                                                       weights)
         self.base_model.trainable = train_base
 

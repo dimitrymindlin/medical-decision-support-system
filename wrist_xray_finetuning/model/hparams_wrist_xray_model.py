@@ -18,7 +18,7 @@ class HparamsWristXrayModel(tf.keras.Model):
 
         self.base_model.trainable = hp.Boolean("train_base")
 
-        self.preprocessing_layer, self.base_layer = get_model_by_name(config, self.img_input, self._input_shape,
+        self.preprocessing_layer, self.base_model = get_model_by_name(config, self.img_input, self._input_shape,
                                                                       weights)
 
         self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
