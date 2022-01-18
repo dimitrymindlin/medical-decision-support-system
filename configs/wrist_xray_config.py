@@ -10,7 +10,7 @@ wrist_xray_config = {
         "image_channel": 3,
     },
     "train": {
-        "train_base": True,
+        "train_base": False,
         "augmentation": False,
         "batch_size": 8,
         "learn_rate": 0.0001,

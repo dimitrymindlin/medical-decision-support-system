@@ -24,8 +24,6 @@ dataset = WristXrayDataset(config)
 
 # Model Definition
 def build_model(hp):
-    config['train_base'] = False  # For the first run, Train only last layers
-
     model = HparamsWristXrayModel(config, hp).model()
 
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
