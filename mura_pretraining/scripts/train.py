@@ -6,7 +6,7 @@ from datetime import datetime
 
 from configs.mura_pretraining_config import mura_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from mura_pretraining.model.mura_model import MuraNet
+from mura_pretraining.model.mura_model import WristPredictNet
 import sys
 
 from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
@@ -16,7 +16,7 @@ print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
 
 # Model Definition
-model = MuraNet(config, train_base=config['train']['train_base'])
+model = WristPredictNet(config, train_base=config['train']['train_base'])
 
 # Training Params
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])

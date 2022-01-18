@@ -7,11 +7,11 @@ import tensorflow as tf
 from utils.model_utils import get_model_by_name
 
 
-class MuraNet(tf.keras.Model):
+class WristPredictNet(tf.keras.Model):
     """MuraDenseNet Model Class with various base models"""
 
     def __init__(self, config, weights='imagenet', train_base=False):
-        super(MuraNet, self).__init__(name='WristPredictNet')
+        super(WristPredictNet, self).__init__(name='WristPredictNet')
         self.config = config
         self._input_shape = (
             self.config['data']['image_height'],
