@@ -25,6 +25,7 @@ dataset = WristXrayDataset(config)
 # Model Definition
 def build_model(hp):
     model = HparamsWristXrayModel(config, hp).model()
+    model.load_weights(f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt")
 
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
