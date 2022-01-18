@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-# import tensorflow_addons as tfa
+import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.wrist_xray_config import wrist_xray_config
@@ -13,25 +13,26 @@ import sys
 config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
-
+cpu_weights_path = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
+gpu_weights_path = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 dataset = WristXrayDataset(config)
 
 # Model Definition
 model = WristXrayNet(config, train_base=config['train']['train_base'])
-model.load_weights("../../checkpoints/mura/best/cp.ckpt")
+model.load_weights(gpu_weights_path)
 
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
-# metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
-# threshold=config["test"]["F1_threshold"], average='macro')
+metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
+                                threshold=config["test"]["F1_threshold"], average='macro')
 
 model.compile(
     optimizer=optimizer,
     loss=loss,
-    metrics=[metric_auc, metric_bin_accuracy]  # metric_f1
+    metrics=[metric_auc, metric_bin_accuracy, metric_f1]  # metric_f1
 )
 
 # Tensorboard Callback and config logging

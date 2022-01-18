@@ -61,12 +61,12 @@ class MuraDataset():
         image = tf.image.resize_with_pad(image, height, width)
         return tf.cast(image, tf.float32) / 255., label  # normalize pixel values
     
-    def augment_data(self, image, label):
+    """def augment_data(self, image, label):
         image = tf.image.random_flip_left_right(image)
         image = tf.image.rot
         #image = tf.image.random_flip_up_down(image)
         #image = tf.image.random_brightness(image, max_delta=0.2)
-        return image, label
+        return image, label"""
 
     def benchmark(self):
         tfds.benchmark(self.ds_train, batch_size=self.config['train']['batch_size'])

@@ -36,7 +36,7 @@ def get_model_by_name(config, img_input, _input_shape, weights):
                                                        weights=weights,
                                                        pooling=config['model']['pooling'],
                                                        classes=len(config['data']['class_names']))
-    return base_model, preprocessing_layer
+    return preprocessing_layer, base_model
 
 
 def get_input_shape_from_config(config):
