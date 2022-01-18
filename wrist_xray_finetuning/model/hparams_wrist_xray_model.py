@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Mura DenseNet model"""
+"""HparamsWristXrayModel model"""
 
 # external
 import tensorflow as tf
@@ -8,7 +8,7 @@ from model_utils import get_model_by_name
 
 
 class HparamsWristXrayModel(tf.keras.Model):
-    """HparamsMuraModel Model Class for parameter optimisation"""
+    """HparamsWristXrayModel Model Class for parameter optimisation"""
 
     def __init__(self, config, hp=None):
         super(HparamsWristXrayModel, self).__init__(name='HparamsWristXrayModel')

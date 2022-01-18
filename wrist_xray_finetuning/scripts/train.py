@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-#import tensorflow_addons as tfa
+import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.wrist_xray_config import wrist_xray_config
@@ -38,12 +38,12 @@ loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
-#metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]), threshold=config["test"]["F1_threshold"], average='macro')
+metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]), threshold=config["test"]["F1_threshold"], average='macro')
 
 model.compile(
     optimizer=optimizer,
     loss=loss,
-    metrics=[metric_auc, metric_bin_accuracy],  #metric_f1
+    metrics=[metric_auc, metric_bin_accuracy, metric_f1]
 )
 
 # Tensorboard Callback and config logging
@@ -104,4 +104,4 @@ result = dict(zip(model.metrics_names, result))
 print("Evaluation Result: ", result)
 result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
-    tf.summary.text("evaluation", tf.convert_to_tensor(result_matrix), step=0)
+    tf.summary.text(f"evaluation_{config['model']['name']}", tf.convert_to_tensor(result_matrix), step=0)
