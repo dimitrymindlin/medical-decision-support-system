@@ -13,7 +13,7 @@ import sys
 config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
-cpu_weights_path = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
+cpu_weights_path = f"../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 gpu_weights_path = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 dataset = WristXrayDataset(config)
 
