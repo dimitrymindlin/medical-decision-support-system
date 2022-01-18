@@ -35,8 +35,3 @@ class HparamsWristXrayModel(tf.keras.Model):
         if self.dropout:
             x = self.dropout(x)
         return self.classifier(x)
-
-    def model(self):
-        x = self.base_model.output
-        predictions = self.classifier(x)
-        return tf.keras.Model(inputs=self.img_input, outputs=predictions)

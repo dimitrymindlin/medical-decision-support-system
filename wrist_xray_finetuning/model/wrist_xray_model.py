@@ -32,8 +32,3 @@ class WristXrayNet(tf.keras.Model):
         x = self.preprocessing_layer(inputs)
         x = self.base_model(x)
         return self.classifier(x)
-
-    def model(self):
-        x = self.base_model.output
-        predictions = self.classifier(x)
-        return tf.keras.Model(inputs=self.img_input, outputs=predictions)

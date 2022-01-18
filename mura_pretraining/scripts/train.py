@@ -16,7 +16,7 @@ print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
 
 # Model Definition
-model = MuraNet(config, train_base=config['train']['train_base']).model()
+model = MuraNet(config, train_base=config['train']['train_base'])
 
 # Training Params
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])

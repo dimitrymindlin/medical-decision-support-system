@@ -23,7 +23,7 @@ dataset = MuraDataset(config)
 # Model Definition
 def build_model(hp):
     config['train_base'] = hp.Boolean("train_base")
-    model = HparamsMuraModel(MODEL_NAME, config, hp).model()
+    model = HparamsMuraModel(config['model']['name'], config, hp)
 
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
