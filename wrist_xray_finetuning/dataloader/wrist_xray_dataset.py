@@ -28,7 +28,7 @@ class WristXrayDataset():
     def _build_train_pipeline(self, ds):
         ds = ds.map(self.preprocess, num_parallel_calls=tf.data.AUTOTUNE)
         ds = ds.shuffle(self.ds_info.splits['train'].num_examples)
-        ds = ds.batch(self.config['train']['batch_size'])
+        #ds = ds.batch(self.config['train']['batch_size'])
         if self.config["train"]["augmentation"]:
             ds = ds.map(self.augment_data, num_parallel_calls=tf.data.AUTOTUNE)
         ds = ds.prefetch(tf.data.AUTOTUNE)

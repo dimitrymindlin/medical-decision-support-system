@@ -4,13 +4,16 @@
 # external
 import tensorflow as tf
 
+from utils.model_utils import get_model_by_name
 
-class WristPredictNet(tf.keras.Model):
+
+class MuraNet(tf.keras.Model):
     """MuraDenseNet Model Class with various base models"""
 
-    def __init__(self, config, weigths='imagenet', train_base=False, model_name="densenet"):
-        super(WristPredictNet, self).__init__(name='WristPredictNet')
+    def __init__(self, config, weigths='imagenet', train_base=False):
+        super(MuraNet, self).__init__(name='WristPredictNet')
         self.config = config
+        self.weights = weigths
         self._input_shape = (
             self.config['data']['image_height'],
             self.config['data']['image_width'],
@@ -19,41 +22,8 @@ class WristPredictNet(tf.keras.Model):
 
         self.img_input = tf.keras.Input(shape=self._input_shape)
 
-        print(f"Model name: {model_name}")
-        if model_name == "densenet":
-            self.preprocessing_layer = tf.keras.applications.densenet.preprocess_input
-            self.base_model = tf.keras.applications.DenseNet169(include_top=False,
-                                                                input_tensor=self.img_input,
-                                                                input_shape=self._input_shape,
-                                                                weights=weigths,
-                                                                pooling=config['model']['pooling'],
-                                                                classes=len(config['data']['class_names']))
-        elif model_name == "vgg":
-            self.preprocessing_layer = tf.keras.applications.vgg19.preprocess_input
-            self.base_model = tf.keras.applications.VGG19(include_top=False,
-                                                          input_tensor=self.img_input,
-                                                          input_shape=self._input_shape,
-                                                          weights=weigths,
-                                                          pooling=config['model']['pooling'],
-                                                          classes=len(config['data']['class_names']))
-        elif model_name == "resnet":
-            self.preprocessing_layer = tf.keras.applications.resnet50.preprocess_input
-            self.base_model = tf.keras.applications.ResNet50(include_top=False,
-                                                             input_tensor=self.img_input,
-                                                             input_shape=self._input_shape,
-                                                             weights=weigths,
-                                                             pooling=config['model']['pooling'],
-                                                             classes=len(config['data']['class_names']))
-
-        elif model_name == "inception":
-            self.preprocessing_layer = tf.keras.applications.inception_v3.preprocess_input
-            self.base_model = tf.keras.applications.InceptionV3(include_top=False,
-                                                                input_tensor=self.img_input,
-                                                                input_shape=self._input_shape,
-                                                                weights=weigths,
-                                                                pooling=config['model']['pooling'],
-                                                                classes=len(config['data']['class_names']))
-
+        self.preprocessing_layer, self.base_layer = get_model_by_name(config, self.img_input, self._input_shape,
+                                                                      self.weights)
         self.base_model.trainable = train_base
 
         self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
@@ -69,8 +39,3 @@ class WristPredictNet(tf.keras.Model):
         x = self.random_rotation_aug(x)
         x = self.base_model(x)
         return self.classifier(x)
-
-    def model(self):
-        x = self.base_model.output
-        predictions = self.classifier(x)
-        return tf.keras.Model(inputs=self.img_input, outputs=predictions)

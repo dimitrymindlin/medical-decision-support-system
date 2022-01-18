@@ -12,10 +12,10 @@ wrist_xray_config = {
     "train": {
         "train_base": True,
         "augmentation": False,
-        "batch_size": 16,
+        "batch_size": 8,
         "learn_rate": 0.0001,
-        "epochs": 5,
-        "patience_learning_rate": 2,
+        "epochs": 60,
+        "patience_learning_rate": 1,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8,
         "use_class_weights": False,

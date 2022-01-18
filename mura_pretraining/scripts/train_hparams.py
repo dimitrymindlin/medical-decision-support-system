@@ -8,10 +8,14 @@ from configs.mura_pretraining_config import mura_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from mura_pretraining.model.hparams_mura_model import HparamsMuraModel
 import keras_tuner as kt
+import sys
 
-MODEL_NAME = "DenseNet121"
-LOG_DIR = f"logs/tuning_{MODEL_NAME}_" + datetime.now().strftime("%Y-%m-%d--%H.%M")
+from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
+
+print_running_on_gpu(tf)
 config = mura_config
+get_model_name_from_cli(sys.argv, config)
+LOG_DIR = f"logs/tuning_{config['model']['name']}_" + datetime.now().strftime("%Y-%m-%d--%H.%M")
 
 dataset = MuraDataset(config)
 
@@ -55,11 +59,11 @@ tuner.search(dataset.ds_train,
              epochs=config["train"]["epochs"],
              callbacks=[tf.keras.callbacks.EarlyStopping(patience=config['train']['early_stopping_patience']),
                         tf.keras.callbacks.ReduceLROnPlateau(
-                                         monitor="val_loss",
-                                         factor=0.1,
-                                         patience=config['train']['patience_learning_rate'],
-                                         mode="min",
-                                         min_lr=config['train']['min_learning_rate'],
-                                     ),
+                            monitor="val_loss",
+                            factor=0.1,
+                            patience=config['train']['patience_learning_rate'],
+                            mode="min",
+                            min_lr=config['train']['min_learning_rate'],
+                        ),
                         tf.keras.callbacks.TensorBoard(LOG_DIR)],
              )

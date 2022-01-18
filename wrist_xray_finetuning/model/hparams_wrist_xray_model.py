@@ -4,30 +4,23 @@
 # external
 import tensorflow as tf
 
-from model_utils import get_model_by_name
+from utils.model_utils import get_model_by_name, get_input_shape_from_config
 
 
 class HparamsWristXrayModel(tf.keras.Model):
     """HparamsWristXrayModel Model Class for parameter optimisation"""
 
-    def __init__(self, config, hp=None):
+    def __init__(self, config, hp=None, weights='imagenet'):
         super(HparamsWristXrayModel, self).__init__(name='HparamsWristXrayModel')
         self.config = config
-        self._input_shape = (
-            self.config['data']['image_height'],
-            self.config['data']['image_width'],
-            self.config['data']['image_channel']
-        )
+        self.weights = weights
+        self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)
-
-        self.weights = 'imagenet'
 
         self.base_model.trainable = hp.Boolean("train_base")
 
         self.preprocessing_layer, self.base_layer = get_model_by_name(config, self.img_input, self._input_shape,
                                                                       self.weights)
-
-        self.base_model.trainable = hp.Boolean("train_base")
 
         self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
                                                 name="predictions")

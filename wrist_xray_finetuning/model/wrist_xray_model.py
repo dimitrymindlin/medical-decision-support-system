@@ -1,37 +1,37 @@
 # -*- coding: utf-8 -*-
-"""WristXray DenseNet model"""
+"""WristXrayNet model"""
 
 # external
 import tensorflow as tf
 
-class WristXrayDenseNet(tf.keras.Model):
-    """WristXray Model Class"""
+from utils.model_utils import get_model_by_name, get_input_shape_from_config
 
-    def __init__(self, config, weigths='imagenet', train_base=False):
-        super(WristXrayDenseNet, self).__init__(name='WristXrayDenseNet')
+
+class WristXrayNet(tf.keras.Model):
+    """WristXrayNet Model Class"""
+
+    def __init__(self, config, weights='imagenet', train_base=False):
+        super(WristXrayNet, self).__init__(name='WristXrayNet')
         self.config = config
-        self._input_shape = (
-            self.config['data']['image_height'],
-            self.config['data']['image_width'],
-            self.config['data']['image_channel']
-        )
+        self.weights = weights
+        self._input_shape = get_input_shape_from_config(self.config)
+
         self.img_input = tf.keras.Input(shape=self._input_shape)
-        
-        self.base_model = tf.keras.applications.DenseNet121(
-            include_top=False,
-            input_tensor=self.img_input,
-            input_shape=self._input_shape,
-            weights=weigths,
-            pooling=config['model']['pooling'],
-            classes=len(config['data']['class_names']),
-        )
+
+        self.preprocessing_layer, self.base_layer = get_model_by_name(config, self.img_input, self._input_shape,
+                                                                      self.weights)
         self.base_model.trainable = train_base
-        
-        self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid", name="predictions")
-        self.last_conv_layer="bn"
+
+        self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
+                                                name="predictions")
+
+        # Augmentation layers
+        self.random_flipping_aug = tf.keras.layers.RandomFlip(mode="vertical")
+        self.random_rotation_aug = tf.keras.layers.experimental.preprocessing.RandomRotation(0.3)
 
     def call(self, inputs):
-        x = self.base_model(inputs)
+        x = self.preprocessing_layer(inputs)
+        x = self.base_model(x)
         return self.classifier(x)
 
     def model(self):

@@ -5,40 +5,28 @@ import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.wrist_xray_config import wrist_xray_config
+from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
 from wrist_xray_finetuning.dataloader import WristXrayDataset
-from wrist_xray_finetuning.model.wrist_xray_model import WristXrayDenseNet
+from wrist_xray_finetuning.model.wrist_xray_model import WristXrayNet
 import sys
 
 config = wrist_xray_config
-# set cli arguments
-for arg in sys.argv:
-    if arg == "--use_class_weights":
-        config["train"]["use_class_weights"] = True
-        print("Using class weights...")
-    elif arg == "--augmentation":
-        config["train"]["augmentation"] = True
-        print("Using augmentation...")
-
-input_shape = (None,
-               config['data']['image_height'],
-               config['data']['image_width'],
-               config['data']['image_channel'])
+print_running_on_gpu(tf)
+get_model_name_from_cli(sys.argv, config)
 
 dataset = WristXrayDataset(config)
 
 # Model Definition
-train_base = config['train']['train_base']
-model = WristXrayDenseNet(config, train_base=train_base).model()
-if config['train']['use_mura_weights']:
-    print("Using best mura weights...")
-    model.load_weights("../../checkpoints/mura/best/cp.ckpt")
+model = WristXrayNet(config, train_base=config['train']['train_base']).model()
+model.load_weights("../../checkpoints/mura/best/cp.ckpt")
 
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
-metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]), threshold=config["test"]["F1_threshold"], average='macro')
+metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
+                                threshold=config["test"]["F1_threshold"], average='macro')
 
 model.compile(
     optimizer=optimizer,
@@ -104,4 +92,4 @@ result = dict(zip(model.metrics_names, result))
 print("Evaluation Result: ", result)
 result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
-    tf.summary.text(f"evaluation_{config['model']['name']}", tf.convert_to_tensor(result_matrix), step=0)
+    tf.summary.text(f"wrist_xray_evaluation_{config['model']['name']}", tf.convert_to_tensor(result_matrix), step=0)

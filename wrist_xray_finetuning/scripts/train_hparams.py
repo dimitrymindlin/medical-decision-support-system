@@ -8,26 +8,13 @@ import sys
 from configs.wrist_xray_config import wrist_xray_config
 import keras_tuner as kt
 
+from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
 from wrist_xray_finetuning.dataloader import WristXrayDataset
 from wrist_xray_finetuning.model.hparams_wrist_xray_model import HparamsWristXrayModel
 
 config = wrist_xray_config
-print(f"Tensorflow version: {tf.version.VERSION}")
-if tf.test.gpu_device_name():
-    print('Default GPU Device:{}'.format(tf.test.gpu_device_name()))
-else:
-    print("Please install GPU version of TF")
-
-# set cli arguments
-for arg in sys.argv:
-    if arg == "--densenet":
-        config["model"]["name"] = "densenet"
-    elif arg == "--vgg":
-        config["model"]["name"] = "vgg"
-    elif arg == "--resnet":
-        config["model"]["name"] = "resnet"
-    elif arg == "--inception":
-        config["model"]["name"] = "inception"
+print_running_on_gpu(tf)
+get_model_name_from_cli(sys.argv, config)
 
 LOG_DIR = f'logs/wrist_xray_tuning_{config["model"]["name"]}_' + datetime.now().strftime("%Y-%m-%d--%H.%M")
 config = wrist_xray_config
