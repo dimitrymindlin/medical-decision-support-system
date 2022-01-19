@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-# import tensorflow_addons as tfa
+#import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.mura_pretraining_config import mura_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from mura_pretraining.model.mura_model import WristPredictNet
+from utils.path_constants import PathConstants
 import sys
 
 from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
@@ -14,6 +15,8 @@ from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
 config = mura_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
+TF_LOG_DIR = f'{PathConstants.MURA_TENSORBOARD_PREFIX}/mura_{config["model"]["name"]}/' + datetime.now().strftime(
+    "%Y-%m-%d--%H.%M")
 
 # Model Definition
 model = WristPredictNet(config, train_base=config['train']['train_base'])
@@ -24,7 +27,7 @@ loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
-# metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]), threshold=config["test"]["F1_threshold"], average='macro')
+#metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]), threshold=config["test"]["F1_threshold"], average='macro')
 
 model.compile(
     optimizer=optimizer,
@@ -33,17 +36,12 @@ model.compile(
 )
 
 # Tensorboard Callback and config logging
-log_dir = f'logs/mura_{config["model"]["name"]}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-
-config_matrix = [[k, str(w)] for k, w in config["train"].items()]
-file_writer = tf.summary.create_file_writer(log_dir)
-with file_writer.as_default():
-    tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
 
 # Checkpoint Callback to only save best checkpoint
 checkpoint_filepath = f'checkpoints/mura_{config["model"]["name"]}/' + datetime.now().strftime(
     "%Y-%m-%d--%H.%M") + '/cp.ckpt'
+
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     save_weights_only=True,
@@ -70,9 +68,7 @@ dyn_lr = tf.keras.callbacks.ReduceLROnPlateau(
 dataset = MuraDataset(config)
 
 # Class weights for training underrepresented classes
-class_weight = None
-if config["train"]["use_class_weights"]:
-    class_weight = dataset.train_classweights
+class_weight = dataset.train_classweights if config["train"]["use_class_weights"] else None
 
 # Model Training
 model.fit(
@@ -90,8 +86,14 @@ result = model.evaluate(
     batch_size=config['test']['batch_size'],
     callbacks=[tensorboard_callback])
 
+# Log Text like config and evaluation
+config_matrix = [[k, str(w)] for k, w in config["train"].items()]
+file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
+with file_writer.as_default():
+    tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
+
 result = dict(zip(model.metrics_names, result))
 print("Evaluation Result: ", result)
 result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
-    tf.summary.text(f"mura_evaluation_{config['model']['name']}", tf.convert_to_tensor(result_matrix), step=0)
+    tf.summary.text(f"mura_evaluation", tf.convert_to_tensor(result_matrix), step=0)

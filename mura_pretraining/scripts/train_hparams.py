@@ -7,6 +7,7 @@ from datetime import datetime
 from configs.mura_pretraining_config import mura_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from mura_pretraining.model.hparams_mura_model import HparamsMuraModel
+from utils.path_constants import PathConstants
 import keras_tuner as kt
 import sys
 
@@ -15,14 +16,14 @@ from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
 print_running_on_gpu(tf)
 config = mura_config
 get_model_name_from_cli(sys.argv, config)
-LOG_DIR = f"logs/tuning_{config['model']['name']}_" + datetime.now().strftime("%Y-%m-%d--%H.%M")
+TF_LOG_DIR = f"{PathConstants.MURA_TENSORBOARD_TUNING_PREFIX}/{config['model']['name']}_" + datetime.now().strftime(
+    "%Y-%m-%d--%H.%M")
 
 dataset = MuraDataset(config)
 
 
 # Model Definition
 def build_model(hp):
-    config['train_base'] = hp.Boolean("train_base")
     model = HparamsMuraModel(config['model']['name'], config, hp)
 
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
@@ -52,7 +53,7 @@ tuner = kt.Hyperband(
     build_model,
     objective='val_binary_accuracy',
     max_epochs=30,
-    directory=LOG_DIR)
+    directory=TF_LOG_DIR)
 
 tuner.search(dataset.ds_train,
              validation_data=dataset.ds_val,
@@ -65,5 +66,5 @@ tuner.search(dataset.ds_train,
                             mode="min",
                             min_lr=config['train']['min_learning_rate'],
                         ),
-                        tf.keras.callbacks.TensorBoard(LOG_DIR)],
+                        tf.keras.callbacks.TensorBoard(TF_LOG_DIR)],
              )

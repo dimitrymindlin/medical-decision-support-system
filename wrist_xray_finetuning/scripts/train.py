@@ -6,6 +6,7 @@ from datetime import datetime
 
 from configs.wrist_xray_config import wrist_xray_config
 from mura_pretraining.model.mura_model import WristPredictNet
+from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
 from wrist_xray_finetuning.dataloader import WristXrayDataset
 from wrist_xray_finetuning.model.wrist_xray_model import WristXrayNet
@@ -14,13 +15,14 @@ import sys
 config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
-cpu_weights_path = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
-gpu_weights_path = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
+CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
+GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
+TF_LOG_DIR = f'{PathConstants.WRIST_XRAY_TENSORBOARD_PREFIX}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
 dataset = WristXrayDataset(config)
 
 # Model Definition
 model = WristPredictNet(config, train_base=config['train']['train_base'])
-model.load_weights(gpu_weights_path)
+model.load_weights(GPU_WEIGHT_PATH)
 
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
@@ -36,11 +38,10 @@ model.compile(
 )
 
 # Tensorboard Callback and config logging
-log_dir = 'logs_wrist_xray/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
 
 config_matrix = [[k, str(w)] for k, w in config["train"].items()]
-file_writer = tf.summary.create_file_writer(log_dir)
+file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 with file_writer.as_default():
     tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
 

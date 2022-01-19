@@ -8,6 +8,7 @@ import sys
 from configs.wrist_xray_config import wrist_xray_config
 import keras_tuner as kt
 
+from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
 from wrist_xray_finetuning.dataloader import WristXrayDataset
 from wrist_xray_finetuning.model.hparams_wrist_xray_model import HparamsWristXrayModel
@@ -16,7 +17,8 @@ config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
 
-LOG_DIR = f'logs_wrist_xray/{config["model"]["name"]}_' + datetime.now().strftime("%Y-%m-%d--%H.%M")
+TF_LOGDIR_PATH = f'{PathConstants.WRIST_XRAY_TENSORBOARD_TUNING_PREFIX}/{config["model"]["name"]}_' + datetime.now().strftime(
+    "%Y-%m-%d--%H.%M")
 config = wrist_xray_config
 
 dataset = WristXrayDataset(config)
@@ -54,7 +56,7 @@ tuner = kt.Hyperband(
     build_model,
     objective='val_binary_accuracy',
     max_epochs=30,
-    directory=LOG_DIR)
+    directory=TF_LOGDIR_PATH)
 
 tuner.search(dataset.ds_train,
              validation_data=dataset.ds_val,
@@ -67,5 +69,5 @@ tuner.search(dataset.ds_train,
                             mode="min",
                             min_lr=config['train']['min_learning_rate'],
                         ),
-                        tf.keras.callbacks.TensorBoard(LOG_DIR)],
+                        tf.keras.callbacks.TensorBoard(TF_LOGDIR_PATH)],
              )
