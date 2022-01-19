@@ -28,6 +28,6 @@ mura_config = {
     "model": {
         "name": "densenet",
         "pretrained": True,
-        "pooling": "avg",
+        "pooling": "max",
     }
 }

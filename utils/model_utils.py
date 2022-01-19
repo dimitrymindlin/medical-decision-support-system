@@ -5,7 +5,7 @@ def get_model_by_name(config, img_input, _input_shape, weights):
     print(f"Loading Model: {config['model']['name']}")
     if config["model"]["name"] == "densenet":
         preprocessing_layer = tf.keras.applications.densenet.preprocess_input
-        base_model = tf.keras.applications.DenseNet169(include_top=False,
+        base_model = tf.keras.applications.DenseNet121(include_top=False,
                                                        input_tensor=img_input,
                                                        input_shape=_input_shape,
                                                        weights=weights,
