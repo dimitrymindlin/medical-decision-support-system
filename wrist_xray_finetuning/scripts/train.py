@@ -22,7 +22,7 @@ dataset = WristXrayDataset(config)
 
 # Model Definition
 model = WristPredictNet(config, train_base=config['train']['train_base'])
-model.load_weights(CPU_WEIGHT_PATH)
+model.load_weights(GPU_WEIGHT_PATH)
 #x = tf.keras.layers.Flatten()()
 #x = base_model(x, training=False)
 #x = tf.keras.layers.GlobalAveragePooling2D()(model.layers[-2].output)
