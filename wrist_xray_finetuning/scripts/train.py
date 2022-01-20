@@ -22,7 +22,13 @@ dataset = WristXrayDataset(config)
 
 # Model Definition
 model = WristPredictNet(config, train_base=config['train']['train_base'])
-model.load_weights(GPU_WEIGHT_PATH)
+model.load_weights(CPU_WEIGHT_PATH)
+#x = tf.keras.layers.Flatten()()
+#x = base_model(x, training=False)
+#x = tf.keras.layers.GlobalAveragePooling2D()(model.layers[-2].output)
+x = tf.keras.layers.Dropout(0.2)(model.layers[-2].output)  # Regularize with dropout
+x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+model = tf.keras.Model(inputs=model.layers[-2].input, outputs=x)
 
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
