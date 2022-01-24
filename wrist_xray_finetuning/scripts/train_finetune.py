@@ -9,6 +9,7 @@ from mura_pretraining.model.mura_model import WristPredictNet
 from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
 from wrist_xray_finetuning.dataloader import WristXrayDataset
+from wrist_xray_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model
 from wrist_xray_finetuning.model.wrist_xray_model import WristXrayNet
 import sys
 
@@ -23,13 +24,14 @@ dataset = WristXrayDataset(config)
 config['train']['train_base'] = True
 # Model Definition
 model = WristPredictNet(config, train_base=config['train']['train_base'])
+model = get_finetuning_model_from_pretrained_model(model)
 model.load_weights(GPU_WEIGHT_PATH)
 # x = tf.keras.layers.Flatten()()
 # x = base_model(x, training=False)
 # x = tf.keras.layers.GlobalAveragePooling2D()(model.layers[-2].output)
-x = tf.keras.layers.Dropout(0.2)(model.layers[-2].output)  # Regularize with dropout
+"""x = tf.keras.layers.Dropout(0.2)(model.layers[-2].output)  # Regularize with dropout
 x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-model = tf.keras.Model(inputs=model.layers[-2].input, outputs=x)
+model = tf.keras.Model(inputs=model.layers[-2].input, outputs=x)"""
 
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
