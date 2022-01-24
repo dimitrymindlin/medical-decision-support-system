@@ -16,7 +16,7 @@ import sys
 config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
-#CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/{config['train']['best_checkpoint']}/cp.ckpt"
+# CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/{config['train']['best_checkpoint']}/cp.ckpt"
 GPU_WEIGHT_PATH = f"checkpoints/wrist_xray/{config['train']['best_checkpoint']}/cp.ckpt"
 TF_LOG_DIR = f'{PathConstants.WRIST_XRAY_TENSORBOARD_FINETUNING_PREFIX}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
 dataset = WristXrayDataset(config)
@@ -26,12 +26,6 @@ config['train']['train_base'] = True
 model = WristPredictNet(config, train_base=config['train']['train_base'])
 model = get_finetuning_model_from_pretrained_model(model)
 model.load_weights(GPU_WEIGHT_PATH)
-# x = tf.keras.layers.Flatten()()
-# x = base_model(x, training=False)
-# x = tf.keras.layers.GlobalAveragePooling2D()(model.layers[-2].output)
-"""x = tf.keras.layers.Dropout(0.2)(model.layers[-2].output)  # Regularize with dropout
-x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-model = tf.keras.Model(inputs=model.layers[-2].input, outputs=x)"""
 
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate_finetuning"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
@@ -69,15 +63,6 @@ early_stopping = tf.keras.callbacks.EarlyStopping(
     min_delta=0,
     patience=config['train']['early_stopping_patience'])
 
-# Dynamic Learning Rate
-dyn_lr = tf.keras.callbacks.ReduceLROnPlateau(
-    monitor="val_loss",
-    factor=0.1,
-    patience=config['train']['patience_learning_rate'],
-    mode="min",
-    min_lr=config['train']['min_learning_rate'],
-)
-
 # Class weights for training underrepresented classes
 class_weight = None
 if config["train"]["use_class_weights"]:
@@ -88,7 +73,7 @@ model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_val,
-    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr],
+    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping],
     class_weight=class_weight
 )
 
