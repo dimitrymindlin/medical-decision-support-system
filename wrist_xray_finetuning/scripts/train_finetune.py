@@ -33,7 +33,7 @@ model.load_weights(GPU_WEIGHT_PATH)
 x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
 model = tf.keras.Model(inputs=model.layers[-2].input, outputs=x)"""
 
-optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
+optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate_finetuning"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)

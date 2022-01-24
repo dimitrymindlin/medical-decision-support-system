@@ -30,7 +30,7 @@ x = tf.keras.layers.Dropout(0.2)(model.layers[-2].output)  # Regularize with dro
 x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
 model = tf.keras.Model(inputs=model.layers[-2].input, outputs=x)
 
-optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
+optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate_final_layers"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
