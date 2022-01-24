@@ -65,7 +65,7 @@ def build_model(hp):
 
 tuner = kt.Hyperband(
     build_model,
-    objective='val_auc',
+    objective=kt.Objective("val_auc", direction="max"),
     max_epochs=30,
     directory=TF_LOGDIR_PATH)
 
