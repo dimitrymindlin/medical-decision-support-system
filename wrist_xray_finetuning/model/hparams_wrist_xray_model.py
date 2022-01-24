@@ -13,10 +13,11 @@ class HparamsWristXrayModel(tf.keras.Model):
     def __init__(self, config, hp=None, weights='imagenet'):
         super(HparamsWristXrayModel, self).__init__(name='HparamsWristXrayModel')
         self.config = config
+        self.hp = hp
         self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)
 
-        self.base_model.trainable = hp.Boolean("train_base")
+        self.base_model.trainable = config['train']['train_base']
 
         self.preprocessing_layer, self.base_model = get_model_by_name(config, self.img_input, self._input_shape,
                                                                       weights)
@@ -24,14 +25,10 @@ class HparamsWristXrayModel(tf.keras.Model):
         self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
                                                 name="predictions")
 
-        self.dropout = tf.keras.layers.Dropout(0.5) if hp.Boolean("dropout") else None
-
-        self.global_avg_pooling = tf.keras.layers.GlobalAveragePooling2D() if hp.Boolean("global_avg_pooling") else None
-
     def call(self, inputs):
-        x = self.base_model(inputs)
-        if self.global_avg_pooling:
-            x = self.global_avg_pooling(x)
-        if self.dropout:
-            x = self.dropout(x)
+        x = self.preprocessing_layer(inputs)
+        if self.hp.Boolean("augmentation"):
+            x = self.random_flipping_aug(x)
+            x = self.random_rotation_aug(x)
+        x = self.base_model(x)
         return self.classifier(x)

@@ -17,9 +17,8 @@ config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
 
-TF_LOGDIR_PATH = f'{PathConstants.WRIST_XRAY_TENSORBOARD_TUNING_PREFIX}/{config["model"]["name"]}_' + datetime.now().strftime(
+TF_LOGDIR_PATH = f'{PathConstants.WRIST_XRAY_TENSORBOARD_HPARAMS_PREFIX}/{config["model"]["name"]}_' + datetime.now().strftime(
     "%Y-%m-%d--%H.%M")
-config = wrist_xray_config
 
 dataset = WristXrayDataset(config)
 
@@ -28,6 +27,16 @@ dataset = WristXrayDataset(config)
 def build_model(hp):
     model = HparamsWristXrayModel(config, hp)
     model.load_weights(f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt")
+    if hp.Boolean("extra_layers"):
+        x = tf.keras.layers.Dropout(0.3)(model.layers[-2].output)  # Regularize with dropout
+        x = tf.keras.layers.Flatten()(x)
+        x = tf.keras.layers.Dense(256, activation="relu")(x)
+        x = tf.keras.layers.Dropout(0.2)(x)
+    else:
+        x = tf.keras.layers.Dropout(0.2)(model.layers[-2].output)
+    x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+
+    model = tf.keras.Model(inputs=model.layers[-2].input, outputs=x)
 
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
@@ -38,7 +47,7 @@ def build_model(hp):
 
     # Optimizer and LR
     optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
-    learning_rate = hp.Choice('learning_rate', [0.001, 0.0005, 0.0001])
+    learning_rate = hp.Choice('learning_rate', [0.00001, 0.00005, 0.0001])
     if optimizer == "adam":
         optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
     elif optimizer == "sgd":
@@ -54,7 +63,7 @@ def build_model(hp):
 
 tuner = kt.Hyperband(
     build_model,
-    objective='val_binary_accuracy',
+    objective='val_auc',
     max_epochs=30,
     directory=TF_LOGDIR_PATH)
 
