@@ -16,6 +16,8 @@ from wrist_xray_finetuning.model.hparams_wrist_xray_model import HparamsWristXra
 config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
+CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
+GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 
 TF_LOGDIR_PATH = f'{PathConstants.WRIST_XRAY_TENSORBOARD_HPARAMS_PREFIX}/{config["model"]["name"]}_' + datetime.now().strftime(
     "%Y-%m-%d--%H.%M")
@@ -26,7 +28,7 @@ dataset = WristXrayDataset(config)
 # Model Definition
 def build_model(hp):
     model = HparamsWristXrayModel(config, hp)
-    model.load_weights(f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt")
+    model.load_weights(GPU_WEIGHT_PATH)
     if hp.Boolean("extra_layers"):
         x = tf.keras.layers.Dropout(0.3)(model.layers[-2].output)  # Regularize with dropout
         x = tf.keras.layers.Flatten()(x)
