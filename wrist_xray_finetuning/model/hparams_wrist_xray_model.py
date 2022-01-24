@@ -4,7 +4,7 @@
 # external
 import tensorflow as tf
 
-from utils.model_utils import get_model_by_name, get_input_shape_from_config
+from utils.model_utils import get_model_by_name, get_input_shape_from_config, get_preprocessing_by_name
 
 
 class HparamsWristXrayModel(tf.keras.Model):
@@ -16,12 +16,11 @@ class HparamsWristXrayModel(tf.keras.Model):
         self.hp = hp
         self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)
-
-        self.preprocessing_layer, self.base_model = get_model_by_name(config, self.img_input, self._input_shape,
-                                                                      weights)
-        
+        self.preprocessing_layer = get_preprocessing_by_name(self.config, self._input_shape)
+        self.random_flipping_aug = tf.keras.layers.RandomFlip(mode="vertical")
+        self.random_rotation_aug = tf.keras.layers.experimental.preprocessing.RandomRotation(0.3)
+        self.base_model = get_model_by_name(self.config, self.img_input, self._input_shape, weights)
         self.base_model.trainable = config['train']['train_base']
-
         self.classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
                                                 name="predictions")
 

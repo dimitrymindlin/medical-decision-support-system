@@ -28,7 +28,7 @@ dataset = WristXrayDataset(config)
 # Model Definition
 def build_model(hp):
     model = HparamsWristXrayModel(config, hp)
-    model.load_weights(GPU_WEIGHT_PATH)
+    model.load_weights(CPU_WEIGHT_PATH)
     if hp.Boolean("extra_layers"):
         x = tf.keras.layers.Dropout(0.3)(model.layers[-2].output)  # Regularize with dropout
         x = tf.keras.layers.Flatten()(x)
