@@ -16,7 +16,7 @@ import sys
 config = wrist_xray_config
 print_running_on_gpu(tf)
 get_model_name_from_cli(sys.argv, config)
-CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
+CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/{config['train']['best_checkpoint']}/cp.ckpt"
 GPU_WEIGHT_PATH = f"checkpoints/wrist_xray/best/cp.ckpt"
 TF_LOG_DIR = f'{PathConstants.WRIST_XRAY_TENSORBOARD_FINETUNING_PREFIX}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
 dataset = WristXrayDataset(config)

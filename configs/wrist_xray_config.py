@@ -20,7 +20,8 @@ wrist_xray_config = {
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8,
         "use_class_weights": False,
-        "use_mura_weights": True
+        "use_mura_weights": True,
+        "best_checkpoint": "2022-01-24--11.15"
     },
     "test": {
         "batch_size": 16,
