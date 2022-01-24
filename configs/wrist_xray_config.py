@@ -11,7 +11,7 @@ wrist_xray_config = {
     },
     "train": {
         "train_base": False,
-        "augmentation": False,
+        "augmentation": True,
         "batch_size": 8,
         "learn_rate_finetuning": 0.00001,
         "learn_rate_final_layers": 0.01,

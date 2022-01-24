@@ -30,5 +30,8 @@ class WristXrayNet(tf.keras.Model):
 
     def call(self, inputs):
         x = self.preprocessing_layer(inputs)
+        if self.config['train']['augmentation']:
+            x = self.random_flipping_aug(x)
+            x = self.random_rotation_aug(x)
         x = self.base_model(x)
         return self.classifier(x)
