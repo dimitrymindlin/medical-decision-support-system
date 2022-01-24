@@ -24,8 +24,8 @@ class WristPredictNet(tf.keras.Model):
                                                 name="predictions")
 
     def call(self, x):
+        x = self.preprocessing_layer(x)
         if self.config['train']['augmentation']:
-            x = self.preprocessing_layer(x)
             x = self.random_flipping_aug(x)
             x = self.random_rotation_aug(x)
         x = self.base_model(x)
