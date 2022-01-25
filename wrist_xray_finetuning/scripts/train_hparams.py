@@ -66,7 +66,6 @@ def build_model(hp):
 tuner = kt.BayesianOptimization(
     build_model,
     objective=kt.Objective("val_auc", direction="max"),
-    max_epochs=30,
     directory=TF_LOGDIR_PATH)
 
 tuner.search(dataset.ds_train,
