@@ -63,7 +63,7 @@ def build_model(hp):
     return model
 
 
-tuner = kt.Hyperband(
+tuner = kt.BayesianOptimization(
     build_model,
     objective=kt.Objective("val_auc", direction="max"),
     max_epochs=30,
