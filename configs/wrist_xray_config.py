@@ -16,7 +16,7 @@ wrist_xray_config = {
         "learn_rate_finetuning": 0.00001,
         "learn_rate_final_layers": 0.01,
         "epochs": 60,
-        "patience_learning_rate": 1,
+        "patience_learning_rate": 3,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8,
         "use_class_weights": False,
