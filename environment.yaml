@@ -12,3 +12,6 @@ dependencies:
       - tensorflow-datasets==4.4.0
       - kaggle
       - keras-tuner
+      - lime
+      - tf-explain
+      - imutils
