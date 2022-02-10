@@ -3,7 +3,7 @@
 
 # external
 import tensorflow as tf
-
+import tensorflow_addons as tfa
 from utils.model_utils import get_model_by_name, get_input_shape_from_config, get_preprocessing_by_name
 
 
@@ -24,9 +24,16 @@ class WristPredictNet(tf.keras.Model):
                                                 name="predictions")
 
     def call(self, x):
-        x = self.preprocessing_layer(x)
+        x = tfa.image.equalize(x)
+        x = self.resize_with_pad(x)
+        x = self.preprocessing_layer(x)  # Normalisation to [0,1]
         if self.config['train']['augmentation']:
             x = self.random_flipping_aug(x)
             x = self.random_rotation_aug(x)
         x = self.base_model(x)
         return self.classifier(x)
+
+    def resize_with_pad(self, image):
+        return tf.image.resize_with_pad(image,
+                                        self.config['data']['image_height'],
+                                        self.config['data']['image_width'])

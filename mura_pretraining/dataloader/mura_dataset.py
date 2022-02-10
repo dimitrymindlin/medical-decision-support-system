@@ -1,7 +1,10 @@
+import PIL
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import numpy as np
 from mura_pretraining.dataloader.mura_tfds import MuraImages
+from preprocessing.square_crop import crop_image
+
 
 class MuraDataset():
 
@@ -27,14 +30,11 @@ class MuraDataset():
         ds = ds.map(self.preprocess, num_parallel_calls=tf.data.AUTOTUNE)
         ds = ds.shuffle(self.ds_info.splits['train'].num_examples)
         ds = ds.batch(self.config['train']['batch_size'])
-        """if self.config["train"]["augmentation"]:
-            ds = ds.map(self.augment_data, num_parallel_calls=tf.data.AUTOTUNE)"""
         ds = ds.prefetch(tf.data.AUTOTUNE)
         return ds
 
     def _build_test_pipeline(self, ds):
-        ds = ds.map(
-            self.preprocess, num_parallel_calls=tf.data.AUTOTUNE)
+        ds = ds.map(self.preprocess, num_parallel_calls=tf.data.AUTOTUNE)
         ds = ds.batch(self.config['test']['batch_size'])
         ds = ds.prefetch(tf.data.AUTOTUNE)
         return ds
@@ -58,15 +58,16 @@ class MuraDataset():
     def preprocess(self, image, label):
         height = self.config['data']['image_height']
         width = self.config['data']['image_width']
-        image = tf.image.resize_with_pad(image, height, width)
-        return tf.cast(image, tf.float32) / 255., label  # normalize pixel values
-    
-    """def augment_data(self, image, label):
-        image = tf.image.random_flip_left_right(image)
-        image = tf.image.rot
-        #image = tf.image.random_flip_up_down(image)
-        #image = tf.image.random_brightness(image, max_delta=0.2)
-        return image, label"""
+        image = tf.image.resize_with_pad(tf.convert_to_tensor(image), height, width)
+        return tf.cast(image, tf.float32), label  # normalize pixel values
 
     def benchmark(self):
         tfds.benchmark(self.ds_train, batch_size=self.config['train']['batch_size'])
+
+"""def load_cropped_ds(config):
+    ds = MuraDataset(config)
+    for idx, (image, label) in enumerate(ds.ds_train):
+        #print(ds.ds_train[idx][0].shape())
+        ds.ds_train[idx][0] = crop_image(image)
+        print(ds.ds_train[idx][0].shape())
+        print("Dimi")"""
