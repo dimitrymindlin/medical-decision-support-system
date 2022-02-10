@@ -9,6 +9,8 @@ from mura_pretraining.model.mura_model import WristPredictNet
 from utils.path_constants import PathConstants
 import sys
 import numpy as np
+import tensorflow_datasets as tfds
+import matplotlib.pyplot as plt
 
 from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
 
@@ -71,6 +73,22 @@ dataset = MuraDataset(config)
 # Class weights for training underrepresented classes
 class_weight = dataset.train_classweights if config["train"]["use_class_weights"] else None
 
+# Log Text like config and evaluation
+config_matrix = [[k, str(w)] for k, w in config["train"].items()]
+file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
+with file_writer.as_default():
+    tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
+"""    images = dataset.ds_train.take(1)
+    tfds.visualization.show_examples(images, dataset.ds_info)
+    for image, label in images:
+        tf.summary.image("Training examples", image, max_outputs=len(image), step=0)
+    #tf.summary.image("training data examples", images, max_outputs=len(images), step=0)
+    images = dataset.ds_test.take(1)
+    for image, label in images:
+        tf.summary.image("Test examples", image, max_outputs=len(image), step=0)
+    tf.summary.image("Test examples", images[0][0], max_outputs=len(image), step=0)
+
+exit()"""
 # Model Training
 model.fit(
     dataset.ds_train,
@@ -87,13 +105,7 @@ result = model.evaluate(
     batch_size=config['test']['batch_size'],
     callbacks=[tensorboard_callback])
 
-# Log Text like config and evaluation
-config_matrix = [[k, str(w)] for k, w in config["train"].items()]
-file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
-with file_writer.as_default():
-    tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
-    images = np.reshape(dataset.ds_train.take(1), (-1, 28, 28, 1))
-    tf.summary.image("25 training data examples", images, max_outputs=len(images), step=0)
+
 
 result = dict(zip(model.metrics_names, result))
 print("Evaluation Result: ", result)
