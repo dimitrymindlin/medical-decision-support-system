@@ -3,12 +3,12 @@
 import tensorflow as tf
 #import tensorflow_addons as tfa
 from datetime import datetime
-
 from configs.mura_pretraining_config import mura_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from mura_pretraining.model.mura_model import WristPredictNet
 from utils.path_constants import PathConstants
 import sys
+import numpy as np
 
 from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
 
@@ -66,6 +66,7 @@ dyn_lr = tf.keras.callbacks.ReduceLROnPlateau(
 
 # Get Dataset
 dataset = MuraDataset(config)
+#dataset = load_cropped_ds(config)
 
 # Class weights for training underrepresented classes
 class_weight = dataset.train_classweights if config["train"]["use_class_weights"] else None
@@ -91,6 +92,8 @@ config_matrix = [[k, str(w)] for k, w in config["train"].items()]
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 with file_writer.as_default():
     tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
+    images = np.reshape(dataset.ds_train.take(1), (-1, 28, 28, 1))
+    tf.summary.image("25 training data examples", images, max_outputs=len(images), step=0)
 
 result = dict(zip(model.metrics_names, result))
 print("Evaluation Result: ", result)
