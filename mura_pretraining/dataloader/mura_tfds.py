@@ -6,9 +6,9 @@ import pandas as pd
 
 
 class MuraImages(tfds.core.GeneratorBasedBuilder):
-    VERSION = tfds.core.Version('1.0.3')
+    VERSION = tfds.core.Version('1.0.4')
     RELEASE_NOTES = {
-        '1.0.3': 'Initial release.',
+        '1.0.4': 'Initial release.',
     }
 
     def _info(self) -> tfds.core.DatasetInfo:
@@ -42,7 +42,8 @@ class MuraImages(tfds.core.GeneratorBasedBuilder):
 
     def _generate_examples(self, path):
         """Yields examples."""
-        body_parts = ["XR_WRIST"]
+        #body_parts = ["XR_WRIST"]
+        body_parts = ["XR_HAND", "XR_FINGER", "XR_FOREARM", "XR_SHOULDER", "XR_HUMERUS"]
 
         # Read the input data out of the source files
         root = "/".join(path.split("/")[:-2])  # ../.. to get to root dataloader folder

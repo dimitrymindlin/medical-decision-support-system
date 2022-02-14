@@ -9,7 +9,7 @@ from mura_pretraining.dataloader.mura_tfds import MuraImages
 mura_config["dataset"]["download"] = True
 
 (train, validation, test), info = tfds.load(
-            'MuraImages:1.0.3',
+            'MuraImages:1.0.4',
             split=['train[:80%]', 'train[80%:]', 'test'],
             shuffle_files=True,
             as_supervised=True,

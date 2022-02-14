@@ -7,7 +7,6 @@ class MuraDataset():
 
     def __init__(self, config):
         self.config = config
-        print(self.config["dataset"]["download"])
         (train, validation, test), info = tfds.load(
             'MuraImages',
             split=['train[:80%]', 'train[80%:]', 'test'],
