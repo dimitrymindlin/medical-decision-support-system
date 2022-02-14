@@ -8,9 +8,6 @@ from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from mura_pretraining.model.mura_model import WristPredictNet
 from utils.path_constants import PathConstants
 import sys
-import numpy as np
-import tensorflow_datasets as tfds
-import matplotlib.pyplot as plt
 
 from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
 
