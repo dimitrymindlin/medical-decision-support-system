@@ -5,7 +5,7 @@ import tensorflow as tf
 from datetime import datetime
 from configs.mura_pretraining_config import mura_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from mura_pretraining.model.mura_model import WristPredictNet
+from mura_pretraining.model.mura_model import get_mura_model
 from utils.path_constants import PathConstants
 import sys
 
@@ -18,7 +18,8 @@ TF_LOG_DIR = f'{PathConstants.MURA_TENSORBOARD_PREFIX}/mura_{config["model"]["na
     "%Y-%m-%d--%H.%M")
 
 # Model Definition
-model = WristPredictNet(config, train_base=config['train']['train_base'])
+#model = WristPredictNet(config, train_base=config['train']['train_base'])
+model = get_mura_model(config)
 
 # Training Params
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
