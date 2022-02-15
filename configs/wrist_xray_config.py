@@ -21,7 +21,7 @@ wrist_xray_config = {
         "early_stopping_patience": 8,
         "use_class_weights": False,
         "use_mura_weights": True,
-        "best_checkpoint": "2022-01-24--11.15"
+        "best_checkpoint": "2022-02-10--12.54"
     },
     "test": {
         "batch_size": 16,

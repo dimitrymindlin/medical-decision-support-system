@@ -2,7 +2,7 @@ import tensorflow_datasets as tfds
 import os
 
 
-class MuraFinetuningImages(tfds.core.GeneratorBasedBuilder):
+class MuraWristImages(tfds.core.GeneratorBasedBuilder):
     VERSION = tfds.core.Version('1.0.0')
     RELEASE_NOTES = {
         '1.0.0': 'Initial release.',

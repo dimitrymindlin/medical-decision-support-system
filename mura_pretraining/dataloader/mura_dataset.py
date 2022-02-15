@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import numpy as np
-from mura_finetuning.dataloader.mura_finetuning_tfds import MuraFinetuningImages
+from mura_finetuning.dataloader.mura_wrist_tfds import MuraWristImages
 from mura_pretraining.dataloader.mura_tfds import MuraImages
 
 
@@ -9,7 +9,7 @@ class MuraDataset():
 
     def __init__(self, config, finetuning=False):
         self.config = config
-        dataset = 'MuraImages' if not finetuning else 'MuraFinetuningImages'
+        dataset = 'MuraImages' if not finetuning else 'MuraWristImages'
         (train, validation, test), info = tfds.load(
             dataset,
             split=['train[:80%]', 'train[80%:]', 'test'],
@@ -62,6 +62,7 @@ class MuraDataset():
 
     def benchmark(self):
         tfds.benchmark(self.ds_train, batch_size=self.config['train']['batch_size'])
+
 
 """def load_cropped_ds(config):
     ds = MuraDataset(config)
