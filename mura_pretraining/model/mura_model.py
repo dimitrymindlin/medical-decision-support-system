@@ -10,9 +10,10 @@ from utils.model_utils import get_model_by_name, get_input_shape_from_config, ge
 class WristPredictNet(tf.keras.Model):
     """MuraDenseNet Model Class with various base models"""
 
-    def __init__(self, config, weights='imagenet', train_base=False):
+    def __init__(self, config, weights='imagenet', train_base=False, include_top=True):
         super(WristPredictNet, self).__init__(name='WristPredictNet')
         self.config = config
+        self.include_top = include_top
         self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)
         self.preprocessing_layer = get_preprocessing_by_name(self.config, self._input_shape)
@@ -31,7 +32,10 @@ class WristPredictNet(tf.keras.Model):
             x = self.random_flipping_aug(x)
             x = self.random_rotation_aug(x)
         x = self.base_model(x)
-        return self.classifier(x)
+        if self.include_top:
+            return self.classifier(x)
+        else:
+            return x
 
     def resize_with_pad(self, image):
         return tf.image.resize_with_pad(image,
