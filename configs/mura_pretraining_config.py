@@ -4,9 +4,9 @@ mura_config = {
     },
     "data": {
         "class_names": ["positive"],
-        "input_size": (120, 120),
-        "image_height": 120,
-        "image_width": 120,
+        "input_size": (520, 520),
+        "image_height": 520,
+        "image_width": 520,
         "image_channel": 3,
         "crop_images": True
     },
