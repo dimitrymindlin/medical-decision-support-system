@@ -6,10 +6,12 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 from mura_pretraining.dataloader.mura_tfds import MuraImages
+from mura_finetuning.dataloader.mura_finetuning_tfds import MuraFinetuningImages
+
 mura_config["dataset"]["download"] = True
 
 (train, validation, test), info = tfds.load(
-            'MuraImages:1.0.4',
+            'MuraFinetuningImages',
             split=['train[:80%]', 'train[80%:]', 'test'],
             shuffle_files=True,
             as_supervised=True,
@@ -18,7 +20,7 @@ mura_config["dataset"]["download"] = True
         )
 
 fig = tfds.visualization.show_examples(train, info)
-plt.show(fig)
+plt.show()
 exit()
 dataset = MuraDataset(mura_config)
 

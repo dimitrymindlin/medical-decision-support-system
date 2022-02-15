@@ -1,14 +1,17 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import numpy as np
+from mura_finetuning.dataloader.mura_finetuning_tfds import MuraFinetuningImages
+from mura_pretraining.dataloader.mura_tfds import MuraImages
 
 
 class MuraDataset():
 
-    def __init__(self, config):
+    def __init__(self, config, finetuning=False):
         self.config = config
+        dataset = 'MuraImages' if not finetuning else 'MuraFinetuningImages'
         (train, validation, test), info = tfds.load(
-            'MuraImages',
+            dataset,
             split=['train[:80%]', 'train[80%:]', 'test'],
             shuffle_files=True,
             as_supervised=True,
