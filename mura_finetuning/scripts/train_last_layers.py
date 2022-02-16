@@ -13,6 +13,7 @@ import sys
 
 config = mura_finetuning_config
 get_model_name_from_cli(sys.argv, config)
+print(config["model"]["name"])
 
 CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
