@@ -5,6 +5,6 @@ conda activate medical-decision-support-system
 cd /media/compute/homes/dmindlin/medical-decision-support-system
 
 tensorboard dev upload --logdir logs_mura \
-    --name "Mura Pretraining Board" \
-    --description "Comparison of several hyperparameters and pretraining" \
+    --name "Mura Pretraining" \
+    --description "Pretraining models on the mura dataset except of Wrist Xrays" \
     --one_shot

@@ -8,4 +8,4 @@
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-core=1
 
-srun upload_tensorboard_mura.job.sh
+srun tensorboard_mura.job.sh
