@@ -1,4 +1,4 @@
-mura_config = {
+mura_hparams_config = {
     "dataset": {
         "download": True,
     },
@@ -10,7 +10,7 @@ mura_config = {
         "image_channel": 3,
     },
     "train": {
-        "train_base": True,
+        "train_base": False,
         "augmentation": True,
         "use_class_weights": True,
         "batch_size": 8,

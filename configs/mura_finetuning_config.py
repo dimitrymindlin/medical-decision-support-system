@@ -8,10 +8,9 @@ mura_finetuning_config = {
         "image_height": 320,
         "image_width": 320,
         "image_channel": 3,
-        "crop_images": True
     },
     "train": {
-        "train_base": True,
+        "train_base": False,
         "augmentation": True,
         "use_class_weights": True,
         "batch_size": 8,

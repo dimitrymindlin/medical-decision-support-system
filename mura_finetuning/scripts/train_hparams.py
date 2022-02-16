@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-# import tensorflow_addons as tfa
+#import tensorflow_addons as tfa
 from datetime import datetime
 
-from configs.mura_pretraining_config import mura_config
+from configs.mura_hparams_config import mura_hparams_config
+from mura_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model_hp
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from mura_pretraining.model.hparams_mura_model import HparamsMuraModel
+from mura_pretraining.model.mura_model import get_mura_model
 from utils.path_constants import PathConstants
 import keras_tuner as kt
 import sys
@@ -14,28 +15,36 @@ import sys
 from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
 
 print_running_on_gpu(tf)
-config = mura_config
+config = mura_hparams_config
+CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
+GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 get_model_name_from_cli(sys.argv, config)
-TF_LOG_DIR = f"{PathConstants.MURA_TENSORBOARD_TUNING_PREFIX}/{config['model']['name']}_" + datetime.now().strftime(
+TF_LOG_DIR = f"{PathConstants.MURA_TENSORBOARD_HPARAMS_PREFIX}/{config['model']['name']}_" + datetime.now().strftime(
     "%Y-%m-%d--%H.%M")
 
-dataset = MuraDataset(config)
+# Dataset
+dataset = MuraDataset(config, finetuning=True)
 
 
 # Model Definition
 def build_model(hp):
-    model = HparamsMuraModel(config['model']['name'], config, hp)
+    # Model Definition
+    model = get_mura_model(config, include_top=False)
+    model.load_weights(GPU_WEIGHT_PATH).expect_partial()
+    model = get_finetuning_model_from_pretrained_model_hp(model, hp)
 
+    # Training params
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-    metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
-                                      from_logits=False)
-    metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
+    auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
+                                      from_logits=False, name="auc")
+    bin_accuracy = tf.keras.metrics.BinaryAccuracy(name="bin_accuracy")
+
     """metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
                                     threshold=config["test"]["F1_threshold"], average='macro')"""
 
     # Optimizer and LR
     optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
-    learning_rate = hp.Choice('learning_rate', [0.001, 0.0005, 0.0001])
+    learning_rate = hp.Choice('learning_rate', [0.001, 0.0001, 0.0005])
     if optimizer == "adam":
         optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
     elif optimizer == "sgd":
@@ -44,14 +53,14 @@ def build_model(hp):
     model.compile(
         optimizer=optimizer,
         loss=loss,
-        metrics=[metric_auc, metric_bin_accuracy]  # metric_f1
+        metrics=[auc, bin_accuracy]
     )
     return model
 
 
 tuner = kt.Hyperband(
     build_model,
-    objective='val_binary_accuracy',
+    objective=kt.Objective("val_auc", direction="max"),
     max_epochs=30,
     directory=TF_LOG_DIR)
 
