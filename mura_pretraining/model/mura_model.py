@@ -53,11 +53,11 @@ def resize_with_pad(image, height, width):
     return tf.image.resize_with_pad(image, height, width)
 
 
-def get_mura_model(config):
+def get_mura_model(config, include_top=True):
     input_shape = get_input_shape_from_config(config)
     inputs = tf.keras.Input(shape=input_shape)
     pre = PreprocessNet(config)(inputs)
-    wrist_net = WristPredictNet(config)(pre)
+    wrist_net = WristPredictNet(config, include_top=include_top)(pre)
     return tf.keras.Model(inputs, wrist_net)
 
 
