@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-#import tensorflow_addons as tfa
+# import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.mura_hparams_config import mura_hparams_config
@@ -16,10 +16,11 @@ from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
 
 print_running_on_gpu(tf)
 config = mura_hparams_config
+get_model_name_from_cli(sys.argv, config)
 CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 get_model_name_from_cli(sys.argv, config)
-TF_LOG_DIR = f"{PathConstants.MURA_TENSORBOARD_HPARAMS_PREFIX}/{config['model']['name']}_" + datetime.now().strftime(
+TF_LOG_DIR = f"{PathConstants.WRIST_LAST_LAYERS_HPARAMS}/{config['model']['name']}_" + datetime.now().strftime(
     "%Y-%m-%d--%H.%M")
 
 # Dataset
@@ -36,7 +37,7 @@ def build_model(hp):
     # Training params
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
-                                      from_logits=False, name="auc")
+                               from_logits=False, name="auc")
     bin_accuracy = tf.keras.metrics.BinaryAccuracy(name="bin_accuracy")
 
     """metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
