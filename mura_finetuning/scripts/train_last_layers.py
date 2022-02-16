@@ -12,15 +12,13 @@ from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
 import sys
 
 config = mura_finetuning_config
+get_model_name_from_cli(sys.argv, config)
+
 CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 TF_LOG_DIR = f'{PathConstants.WRIST_LAST_LAYERS}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 print_running_on_gpu(tf)
-
-# Extract Model Name
-get_model_name_from_cli(sys.argv, config)
-print(config["model"]["name"])
 
 # Dataset Definition
 dataset = MuraDataset(config, finetuning=True)
