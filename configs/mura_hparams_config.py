@@ -10,7 +10,7 @@ mura_hparams_config = {
         "image_channel": 3,
     },
     "train": {
-        "train_base": False,
+        "train_base": True,
         "augmentation": True,
         "use_class_weights": True,
         "batch_size": 8,
