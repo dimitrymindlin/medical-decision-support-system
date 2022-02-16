@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import numpy as np
-import sklearn
 import tensorflow as tf
 import tensorflow_addons as tfa
 from datetime import datetime
@@ -9,11 +7,9 @@ from configs.mura_finetuning_config import mura_finetuning_config
 from mura_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model
 from mura_pretraining.dataloader import MuraDataset
 from mura_pretraining.model.mura_model import get_mura_model
-from utils.confusion_matrix import plot_to_image, plot_confusion_matrix_util
 from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
 import sys
-from matplotlib import pyplot as plt
 
 config = mura_finetuning_config
 CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
@@ -54,7 +50,6 @@ config_matrix = [[k, str(w)] for k, w in config["train"].items()]
 with file_writer.as_default():
     tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
 
-
 """def log_confusion_matrix(epoch, logs):
     # Use the model to predict the values from the test_images.
     y_pred = []  # store predicted labels
@@ -87,10 +82,9 @@ with file_writer.as_default():
         tf.summary.image("Confusion Matrix", cm_image, step=epoch)
     print("Done")"""
 
-
 # Tensorboard Callbacks
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
-#cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
+# cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
 checkpoint_filepath = 'checkpoints/wrist_xray/' + datetime.now().strftime("%Y-%m-%d--%H.%M") + '/cp.ckpt'
 # Save best only
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
