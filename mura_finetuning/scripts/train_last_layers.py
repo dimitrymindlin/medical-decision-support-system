@@ -20,6 +20,7 @@ print_running_on_gpu(tf)
 
 # Extract Model Name
 get_model_name_from_cli(sys.argv, config)
+print(config["model"]["name"])
 
 # Dataset Definition
 dataset = MuraDataset(config, finetuning=True)
