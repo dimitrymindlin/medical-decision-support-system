@@ -4,7 +4,7 @@ import tensorflow as tf
 # import tensorflow_addons as tfa
 from datetime import datetime
 
-from configs.mura_hparams_config import mura_hparams_config as config
+from configs.frozen_hp_config import frozen_hp_config as config
 from mura_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model_hp
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from mura_pretraining.model.mura_model import get_mura_model
@@ -28,6 +28,9 @@ dataset = MuraDataset(config, only_wrist_data=True)
 # Model Definition
 def build_model(hp):
     # Model Definition
+    config["train"]["augmentation"] = hp.Boolean('augmentation')
+    config["train"]["use_class_weights"] = hp.Boolean("use_class_weights")
+    config["train"]["batch_size"] = hp.Choice("batch_size", [8, 32, 64])
     model = get_mura_model(config, include_top=False)
     model.load_weights(GPU_WEIGHT_PATH).expect_partial()
     model = get_finetuning_model_from_pretrained_model_hp(model, hp)

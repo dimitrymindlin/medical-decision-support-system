@@ -3,7 +3,7 @@
 import tensorflow as tf
 #import tensorflow_addons as tfa
 from datetime import datetime
-from configs.mura_pretraining_config import mura_config
+from configs.pretraining_config import pretraining_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from mura_pretraining.model.mura_model import get_mura_model
 from utils.path_constants import PathConstants
@@ -11,7 +11,7 @@ import sys
 
 from utils.training_utils import get_model_name_from_cli_to_config, print_running_on_gpu
 
-config = mura_config
+config = pretraining_config
 print_running_on_gpu(tf)
 get_model_name_from_cli_to_config(sys.argv, config)
 TF_LOG_DIR = f'{PathConstants.PRETRAIN}/mura_{config["model"]["name"]}/' + datetime.now().strftime(

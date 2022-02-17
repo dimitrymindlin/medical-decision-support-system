@@ -1,23 +1,21 @@
-mura_finetuning_config = {
+pretraining_config = {
     "dataset": {
         "download": True,
     },
     "data": {
         "class_names": ["positive"],
-        "input_size": (320, 320),
-        "image_height": 320,
-        "image_width": 320,
+        "input_size": (520, 520),
+        "image_height": 520,
+        "image_width": 520,
         "image_channel": 3,
     },
     "train": {
-        "finetune": False,
-        "train_base": False,
+        "train_base": True,
         "augmentation": True,
         "use_class_weights": True,
         "batch_size": 8,
         "epochs": 60,
-        "learn_rate_finetuning": 0.0001,
-        "learn_rate_final_layers": 0.001,
+        "learn_rate": 0.0001,
         "patience_learning_rate": 1,
         "factor_learning_rate": 0.1,
         "min_learning_rate": 1e-8,
