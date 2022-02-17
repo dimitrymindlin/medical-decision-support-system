@@ -28,7 +28,7 @@ for arg in sys.argv:
         config["train"]["finetune"] = True
         config["train"]["train_base"] = True
         TF_LOG_DIR = f'{PathConstants.FINETUNE}/' + timestamp
-        GPU_WEIGHT_PATH = f"checkpoints/wrist_train/best/cp.ckpt"
+        GPU_WEIGHT_PATH = f"checkpoints/frozen_{model_name}/best/cp.ckpt"
         checkpoint_filepath = f'checkpoints/finetune_{model_name}/' + timestamp
 
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
