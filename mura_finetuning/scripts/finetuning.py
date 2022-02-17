@@ -7,6 +7,7 @@ from configs.finetuning_config import finetuning_config as config
 from mura_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model
 from mura_pretraining.dataloader import MuraDataset
 from mura_pretraining.model.mura_model import get_mura_model
+from utils.eval_metrics import PRTensorBoard
 from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 import sys
@@ -15,7 +16,6 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 import io
-
 
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 model_name = get_model_name_from_cli_to_config(sys.argv, config)
@@ -98,6 +98,7 @@ with file_writer.as_default():
         tf.summary.image("Confusion Matrix", cm_image, step=epoch)
     print("Done")"""
 
+
 def log_confusion_matrix(epoch, logs):
     # Use the model to predict the values from the validation dataset.
     test_pred = model.predict_classes(dataset.ds_test)
@@ -127,6 +128,7 @@ def log_confusion_matrix(epoch, logs):
     # Log the confusion matrix as an image summary.
     with file_writer.as_default():
         tf.summary.image("Confusion Matrix", image, step=epoch)
+
 
 # Tensorboard Callbacks
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
@@ -165,7 +167,8 @@ model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_val,
-    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr, cm_callback],
+    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr, cm_callback,
+               PRTensorBoard(log_dir=TF_LOG_DIR)],
     class_weight=class_weight
 )
 

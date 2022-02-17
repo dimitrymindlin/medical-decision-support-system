@@ -21,7 +21,7 @@ finetuning_config = {
         "patience_learning_rate": 1,
         "factor_learning_rate": 0.1,
         "min_learning_rate": 1e-8,
-        "early_stopping_patience": 8
+        "early_stopping_patience": 5
     },
     "test": {
         "batch_size": 8,
