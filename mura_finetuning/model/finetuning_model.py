@@ -10,7 +10,7 @@ def get_finetuning_model_from_pretrained_model(model):
 
 def get_finetuning_model_from_pretrained_model_hp(model, hp):
     x = model.layers[-1].output
-    dropout_rate = hp.Choice(0.2, 0.3)
+    dropout_rate = hp.Choice('dropout_rate', [0.2, 0.3])
     if hp.Boolean("extra_layers"):
         x = tf.keras.layers.GlobalAveragePooling2D()(x)
         x = tf.keras.layers.Dropout(dropout_rate)(x)  # Regularize with dropout
