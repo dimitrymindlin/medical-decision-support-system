@@ -5,7 +5,7 @@ import tensorflow as tf
 from datetime import datetime
 from configs.pretraining_config import pretraining_config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from mura_pretraining.model.mura_model import get_mura_model
+from models.mura_model import get_mura_model
 from utils.path_constants import PathConstants
 import sys
 

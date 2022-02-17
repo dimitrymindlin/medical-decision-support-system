@@ -5,9 +5,9 @@ import tensorflow as tf
 from datetime import datetime
 
 from configs.frozen_hp_config import frozen_hp_config as config
-from mura_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model_hp
+from models.finetuning_model import get_finetuning_model_from_pretrained_model_hp
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from mura_pretraining.model.mura_model import get_mura_model
+from models.mura_model import get_mura_model
 from utils.path_constants import PathConstants
 import keras_tuner as kt
 import sys

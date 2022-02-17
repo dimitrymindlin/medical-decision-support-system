@@ -3,7 +3,7 @@ import matplotlib.cm as cm
 import numpy as np
 import cv2
 
-from explainable_ai.utils import image_stack
+from xai.utils import image_stack
 
 
 def make_heatmap(img_array, model, last_conv_layer_name, pred_index=None):

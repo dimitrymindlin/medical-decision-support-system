@@ -8,14 +8,14 @@ from keras_explain.lrp import LRP
 import tensorflow as tf
 from configs.wrist_xray_config import wrist_xray_config
 from wrist_xray_finetuning.dataloader import WristXrayDataset
-from wrist_xray_finetuning.model.wrist_xray_model import WristXrayDenseNet
+from wrist_xray_finetuning.model.wrist_xray_model import WristXrayNet
 
 config = wrist_xray_config
 dataset = WristXrayDataset(config)
 data = dataset.ds_test.take(10)
 
 train_base = config['train']['train_base']
-model = WristXrayDenseNet(config, train_base=train_base).model()
+model = WristXrayNet(config, train_base=train_base)
 model.load_weights("../../checkpoints/mura/best/cp.ckpt")
 
 for index, example in enumerate(data):
@@ -28,7 +28,7 @@ for index, example in enumerate(data):
     explainer = GradCAM()
     grid = explainer.explain(([image], None), model, class_index=0)
     print("Label: %d" % label)
-    explainer.save(grid, "./explainable_ai", output_name=f"grad_cam_{index}.png")"""
+    explainer.save(grid, "./xai", output_name=f"grad_cam_{index}.png")"""
 
     explainer = LRP(model)
     exp = explainer.explain(image, label)

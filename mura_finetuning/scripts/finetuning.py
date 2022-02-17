@@ -4,9 +4,9 @@ import tensorflow_addons as tfa
 from datetime import datetime
 
 from configs.finetuning_config import finetuning_config as config
-from mura_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model
+from models.finetuning_model import get_finetuning_model_from_pretrained_model
 from mura_pretraining.dataloader import MuraDataset
-from mura_pretraining.model.mura_model import get_mura_model
+from models.mura_model import get_mura_model
 from utils.eval_metrics import PRTensorBoard
 from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
