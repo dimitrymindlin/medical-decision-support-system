@@ -169,8 +169,7 @@ model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_val,
-    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr, cm_callback,
-               PRTensorBoard(log_dir=TF_LOG_DIR)],
+    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr, cm_callback],
     class_weight=class_weight
 )
 
