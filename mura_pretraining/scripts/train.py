@@ -14,7 +14,7 @@ from utils.training_utils import get_model_name_from_cli_to_config, print_runnin
 config = mura_config
 print_running_on_gpu(tf)
 get_model_name_from_cli_to_config(sys.argv, config)
-TF_LOG_DIR = f'{PathConstants.MURA_PRETRAIN}/mura_{config["model"]["name"]}/' + datetime.now().strftime(
+TF_LOG_DIR = f'{PathConstants.PRETRAIN}/mura_{config["model"]["name"]}/' + datetime.now().strftime(
     "%Y-%m-%d--%H.%M")
 
 # Model Definition
