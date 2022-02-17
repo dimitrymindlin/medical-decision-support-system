@@ -1,4 +1,4 @@
-def get_model_name_from_cli(sys_argv, config):
+def get_model_name_from_cli_to_config(sys_argv, config):
     # set cli arguments
     for arg in sys_argv:
         if arg == "--densenet":

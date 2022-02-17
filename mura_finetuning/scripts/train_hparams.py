@@ -12,14 +12,14 @@ from utils.path_constants import PathConstants
 import keras_tuner as kt
 import sys
 
-from utils.training_utils import get_model_name_from_cli, print_running_on_gpu
+from utils.training_utils import get_model_name_from_cli_to_config, print_running_on_gpu
 
 print_running_on_gpu(tf)
 config = mura_hparams_config
-get_model_name_from_cli(sys.argv, config)
+get_model_name_from_cli_to_config(sys.argv, config)
 CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
-get_model_name_from_cli(sys.argv, config)
+get_model_name_from_cli_to_config(sys.argv, config)
 TF_LOG_DIR = f"{PathConstants.WRIST_LAST_LAYERS_HPARAMS}/{config['model']['name']}_" + datetime.now().strftime(
     "%Y-%m-%d--%H.%M")
 

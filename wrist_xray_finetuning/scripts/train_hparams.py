@@ -9,13 +9,13 @@ from configs.wrist_xray_config import wrist_xray_config
 import keras_tuner as kt
 
 from utils.path_constants import PathConstants
-from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
+from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 from wrist_xray_finetuning.dataloader import WristXrayDataset
 from wrist_xray_finetuning.model.hparams_wrist_xray_model import HparamsWristXrayModel
 
 config = wrist_xray_config
 print_running_on_gpu(tf)
-get_model_name_from_cli(sys.argv, config)
+get_model_name_from_cli_to_config(sys.argv, config)
 CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
 

@@ -7,7 +7,7 @@ from datetime import datetime
 from configs.wrist_xray_config import wrist_xray_config
 from mura_pretraining.model.mura_model import WristPredictNet
 from utils.path_constants import PathConstants
-from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
+from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 from wrist_xray_finetuning.dataloader import WristXrayDataset
 from wrist_xray_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model
 from wrist_xray_finetuning.model.wrist_xray_model import WristXrayNet
@@ -15,7 +15,7 @@ import sys
 
 config = wrist_xray_config
 print_running_on_gpu(tf)
-get_model_name_from_cli(sys.argv, config)
+get_model_name_from_cli_to_config(sys.argv, config)
 # CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/{config['train']['best_checkpoint']}/cp.ckpt"
 GPU_WEIGHT_PATH = f"checkpoints/wrist_xray/{config['train']['best_checkpoint']}/cp.ckpt"
 TF_LOG_DIR = f'{PathConstants.WRIST_LAST_LAYERS_HPARAMS}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
