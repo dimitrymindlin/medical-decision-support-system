@@ -14,7 +14,7 @@ frozen_hp_config = {
         "augmentation": True,
         "use_class_weights": True,
         "batch_size": 8,
-        "epochs": 60,
+        "epochs": 5,
         "learn_rate": 0.0001,
         "patience_learning_rate": 1,
         "factor_learning_rate": 0.1,
