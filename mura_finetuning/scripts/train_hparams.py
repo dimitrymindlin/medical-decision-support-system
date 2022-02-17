@@ -4,7 +4,7 @@ import tensorflow as tf
 # import tensorflow_addons as tfa
 from datetime import datetime
 
-from configs.mura_hparams_config import mura_hparams_config
+from configs.mura_hparams_config import mura_hparams_config as config
 from mura_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model_hp
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from mura_pretraining.model.mura_model import get_mura_model
@@ -14,14 +14,12 @@ import sys
 
 from utils.training_utils import get_model_name_from_cli_to_config, print_running_on_gpu
 
+timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 print_running_on_gpu(tf)
-config = mura_hparams_config
+model_name = get_model_name_from_cli_to_config(sys.argv, config)
+GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"
 get_model_name_from_cli_to_config(sys.argv, config)
-CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
-GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
-get_model_name_from_cli_to_config(sys.argv, config)
-TF_LOG_DIR = f"{PathConstants.WRIST_LAST_LAYERS_HPARAMS}/{config['model']['name']}_" + datetime.now().strftime(
-    "%Y-%m-%d--%H.%M")
+TF_LOG_DIR = f"{PathConstants.FROZEN_HP}/{model_name}_" + timestamp
 
 # Dataset
 dataset = MuraDataset(config, only_wrist_data=True)
