@@ -1,4 +1,5 @@
+# For tensorboard logging
 class PathConstants:
-    PRETRAIN = "logs_pretrain"
-    FROZEN = "logs_frozen"
-    FINETUNE = "logs_finetune"
+    PRETRAIN = "tensorboard_logs/logs_pretrain"
+    FROZEN = "tensorboard_logs/logs_frozen"
+    FINETUNE = "tensorboard_logs/logs_finetune"
