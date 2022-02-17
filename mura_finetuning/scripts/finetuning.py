@@ -11,18 +11,19 @@ from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 import sys
 
-get_model_name_from_cli_to_config(sys.argv, config)
-TF_LOG_DIR = None
+timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
+model_name = get_model_name_from_cli_to_config(sys.argv, config)
+GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"  # for cpu prepend "../../"
+TF_LOG_DIR = f'{PathConstants.FROZEN}/' + timestamp
+checkpoint_filepath = f'checkpoints/frozen_{model_name}/' + timestamp
+
 for arg in sys.argv:
     if arg == "--finetune":
         config["train"]["finetune"] = True
-        TF_LOG_DIR = f'{PathConstants.WRIST_FINETUNE}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
-
-if not TF_LOG_DIR:
-    TF_LOG_DIR = f'{PathConstants.WRIST_LAST_LAYERS}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
-
-CPU_WEIGHT_PATH = f"../../checkpoints/wrist_xray/best/cp.ckpt"
-GPU_WEIGHT_PATH = f"checkpoints/wrist_xray/best/cp.ckpt"
+        config["train"]["train_base"] = True
+        TF_LOG_DIR = f'{PathConstants.FINETUNE}/' + timestamp
+        GPU_WEIGHT_PATH = f"checkpoints/wrist_train/best/cp.ckpt"
+        checkpoint_filepath = f'checkpoints/finetune_{model_name}/' + timestamp
 
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 print_running_on_gpu(tf)
@@ -36,7 +37,10 @@ model.load_weights(GPU_WEIGHT_PATH).expect_partial()
 model = get_finetuning_model_from_pretrained_model(model)
 
 # Training Parameter
-optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate_final_layers"])
+if config["train"]["finetune"]:
+    optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate_finetuning"])
+else:
+    optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate_final_layers"])
 loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
@@ -91,7 +95,7 @@ with file_writer.as_default():
 # Tensorboard Callbacks
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
 # cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
-checkpoint_filepath = 'checkpoints/wrist_xray/' + datetime.now().strftime("%Y-%m-%d--%H.%M") + '/cp.ckpt'
+
 # Save best only
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,

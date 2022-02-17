@@ -45,7 +45,7 @@ def build_model(hp):
 
     # Optimizer and LR
     optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
-    learning_rate = hp.Choice('learning_rate', [0.001, 0.0001, 0.0005])
+    learning_rate = hp.Choice('learning_rate', [0.01, 0.001, 0.0001])
     if optimizer == "adam":
         optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
     elif optimizer == "sgd":
