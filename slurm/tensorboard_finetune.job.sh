@@ -4,7 +4,7 @@ conda activate medical-decision-support-system
 
 cd /media/compute/homes/dmindlin/medical-decision-support-system
 
-tensorboard dev upload --logdir tensorboard_logs/logs_wrist_train_hp \
-    --name "Mura Wrist Last Layers HP Board" \
+tensorboard dev upload --logdir tensorboard_logs/logs_finetune \
+    --name "Mura Wrist Finetuning Board" \
     --description "Comparison of several hyperparameters and pretraining" \
     --one_shot
