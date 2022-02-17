@@ -8,6 +8,7 @@ dependencies:
   - tensorboard
   - tensorflow=2.6.0
   - tensorflow-gpu=2.6.0
+  - seaborn
   - pip:
       - tensorflow-datasets==4.4.0
       - kaggle

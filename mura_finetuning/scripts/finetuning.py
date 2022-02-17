@@ -10,6 +10,12 @@ from mura_pretraining.model.mura_model import get_mura_model
 from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 import sys
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
+import io
+
 
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 model_name = get_model_name_from_cli_to_config(sys.argv, config)
@@ -92,9 +98,39 @@ with file_writer.as_default():
         tf.summary.image("Confusion Matrix", cm_image, step=epoch)
     print("Done")"""
 
+def log_confusion_matrix(epoch, logs):
+    # Use the model to predict the values from the validation dataset.
+    test_pred = model.predict_classes(dataset.ds_test)
+    classes = [0, 1]
+    con_mat = tf.math.confusion_matrix(labels=["Normal", "Abnormal"], predictions=test_pred).numpy()
+    con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
+
+    con_mat_df = pd.DataFrame(con_mat_norm,
+                              index=classes,
+                              columns=classes)
+
+    figure = plt.figure(figsize=(8, 8))
+    sns.heatmap(con_mat_df, annot=True, cmap=plt.cm.Blues)
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+
+    plt.close(figure)
+    buf.seek(0)
+    image = tf.image.decode_png(buf.getvalue(), channels=4)
+
+    image = tf.expand_dims(image, 0)
+
+    # Log the confusion matrix as an image summary.
+    with file_writer.as_default():
+        tf.summary.image("Confusion Matrix", image, step=epoch)
+
 # Tensorboard Callbacks
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
-# cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
+cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
 
 # Save best only
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -129,7 +165,7 @@ model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_val,
-    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr],
+    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr, cm_callback],
     class_weight=class_weight
 )
 
