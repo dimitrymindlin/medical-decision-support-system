@@ -9,6 +9,7 @@ def get_model_name_from_cli_to_config(sys_argv, config):
             config["model"]["name"] = "resnet"
         elif arg == "--inception":
             config["model"]["name"] = "inception"
+    return config["model"]["name"]
 
 
 def print_running_on_gpu(tf):
