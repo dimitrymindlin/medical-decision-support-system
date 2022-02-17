@@ -7,11 +7,11 @@ from mura_pretraining.dataloader.mura_tfds import MuraImages
 
 
 class MuraDataset():
-    def __init__(self, config, finetuning=False):
+    def __init__(self, config, only_wrist_data=False):
         self.config = config
         low, high = resource.getrlimit(resource.RLIMIT_NOFILE)
         resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
-        dataset = 'MuraImages' if not finetuning else 'MuraWristImages'
+        dataset = 'MuraImages' if not only_wrist_data else 'MuraWristImages'
         (train, validation, test), info = tfds.load(
             dataset,
             split=['train[:80%]', 'train[80%:]', 'test'],

@@ -3,29 +3,35 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 from datetime import datetime
 
-from configs.mura_finetuning_config import mura_finetuning_config
+from configs.mura_finetuning_config import mura_finetuning_config as config
 from mura_finetuning.model.finetuning_model import get_finetuning_model_from_pretrained_model
 from mura_pretraining.dataloader import MuraDataset
 from mura_pretraining.model.mura_model import get_mura_model
 from utils.path_constants import PathConstants
-from utils.training_utils import print_running_on_gpu, get_model_name_from_cli
+from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 import sys
 
-config = mura_finetuning_config
-get_model_name_from_cli(sys.argv, config)
-print(config["model"]["name"])
+get_model_name_from_cli_to_config(sys.argv, config)
+TF_LOG_DIR = None
+for arg in sys.argv:
+    if arg == "--finetune":
+        config["train"]["finetune"] = True
+        TF_LOG_DIR = f'{PathConstants.WRIST_FINETUNE}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
 
-CPU_WEIGHT_PATH = f"../../checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
-GPU_WEIGHT_PATH = f"checkpoints/mura_{config['model']['name']}/best/cp.ckpt"
-TF_LOG_DIR = f'{PathConstants.WRIST_LAST_LAYERS}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
+if not TF_LOG_DIR:
+    TF_LOG_DIR = f'{PathConstants.WRIST_LAST_LAYERS}/' + datetime.now().strftime("%Y-%m-%d--%H.%M")
+
+CPU_WEIGHT_PATH = f"../../checkpoints/wrist_xray/best/cp.ckpt"
+GPU_WEIGHT_PATH = f"checkpoints/wrist_xray/best/cp.ckpt"
+
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 print_running_on_gpu(tf)
 
 # Dataset Definition
-dataset = MuraDataset(config, finetuning=True)
+dataset = MuraDataset(config, only_wrist_data=True)
 
 # Model Definition
-model = get_mura_model(config, include_top=True)
+model = get_mura_model(config, include_top=False)
 model.load_weights(GPU_WEIGHT_PATH).expect_partial()
 model = get_finetuning_model_from_pretrained_model(model)
 

@@ -10,6 +10,7 @@ mura_finetuning_config = {
         "image_channel": 3,
     },
     "train": {
+        "finetune": False,
         "train_base": False,
         "augmentation": True,
         "use_class_weights": True,

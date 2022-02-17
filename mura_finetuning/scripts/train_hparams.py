@@ -24,7 +24,7 @@ TF_LOG_DIR = f"{PathConstants.WRIST_LAST_LAYERS_HPARAMS}/{config['model']['name'
     "%Y-%m-%d--%H.%M")
 
 # Dataset
-dataset = MuraDataset(config, finetuning=True)
+dataset = MuraDataset(config, only_wrist_data=True)
 
 
 # Model Definition
