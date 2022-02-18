@@ -104,7 +104,7 @@ with file_writer.as_default():
     print("Done")"""
 
 
-def log_confusion_matrix(epoch, logs):
+def log_confusion_matrix(epoch):
     # Use the model to predict the values from the validation dataset.
     test_pred = model.predict(dataset.ds_test)
     test_pred = np.argmax(test_pred, axis=1)
@@ -133,8 +133,7 @@ def log_confusion_matrix(epoch, logs):
     image = tf.expand_dims(image, 0)
 
     # Log the confusion matrix as an image summary.
-    with file_writer.as_default():
-        file_writer.summary.image("Confusion Matrix", image, step=epoch)
+    tf.summary.image("Confusion Matrix", image, step=epoch)
 
 
 # Tensorboard Callbacks
@@ -191,4 +190,3 @@ result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
     tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
     log_confusion_matrix(epoch=0)
-
