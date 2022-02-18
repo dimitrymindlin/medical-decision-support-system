@@ -29,7 +29,7 @@ dataset = MuraDataset(config, only_wrist_data=True)
 def build_model(hp):
     # Model Definition
     config["train"]["use_class_weights"] = hp.Boolean("use_class_weights")
-    config["train"]["batch_size"] = hp.Choice("batch_size", [8, 32])
+    config["train"]["batch_size"] = hp.Choice("batch_size", [8, 64])
     model = get_mura_model(config, include_top=False)
     model.load_weights(GPU_WEIGHT_PATH).expect_partial()
     model = get_finetuning_model_from_pretrained_model_hp(model, hp)
@@ -44,9 +44,9 @@ def build_model(hp):
                                     threshold=config["test"]["F1_threshold"], average='macro')"""
 
     # Optimizer and LR
-    #optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
-    learning_rate = hp.Choice('learning_rate', [0.01, 0.001, 0.0001])
-    #if optimizer == "adam":
+    # optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
+    learning_rate = hp.Choice('learning_rate', [0.01, 0.001])
+    # if optimizer == "adam":
     optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
     """elif optimizer == "sgd":
         optimizer = tf.optimizers.SGD(learning_rate=learning_rate)"""

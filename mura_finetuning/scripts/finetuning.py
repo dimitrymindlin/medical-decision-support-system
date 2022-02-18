@@ -113,6 +113,9 @@ def log_confusion_matrix(epoch):
     classes = [0, 1]
     con_mat = tf.math.confusion_matrix(labels=labels, predictions=test_pred).numpy()
     con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
+    print(con_mat)
+    print("_____")
+    print(con_mat_norm)
 
     con_mat_df = pd.DataFrame(con_mat_norm,
                               index=classes,
