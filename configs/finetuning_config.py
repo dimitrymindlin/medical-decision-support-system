@@ -16,7 +16,7 @@ finetuning_config = {
         "augmentation": True,
         "use_class_weights": True,
         "batch_size": 8,
-        "epochs": 60,
+        "epochs": 5,
         "learn_rate_finetuning": 0.0001,
         "learn_rate_final_layers": 0.001,
         "patience_learning_rate": 1,

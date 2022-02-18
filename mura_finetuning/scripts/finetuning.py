@@ -134,12 +134,12 @@ def log_confusion_matrix(epoch, logs):
 
     # Log the confusion matrix as an image summary.
     with file_writer.as_default():
-        tf.summary.image("Confusion Matrix", image, step=epoch)
+        file_writer.summary.image("Confusion Matrix", image, step=epoch)
 
 
 # Tensorboard Callbacks
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
-cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
+# cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
 
 # Save best only
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -174,7 +174,7 @@ model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_val,
-    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr, cm_callback],
+    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr],
     class_weight=class_weight
 )
 
@@ -190,3 +190,5 @@ print("Evaluation Result: ", result)
 result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
     tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
+    log_confusion_matrix(epoch=0)
+
