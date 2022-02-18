@@ -106,6 +106,7 @@ with file_writer.as_default():
 
 def log_confusion_matrix(epoch):
     # Use the model to predict the values from the validation dataset.
+    print("Dimi, Starting")
     test_pred = model.predict(dataset.ds_test)
     test_pred = np.argmax(test_pred, axis=1)
     labels = np.concatenate([y for x, y in dataset.ds_test], axis=0)
@@ -131,6 +132,7 @@ def log_confusion_matrix(epoch):
     image = tf.image.decode_png(buf.getvalue(), channels=4)
 
     image = tf.expand_dims(image, 0)
+    print("Dimi ", tf.shape(image))
 
     # Log the confusion matrix as an image summary.
     tf.summary.image("Confusion Matrix", image, step=epoch)
