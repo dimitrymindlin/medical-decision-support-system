@@ -56,7 +56,7 @@ metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
 metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
                                 threshold=config["test"]["F1_threshold"], average='macro')
-kappa = tfa.metrics.CohenKappa(num_classes=len(config["data"]["class_names"]))
+kappa = tfa.metrics.CohenKappa(num_classes=2)
 
 model.compile(
     optimizer=optimizer,
