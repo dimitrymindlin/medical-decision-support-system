@@ -30,7 +30,7 @@ def build_model(hp):
     # Model Definition
     config["train"]["augmentation"] = hp.Boolean('augmentation')
     config["train"]["use_class_weights"] = hp.Boolean("use_class_weights")
-    config["train"]["batch_size"] = hp.Choice("batch_size", [8, 32, 64])
+    config["train"]["batch_size"] = hp.Choice("batch_size", [8, 32])
     model = get_mura_model(config, include_top=False)
     model.load_weights(GPU_WEIGHT_PATH).expect_partial()
     model = get_finetuning_model_from_pretrained_model_hp(model, hp)
