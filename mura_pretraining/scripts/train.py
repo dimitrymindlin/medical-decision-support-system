@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
+import tensorflow_addons as tfa
 from datetime import datetime
 from configs.pretraining_config import pretraining_config as config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
@@ -25,11 +26,12 @@ loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
+kappa = tfa.metrics.CohenKappa(num_classes=len(config["data"]["class_names"]))
 
 model.compile(
     optimizer=optimizer,
     loss=loss,
-    metrics=[metric_auc, metric_bin_accuracy]
+    metrics=[metric_auc, metric_bin_accuracy, kappa]
 )
 
 # Tensorboard Callback and config logging

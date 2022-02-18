@@ -7,7 +7,6 @@ from configs.finetuning_config import finetuning_config as config
 from models.finetuning_model import get_finetuning_model_from_pretrained_model
 from mura_pretraining.dataloader import MuraDataset
 from models.mura_model import get_mura_model
-from utils.eval_metrics import PRTensorBoard
 from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 import sys
@@ -57,11 +56,12 @@ metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
 metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
                                 threshold=config["test"]["F1_threshold"], average='macro')
+kappa = tfa.metrics.CohenKappa(num_classes=len(config["data"]["class_names"]))
 
 model.compile(
     optimizer=optimizer,
     loss=loss,
-    metrics=[metric_auc, metric_bin_accuracy, metric_f1]
+    metrics=[metric_auc, metric_bin_accuracy, metric_f1, kappa]
 )
 
 # Log Config
