@@ -3,7 +3,8 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 from datetime import datetime
 
-from configs.finetuning_config import finetuning_config as config
+from configs.finetuning_config import finetuning_config
+from configs.frozen_hp_config import frozen_hp_config
 from models.finetuning_model import get_finetuning_model_from_pretrained_model
 from mura_pretraining.dataloader import MuraDataset
 from models.mura_model import get_mura_model
@@ -18,18 +19,23 @@ from matplotlib import pyplot as plt
 import io
 
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
-model_name = get_model_name_from_cli_to_config(sys.argv, config)
-GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"  # for cpu prepend "../../"
-TF_LOG_DIR = f'{PathConstants.FROZEN}/' + timestamp
-checkpoint_filepath = f'checkpoints/frozen_{model_name}/' + timestamp
 
-for arg in sys.argv:
+for arg in sys.argv:  # Train whole network with low lr
     if arg == "--finetune":
+        config = finetuning_config
+        model_name = get_model_name_from_cli_to_config(sys.argv, config)
         config["train"]["finetune"] = True
         config["train"]["train_base"] = True
         TF_LOG_DIR = f'{PathConstants.FINETUNE}/' + timestamp
         GPU_WEIGHT_PATH = f"checkpoints/frozen_{model_name}/best/cp.ckpt"
         checkpoint_filepath = f'checkpoints/finetune_{model_name}/' + timestamp
+
+# Train only last layers
+config = frozen_hp_config
+model_name = get_model_name_from_cli_to_config(sys.argv, config)
+GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"  # for cpu prepend "../../"
+TF_LOG_DIR = f'{PathConstants.FROZEN}/' + timestamp
+checkpoint_filepath = f'checkpoints/frozen_{model_name}/' + timestamp
 
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 print_running_on_gpu(tf)
