@@ -14,12 +14,22 @@ import sys
 
 from utils.training_utils import get_model_name_from_cli_to_config, print_running_on_gpu
 
+for arg in sys.argv:  # Train whole network with low lr
+    if arg == "--finetune":
+        config["train"]["finetune"] = True
+
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 print_running_on_gpu(tf)
 model_name = get_model_name_from_cli_to_config(sys.argv, config)
-GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"
-get_model_name_from_cli_to_config(sys.argv, config)
-TF_LOG_DIR = f"{PathConstants.FROZEN_HP}/{model_name}_" + timestamp
+
+if config["train"]["finetune"]:
+    config["train"]["train_base"] = True
+    TF_LOG_DIR = f'{PathConstants.FINETUNE}/' + timestamp
+    GPU_WEIGHT_PATH = f"checkpoints/frozen_{model_name}/best/cp.ckpt"
+else:
+    # Train only last layers
+    GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"  # for cpu prepend "../../"
+    TF_LOG_DIR = f'{PathConstants.FROZEN}/' + timestamp
 
 # Dataset
 dataset = MuraDataset(config, only_wrist_data=True)
@@ -45,7 +55,10 @@ def build_model(hp):
 
     # Optimizer and LR
     # optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
-    learning_rate = hp.Choice('learning_rate', [0.01, 0.001])
+    if config["train"]["finetune"]:
+        learning_rate = hp.Choice('learning_rate', [0.001, 0.0001, 0.00001])
+    else:
+        learning_rate = hp.Choice('learning_rate', [0.01, 0.001])
     # if optimizer == "adam":
     optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
     """elif optimizer == "sgd":

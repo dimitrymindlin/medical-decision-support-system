@@ -10,6 +10,7 @@ frozen_hp_config = {
         "image_channel": 3,
     },
     "train": {
+        "finetune": False,
         "config_name": "frozen_hp_config",
         "train_base": False,
         "augmentation": True,

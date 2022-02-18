@@ -31,7 +31,6 @@ if config["train"]["finetune"]:
     checkpoint_filepath = f'checkpoints/finetune_{model_name}/' + timestamp
 else:
     # Train only last layers
-    model_name = get_model_name_from_cli_to_config(sys.argv, config)
     GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"  # for cpu prepend "../../"
     TF_LOG_DIR = f'{PathConstants.FROZEN}/' + timestamp
     checkpoint_filepath = f'checkpoints/frozen_{model_name}/' + timestamp
