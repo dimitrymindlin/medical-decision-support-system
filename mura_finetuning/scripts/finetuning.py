@@ -26,14 +26,14 @@ for arg in sys.argv:  # Train whole network with low lr
 
 if config["train"]["finetune"]:
     config["train"]["train_base"] = True
-    TF_LOG_DIR = f'{PathConstants.FINETUNE}/' + timestamp
+    TF_LOG_DIR = f'{PathConstants.FINETUNE}/finetune_{model_name}/' + timestamp
     GPU_WEIGHT_PATH = f"checkpoints/frozen_{model_name}/best/cp.ckpt"
-    checkpoint_filepath = f'checkpoints/finetune_{model_name}/' + timestamp
+    checkpoint_filepath = f'checkpoints/finetune_{model_name}/' + timestamp + '/cp.ckpt'
 else:
     # Train only last layers
+    TF_LOG_DIR = f'{PathConstants.FROZEN}/frozen_{model_name}/' + timestamp
     GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"  # for cpu prepend "../../"
-    TF_LOG_DIR = f'{PathConstants.FROZEN}/' + timestamp
-    checkpoint_filepath = f'checkpoints/frozen_{model_name}/' + timestamp
+    checkpoint_filepath = f'checkpoints/frozen_{model_name}/' + timestamp + '/cp.ckpt'
 
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 print_running_on_gpu(tf)

@@ -14,7 +14,7 @@ timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 print_running_on_gpu(tf)
 model_name = get_model_name_from_cli_to_config(sys.argv, config)
 TF_LOG_DIR = f'{PathConstants.PRETRAIN}/pre_{model_name}/' + timestamp + "/"
-checkpoint_filepath = f'checkpoints/pre_{model_name}/' + timestamp + "/"
+checkpoint_filepath = f'checkpoints/pre_{model_name}/' + timestamp + '/cp.ckpt'
 
 # Model Definition
 model = get_mura_model(config)
