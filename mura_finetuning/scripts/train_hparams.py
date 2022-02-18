@@ -28,7 +28,6 @@ dataset = MuraDataset(config, only_wrist_data=True)
 # Model Definition
 def build_model(hp):
     # Model Definition
-    config["train"]["augmentation"] = hp.Boolean('augmentation')
     config["train"]["use_class_weights"] = hp.Boolean("use_class_weights")
     config["train"]["batch_size"] = hp.Choice("batch_size", [8, 32])
     model = get_mura_model(config, include_top=False)
@@ -45,12 +44,12 @@ def build_model(hp):
                                     threshold=config["test"]["F1_threshold"], average='macro')"""
 
     # Optimizer and LR
-    optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
+    #optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
     learning_rate = hp.Choice('learning_rate', [0.01, 0.001, 0.0001])
-    if optimizer == "adam":
-        optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
-    elif optimizer == "sgd":
-        optimizer = tf.optimizers.SGD(learning_rate=learning_rate)
+    #if optimizer == "adam":
+    optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
+    """elif optimizer == "sgd":
+        optimizer = tf.optimizers.SGD(learning_rate=learning_rate)"""
 
     model.compile(
         optimizer=optimizer,
