@@ -108,9 +108,9 @@ def log_confusion_matrix(epoch, logs):
     # Use the model to predict the values from the validation dataset.
     test_pred = model.predict(dataset.ds_test)
     test_pred = np.argmax(test_pred, axis=1)
-
+    labels = np.concatenate([y for x, y in dataset.ds_test], axis=0)
     classes = [0, 1]
-    con_mat = tf.math.confusion_matrix(labels=[0, 1], predictions=test_pred).numpy()
+    con_mat = tf.math.confusion_matrix(labels=labels, predictions=test_pred).numpy()
     con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
 
     con_mat_df = pd.DataFrame(con_mat_norm,
