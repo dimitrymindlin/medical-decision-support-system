@@ -35,7 +35,7 @@ model.compile(
 )
 
 # Tensorboard Callback and config logging
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
 
 # Checkpoint Callback to only save best checkpoint
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(

@@ -153,7 +153,7 @@ def log_confusion_matrix(epoch):
 
 
 # Tensorboard Callbacks
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR, histogram_freq=1)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
 # cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
 
 # Save best only
