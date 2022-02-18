@@ -10,6 +10,7 @@ pretraining_config = {
         "image_channel": 3,
     },
     "train": {
+        "config_name": "pretraining_config",
         "train_base": True,
         "augmentation": True,
         "use_class_weights": True,

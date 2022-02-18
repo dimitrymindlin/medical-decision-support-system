@@ -10,6 +10,7 @@ finetuning_config = {
         "image_channel": 3,
     },
     "train": {
+        "config_name": "finetuning_config",
         "finetune": False,
         "train_base": False,
         "augmentation": True,
