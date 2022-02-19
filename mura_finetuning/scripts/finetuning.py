@@ -11,6 +11,7 @@ from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 import sys
 import numpy as np
+from sklearn.metrics import confusion_matrix, classification_report, cohen_kappa_score
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
@@ -111,7 +112,6 @@ def log_confusion_matrix(epoch):
     for ds_name, ds in zip(ds_names, datasets):
         pred = model.predict(ds)
         pred = np.concatenate(np.where(pred > 0.5, 1, 0))
-
         labels = np.concatenate([y for x, y in ds], axis=0)
         con_mat = tf.math.confusion_matrix(labels=labels, predictions=pred).numpy()
         con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
@@ -119,7 +119,9 @@ def log_confusion_matrix(epoch):
         print(con_mat)
         print("__")
         print(con_mat_norm)
-        print("____________________")
+        print("Kappa")
+        print(cohen_kappa_score(labels, pred))
+        print("_________")
 
 
 """
