@@ -106,29 +106,20 @@ with file_writer.as_default():
 def log_confusion_matrix(epoch):
     # Use the model to predict the values from the validation dataset.
     print("CM, Starting")
-    test_pred = model.predict(dataset.ds_test)
-    test_pred = np.argmax(test_pred, axis=1)
-    labels = np.concatenate([y for x, y in dataset.ds_test], axis=0)
-    print("Len and sum of labels")
-    print("le n", len(labels))
-    print("sum ", sum(labels))
-    # classes = [0, 1]
-    con_mat = tf.math.confusion_matrix(labels=labels, predictions=test_pred).numpy()
-    con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
-    print("Test")
-    print(con_mat)
-    print("_____")
-    print(con_mat_norm)
-    print("Train")
-    train_pred = model.predict(dataset.ds_train)
-    train_pred = np.argmax(train_pred, axis=1)
-    labels = np.concatenate([y for x, y in dataset.ds_train], axis=0)
-    # classes = [0, 1]
-    con_mat = tf.math.confusion_matrix(labels=labels, predictions=train_pred).numpy()
-    con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
-    print(con_mat)
-    print("_____")
-    print(con_mat_norm)
+    datasets = [dataset.ds_val, dataset.ds_test]
+    ds_names = ["Validation", "Test"]
+    for ds_name, ds in zip(ds_names, datasets):
+        pred = model.predict(ds)
+        pred = np.concatenate(np.where(pred > 0.5, 1, 0))
+
+        labels = np.concatenate([y for x, y in ds], axis=0)
+        con_mat = tf.math.confusion_matrix(labels=labels, predictions=pred).numpy()
+        con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
+        print(f"{ds_name}")
+        print(con_mat)
+        print("__")
+        print(con_mat_norm)
+        print("____________________")
 
 
 """
