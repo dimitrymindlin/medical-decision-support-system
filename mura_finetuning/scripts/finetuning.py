@@ -7,15 +7,10 @@ from configs.finetuning_config import finetuning_config as config
 from models.finetuning_model import get_finetuning_model_from_pretrained_model
 from mura_pretraining.dataloader import MuraDataset
 from models.mura_model import get_mura_model
+from utils.eval_metrics import log_confusion_matrix
 from utils.path_constants import PathConstants
 from utils.training_utils import print_running_on_gpu, get_model_name_from_cli_to_config
 import sys
-import numpy as np
-from sklearn.metrics import confusion_matrix, classification_report, cohen_kappa_score
-import pandas as pd
-import seaborn as sns
-from matplotlib import pyplot as plt
-import io
 
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 model_name = get_model_name_from_cli_to_config(sys.argv, config)
@@ -71,86 +66,8 @@ config_matrix = [[k, str(w)] for k, w in config["train"].items()]
 with file_writer.as_default():
     tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
 
-"""def log_confusion_matrix(epoch, logs):
-    # Use the model to predict the values from the test_images.
-    y_pred = []  # store predicted labels
-    y_true = []  # store true labels
-
-    # iterate over the dataset
-    for image_batch, label_batch in dataset.ds_test:  # use dataset.unbatch() with repeat
-        # append true labels
-        y_true.append(label_batch)
-        # compute predictions
-        preds = model.predict(image_batch)
-        # append predicted labels
-        y_pred.append(np.argmax(preds, axis=- 1))
-
-    # convert the true and predicted labels into tensors
-    correct_labels = tf.concat([item for item in y_true], axis=0)
-    print(correct_labels)
-    predicted_labels = tf.concat([item for item in y_pred], axis=0)
-    print(predicted_labels)
-    # Calculate the confusion matrix using sklearn.metrics
-    cm = sklearn.metrics.confusion_matrix(correct_labels, predicted_labels)
-
-    figure = plot_confusion_matrix_util(cm, ["Normal", "Abnormal"])
-    cm_image = plot_to_image(figure)
-
-    # Log the confusion matrix as an image summary.
-    print("writing confusion matrix")
-    with file_writer.as_default():
-        tf.summary.image("Confusion Matrix", cm_image, step=epoch)
-        tf.summary.image("Confusion Matrix", cm_image, step=epoch)
-    print("Done")"""
-
-
-def log_confusion_matrix(epoch):
-    # Use the model to predict the values from the validation dataset.
-    print("CM, Starting")
-    datasets = [dataset.ds_val, dataset.ds_test]
-    ds_names = ["Validation", "Test"]
-    for ds_name, ds in zip(ds_names, datasets):
-        pred = model.predict(ds)
-        pred = np.concatenate(np.where(pred > 0.5, 1, 0))
-        labels = np.concatenate([y for x, y in ds], axis=0)
-        con_mat = tf.math.confusion_matrix(labels=labels, predictions=pred).numpy()
-        con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
-        print(f"{ds_name}")
-        print(con_mat)
-        print("__")
-        print(con_mat_norm)
-        print("Kappa")
-        print(cohen_kappa_score(labels, pred))
-        print("_________")
-
-
-"""
-    con_mat_df = pd.DataFrame(con_mat_norm,
-                              index=classes,
-                              columns=classes)
-
-    figure = plt.figure(figsize=(8, 8))
-    sns.heatmap(con_mat_df, annot=True, cmap=plt.cm.Blues)
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-
-    plt.close(figure)
-    buf.seek(0)
-    image = tf.image.decode_png(buf.getvalue(), channels=4)
-
-    image = tf.expand_dims(image, 0)
-    print("Dimi ", tf.shape(image))
-
-    # Log the confusion matrix as an image summary.
-    tf.summary.image("Confusion Matrix", image, step=epoch)"""
-
 # Tensorboard Callbacks
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
-# cm_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
 
 # Save best only
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -201,4 +118,4 @@ print("Evaluation Result: ", result)
 result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
     tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
-    log_confusion_matrix(epoch=0)
+    log_confusion_matrix()
