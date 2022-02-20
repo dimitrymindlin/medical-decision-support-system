@@ -43,7 +43,7 @@ def log_kappa(dataset, model):
     labels = np.concatenate([y for x, y in dataset.ds_test], axis=0)
 
     yp2 = np.argmax(y_pred, axis=1)
-    ya2 = np.argmax(labels, axis=1)
+    ya2 = labels
     print(y_pred.shape, labels.shape)
     m.update_state(ya2, yp2)
     print('Final Kappa result: ', m.result().numpy())
