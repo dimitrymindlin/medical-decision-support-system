@@ -21,6 +21,20 @@ def log_confusion_matrix(dataset, model):
         print("__")
         print(con_mat_norm)
 
+def log_sklearn_consufions_matrix(dataset, model):
+    from sklearn.metrics import confusion_matrix
+    print("SKLEARN CM, Starting")
+    datasets = [dataset.ds_val, dataset.ds_test]
+    ds_names = ["Validation", "Test"]
+    for ds_name, ds in zip(ds_names, datasets):
+        pred = model.predict(ds)
+        pred = np.concatenate(np.where(pred > 0.5, 1, 0))
+        labels = np.concatenate([y for x, y in ds], axis=0)
+        con_mat = confusion_matrix(y_true=labels, y_pred=pred).numpy()
+        print(f"{ds_name}")
+        print(con_mat)
+
+
 
 def log_kappa(dataset, model):
     m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
