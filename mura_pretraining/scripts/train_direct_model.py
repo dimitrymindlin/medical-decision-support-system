@@ -5,7 +5,7 @@ import tensorflow_addons as tfa
 from datetime import datetime
 from configs.direct_training_config import direct_training_config as config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from models.mura_model import get_mura_model
+from models.mura_model import get_mura_model, get_fancy_mura_model
 from utils.eval_metrics import log_confusion_matrix, log_kappa
 from utils.path_constants import PathConstants
 import sys
@@ -22,7 +22,7 @@ checkpoint_filepath = f'checkpoints/direct_{model_name}/' + timestamp + '/cp.ckp
 dataset = MuraDataset(config, only_wrist_data=True)
 
 # Model Definition
-model = get_mura_model(config)
+model = get_fancy_mura_model(config)
 
 # Training Params
 optimizer = tf.keras.optimizers.Adam(config["train"]["learn_rate"])
