@@ -13,7 +13,7 @@ finetuning_config = {
         "config_name": "finetuning_config",
         "finetune": False,
         "train_base": False,
-        "augmentation": False,
+        "augmentation": True,
         "use_class_weights": False,
         "batch_size": 8,
         "epochs": 60,
