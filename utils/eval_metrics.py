@@ -1,7 +1,7 @@
 from keras.callbacks import TensorBoard
-from sklearn.metrics import cohen_kappa_score
 from tensorboard.plugins.pr_curve import summary as pr_summary
 import tensorflow as tf
+import tensorflow_addons as tfa
 import numpy as np
 
 
@@ -20,9 +20,19 @@ def log_confusion_matrix(dataset, model):
         print(con_mat)
         print("__")
         print(con_mat_norm)
-        print("Kappa")
-        print(cohen_kappa_score(labels, pred))
-        print("_________")
+
+
+def log_kappa(dataset, model):
+    m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
+    # model=tf.keras.models.load_model(path)
+    y_pred = model.predict(dataset.ds_test)
+    labels = np.concatenate([y for x, y in dataset.ds_test], axis=0)
+
+    yp2 = np.argmax(y_pred, axis=1)
+    ya2 = np.argmax(labels, axis=1)
+    print(y_pred.shape, labels.shape)
+    m.update_state(ya2, yp2)
+    print('Final Kappa result: ', m.result().numpy())
 
 
 class PRTensorBoard(TensorBoard):
