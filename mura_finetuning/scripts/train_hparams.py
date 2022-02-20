@@ -24,12 +24,12 @@ model_name = get_model_name_from_cli_to_config(sys.argv, config)
 
 if config["train"]["finetune"]:
     config["train"]["train_base"] = True
-    TF_LOG_DIR = f'{PathConstants.FINETUNE}/' + timestamp
+    TF_LOG_DIR = f'{PathConstants.FINETUNE_HP}/' + timestamp
     GPU_WEIGHT_PATH = f"checkpoints/frozen_{model_name}/best/cp.ckpt"
 else:
     # Train only last layers
     GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"  # for cpu prepend "../../"
-    TF_LOG_DIR = f'{PathConstants.FROZEN}/' + timestamp
+    TF_LOG_DIR = f'{PathConstants.FROZEN_HP}/' + timestamp
 
 # Dataset
 dataset = MuraDataset(config, only_wrist_data=True)
