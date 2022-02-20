@@ -87,6 +87,8 @@ def get_fancy_mura_model(config):
     inputs = tf.keras.Input(shape=input_shape)
     pre = PreprocessNet(config)(inputs)
     wrist_net = WristPredictNet(config, include_top=False)(pre)
+
+    x = wrist_net.output
     x = tf.keras.layers.GlobalAveragePooling2D()(wrist_net)
 
     x = tf.keras.layers.Dense(1024)(x)  ###
@@ -95,6 +97,6 @@ def get_fancy_mura_model(config):
     x = tf.keras.layers.Dense(256)(x)
     x = tf.keras.layers.Activation(activation='relu')(x)
     x = tf.keras.layers.Dropout(0.5)(x)
-    x = tf.keras.layers.Dense(2)(x)
-    out = tf.keras.layers.Activation(activation='softmax')(x)
+    out = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
+                                name="predictions")(x)
     return tf.keras.Model(inputs=inputs, outputs=out)
