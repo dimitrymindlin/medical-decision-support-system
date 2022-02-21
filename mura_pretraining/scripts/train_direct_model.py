@@ -30,7 +30,7 @@ loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
-kappa = tfa.metrics.CohenKappa(num_classes=len(config["data"]["class_names"]))
+kappa = tfa.metrics.CohenKappa(num_classes=2)
 
 model.compile(
     optimizer=optimizer,
