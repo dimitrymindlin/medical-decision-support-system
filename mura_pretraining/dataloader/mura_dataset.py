@@ -4,6 +4,12 @@ import numpy as np
 import resource
 from mura_finetuning.dataloader.mura_wrist_tfds import MuraWristImages
 from mura_pretraining.dataloader.mura_tfds import MuraImages
+from albumentations import (
+    Compose, HorizontalFlip, CLAHE, HueSaturationValue,
+    RandomBrightness, RandomContrast, RandomGamma,
+    ToFloat, ShiftScaleRotate
+)
+import cv2
 
 
 class MuraDataset():
@@ -66,6 +72,8 @@ class MuraDataset():
         image = tf.image.resize_with_pad(tf.convert_to_tensor(image), height, width)
         label = tf.one_hot(tf.cast(label, tf.int32), 2)
         label = tf.cast(label, tf.float32)
+        if self.config["train"]["augmentation"]:
+            image = tf.numpy_function(func=aug_fn, inp=[image, self.config["data"]["image_height"]], Tout=tf.float32)
         return tf.cast(image, tf.float32), label  # normalize pixel values
 
     def benchmark(self):
@@ -79,3 +87,23 @@ class MuraDataset():
         ds.ds_train[idx][0] = crop_image(image)
         print(ds.ds_train[idx][0].shape())
         print("Dimi")"""
+
+transforms = Compose([
+    HorizontalFlip(p=0.5),
+    RandomContrast(limit=0.2, p=0.5),
+    RandomGamma(gamma_limit=(80, 120), p=0.5),
+    RandomBrightness(limit=0.2, p=0.5),
+    ShiftScaleRotate(
+        shift_limit=0.0625, scale_limit=0.1,
+        rotate_limit=15, border_mode=cv2.BORDER_REFLECT_101, p=0.8),
+    ToFloat(max_value=255)
+])
+
+
+def aug_fn(image, img_size):
+    data = {"image": image}
+    aug_data = transforms(**data)
+    aug_img = aug_data["image"]
+    aug_img = tf.cast(aug_img / 255.0, tf.float32)
+    aug_img = tf.image.resize(aug_img, size=[img_size, img_size])
+    return aug_img
