@@ -129,10 +129,10 @@ with file_writer.as_default():
     # log_kappa(dataset, model)
     # log_sklearn_consufions_matrix(dataset, model)
 
-print("Kaggel Evaluation")
+print("Kaggel Test Evaluation")
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-vy_data = np.concatenate([y for x, y in dataset.ds_val], axis=0)
-y_pred = model.predict(dataset.ds_val)
+vy_data = np.concatenate([y for x, y in dataset.ds_test], axis=0)
+y_pred = model.predict(dataset.ds_test)
 print(y_pred.shape)
 print(vy_data.shape)
 yp2 = np.argmax(y_pred, axis=1)
