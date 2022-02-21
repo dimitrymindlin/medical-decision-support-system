@@ -29,6 +29,6 @@ direct_training_config = {
     "model": {
         "name": "densenet",
         "pretrained": True,
-        "pooling": "max",
+        "pooling": None,
     }
 }
