@@ -66,7 +66,7 @@ class MuraDataset():
         image = tf.image.resize_with_pad(tf.convert_to_tensor(image), height, width)
         label = tf.one_hot(tf.cast(label, tf.int32), 2)
         label = tf.cast(label, tf.float32)
-        return tf.cast(image, tf.float32) / 255.0, label  # normalize pixel values
+        return tf.cast(image, tf.float32), label  # normalize pixel values
 
     def benchmark(self):
         tfds.benchmark(self.ds_train, batch_size=self.config['train']['batch_size'])
