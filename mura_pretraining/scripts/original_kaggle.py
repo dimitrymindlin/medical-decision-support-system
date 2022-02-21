@@ -95,7 +95,7 @@ albumentation_list = [
         rotate_limit=15, border_mode=cv2.BORDER_REFLECT_101, p=0.8),
     ToFloat(max_value=255)
 ]
-root = '../input/mura-v11/'
+"""root = '../input/mura-v11/'
 chosen_image = imread(root + 'MURA-v1.1/train/XR_WRIST/patient07988/study1_negative/image3.png')
 img_matrix_list = []
 bboxes_list = []
@@ -123,7 +123,7 @@ def plot_multiple_img(img_matrix_list, title_list, ncols, main_title="Data Augme
     plt.show()
 
 
-plot_multiple_img(img_matrix_list, titles_list, ncols=4)
+plot_multiple_img(img_matrix_list, titles_list, ncols=4)"""
 
 
 # **Creating data generator for training and testiing with augmentation:**
