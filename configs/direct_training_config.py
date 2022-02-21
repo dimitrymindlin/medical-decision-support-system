@@ -4,9 +4,9 @@ direct_training_config = {
     },
     "data": {
         "class_names": ["positive"],
-        "input_size": (520, 520),
-        "image_height": 520,
-        "image_width": 520,
+        "input_size": (224, 224),
+        "image_height": 224,
+        "image_width": 224,
         "image_channel": 3,
     },
     "train": {
