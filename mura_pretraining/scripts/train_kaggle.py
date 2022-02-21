@@ -54,7 +54,7 @@ out = keras.layers.Activation(activation='softmax')(x)
 
 model = keras.Model(inputs=input_image, outputs=out)
 
-metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=2,
+metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
 kappa = tfa.metrics.CohenKappa(num_classes=2)

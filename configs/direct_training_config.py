@@ -3,7 +3,7 @@ direct_training_config = {
         "download": True,
     },
     "data": {
-        "class_names": ["positive"],
+        "class_names": ["negative", "positive"],
         "input_size": (224, 224),
         "image_height": 224,
         "image_width": 224,
