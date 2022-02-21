@@ -30,7 +30,7 @@ def log_sklearn_consufions_matrix(dataset, model):
         pred = model.predict(ds)
         pred = np.concatenate(np.where(pred > 0.5, 1, 0))
         labels = np.concatenate([y for x, y in ds], axis=0)
-        con_mat = confusion_matrix(y_true=labels, y_pred=pred).numpy()
+        con_mat = confusion_matrix(y_true=labels, y_pred=pred)
         print(f"{ds_name}")
         print(con_mat)
 
@@ -43,6 +43,7 @@ def log_kappa(dataset, model):
     labels = np.concatenate([y for x, y in dataset.ds_test], axis=0)
 
     yp2 = np.argmax(y_pred, axis=1)
+    yp2 = np.expand_dims(yp2, axis=-1)
     ya2 = labels
     print(y_pred.shape, labels.shape)
     m.update_state(ya2, yp2)
