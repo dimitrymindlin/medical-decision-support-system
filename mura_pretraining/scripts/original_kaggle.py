@@ -11,7 +11,6 @@ import os
 import pandas as pd
 import cv2
 from skimage.transform import resize
-import keras
 import tensorflow_addons as tfa
 from skimage.io import imread
 from sklearn.utils import shuffle
@@ -163,15 +162,8 @@ class My_Custom_Generator(Sequence):
 # In[74]:
 
 
-train_dir = "../input/mura-v11/MURA-v1.1/train"
-validation_dir = '../input/mura-v11/MURA-v1.1/valid'
-print("Total Training patients: ")
-for i in os.listdir(train_dir):
-    print('Total Training patients at {}:'.format(i), len(os.listdir("../input/mura-v11/MURA-v1.1/train/{}".format(i))))
-print("\nTotal Validation patients: ")
-for i in os.listdir(validation_dir):
-    print('Total Validation patients at {}:'.format(i),
-          len(os.listdir("../input/mura-v11/MURA-v1.1/valid/{}".format(i))))
+train_dir = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train"
+validation_dir = '../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid'
 
 # **Getting data using the utility functions**
 
@@ -239,11 +231,8 @@ my_validation_batch_generator = My_Custom_Generator(vimgs, vy_data, batch_size, 
 
 
 part = 'XR_WRIST'
-checkpoint_path = "MURA_model@{}.h5".format(str(part))
+checkpoint_path = "checkpoints/original_kaggle/cp.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
-import json
-
-json_log = open(str(part) + '_experiment_log_MURA.json', mode='wt', buffering=1)
 my_callbacks = [
     keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                     # Callback to save the Keras model or model weights at some frequency.
@@ -260,14 +249,6 @@ my_callbacks = [
                                       min_delta=0.001,
                                       verbose=1,
                                       min_lr=0.000000001),
-    keras.callbacks.LambdaCallback(
-        on_epoch_end=lambda epoch,
-                            logs: json_log.write(json.dumps({'epoch': epoch,
-                                                             'train_loss': logs['loss'],
-                                                             'val_loss': logs['val_loss'],
-                                                             'weights': ""}) + '\n'),
-        # dict(model.get_weights()) - np.array(model.get_weights()).tolist()
-        on_train_end=lambda logs: json_log.close()),
     keras.callbacks.TensorBoard(log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
                                 histogram_freq=1,
                                 write_graph=True,
@@ -285,49 +266,6 @@ my_callbacks = [
                                   )
 ]
 
-# https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ModelCheckpoint
-
-
-# In[14]:
-
-
-# np.array(model.get_weights()).tolist()
-
-
-# **Create a model**
-
-# In[16]:
-
-
-# Inception=tf.keras.applications.InceptionV3(include_top=False,input_shape=(224,224,3))#InceptionResNetV2
-# #for layer in Inception.layers[:4]:
-# #  layer.trainable=False
-# input_image=keras.layers.Input((224,224,3))
-# x=Inception (input_image)
-
-# #x=keras.layers.GlobalAveragePooling2D()(x)
-# x=keras.layers.Flatten()(x)
-# #x=keras.layers.Dense(1024)(x)
-# #x=keras.layers.Activation(activation='relu')(x)
-# #x= keras.layers.Dropout(0.5)(x)
-# x=keras.layers.Dense(256)(x)
-# x=keras.layers.Activation(activation='relu')(x)
-# x= keras.layers.Dropout(0.5)(x)
-# x=keras.layers.Dense(2)(x)
-# out=keras.layers.Activation(activation='softmax')(x)
-
-# model=keras.Model(inputs=input_image,outputs=out)
-# model.compile(optimizer=keras.optimizers.RMSprop(lr=0.0001),loss='categorical_crossentropy',metrics=['accuracy'])
-# print(model.summary())
-
-
-# Second model try:
-#
-
-# In[17]:
-
-
-##### Another model try: ########
 base_model = keras.applications.InceptionV3(
     #     weights='imagenet',  # Load weights pre-trained on ImageNet.,
     input_shape=(224, 224, 3),
@@ -449,16 +387,6 @@ with open(hist_csv_file, mode='w') as f:
 # convert the model.get_weights() dict to a pandas DataFrame:     
 model_weights_df = pd.DataFrame(model.get_weights())
 
-# save to json:  
-model_weights_file = 'XR_WRIST-model_weights.json'
-with open(hist_json_file, mode='w') as f:
-    model_weights_df.to_json(f)
-
-# or save to csv: 
-model_weights_file = 'XR_WRIST-model_weights.csv'
-with open(hist_csv_file, mode='w') as f:
-    model_weights_df.to_csv(f)
-
 # In[78]:
 
 
@@ -498,16 +426,8 @@ vy_data2 = np.argmax(vy_data, axis=1)
 
 from sklearn.metrics import confusion_matrix, classification_report
 
-# **Confusion matrix for validation data:**
-
-# In[58]:
-
-
 cm = confusion_matrix(vy_data2, yp2)
 print(cm)
-
-# In[59]:
-
 
 print(classification_report(vy_data2, yp2))
 
