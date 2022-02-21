@@ -8,6 +8,7 @@ import numpy as np
 # Get Dataset
 from sklearn.metrics import confusion_matrix, classification_report
 from configs.direct_training_config import direct_training_config as config
+from models.mura_model import resize_with_pad
 from mura_pretraining.dataloader import MuraDataset
 
 model_name = "inception"
@@ -43,7 +44,10 @@ input_image = keras.layers.Input((224, 224, 3))
 # We make sure that the base_model is running in inference mode here,
 # by passing `training=False`. This is important for fine-tuning, as you will
 # learn in a few paragraphs.
-x = base_model(input_image)
+x = tfa.image.equalize(input_image)
+x = resize_with_pad(x, config["data"]["image_height"], config["data"]["image_width"])
+x = tf.keras.applications.inception_v3.preprocess_input(x)  # Normalisation to [0,1]
+x = base_model(x)
 
 # Convert features of shape `base_model.output_shape[1:]` to vectors
 x = keras.layers.GlobalAveragePooling2D()(x)  ##### <-
