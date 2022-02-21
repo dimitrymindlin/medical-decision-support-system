@@ -86,13 +86,8 @@ def get_fancy_mura_model(config):
     input_shape = get_input_shape_from_config(config)
     inputs = tf.keras.Input(shape=input_shape)
     #pre = PreprocessNet(config)(inputs)
-    #wrist_net = WristPredictNet(config, include_top=False)(inputs)
-    base_model = tf.keras.applications.InceptionV3(
-        #     weights='imagenet',  # Load weights pre-trained on ImageNet.,
-        input_shape=(520, 520, 3),
-        include_top=False)
-    x = base_model(inputs)
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    wrist_net = WristPredictNet(config, include_top=False)(inputs)
+    x = tf.keras.layers.GlobalAveragePooling2D()(wrist_net)
 
     x = tf.keras.layers.Dense(1024)(x)  ###
     x = tf.keras.layers.Activation(activation='relu')(x)  ###
