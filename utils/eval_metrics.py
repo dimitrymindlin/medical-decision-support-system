@@ -1,4 +1,5 @@
 from keras.callbacks import TensorBoard
+from sklearn.metrics import classification_report
 from tensorboard.plugins.pr_curve import summary as pr_summary
 import tensorflow as tf
 import tensorflow_addons as tfa
@@ -34,6 +35,7 @@ def log_sklearn_consufions_matrix(dataset, model):
         con_mat = confusion_matrix(y_true=labels, y_pred=pred)
         print(f"{ds_name}")
         print(con_mat)
+        print(classification_report(y_true=labels, y_pred=pred))
 
 
 def log_kappa(dataset, model):
@@ -43,7 +45,7 @@ def log_kappa(dataset, model):
     labels = np.concatenate([y for x, y in dataset.ds_test], axis=0)
 
     print(y_pred.shape, labels.shape)
-    m.update_state(y_pred, labels)
+    m.update_state(y_true=labels, y_pred=y_pred)
     print('Final Kappa result: ', m.result().numpy())
 
 
