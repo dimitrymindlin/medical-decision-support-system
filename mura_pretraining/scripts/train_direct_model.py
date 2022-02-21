@@ -6,7 +6,7 @@ from datetime import datetime
 from configs.direct_training_config import direct_training_config as config
 from mura_pretraining.dataloader.mura_dataset import MuraDataset
 from models.mura_model import get_fancy_mura_model
-from utils.eval_metrics import log_confusion_matrix, log_kappa
+from utils.eval_metrics import log_confusion_matrix, log_kappa, log_sklearn_consufions_matrix
 from utils.path_constants import PathConstants
 import sys
 
@@ -96,3 +96,4 @@ with file_writer.as_default():
     tf.summary.text(f"mura_evaluation", tf.convert_to_tensor(result_matrix), step=0)
     log_confusion_matrix(dataset, model)
     log_kappa(dataset, model)
+    log_sklearn_consufions_matrix(dataset, model)
