@@ -21,6 +21,7 @@ def log_confusion_matrix(dataset, model):
         print("__")
         print(con_mat_norm)
 
+
 def log_sklearn_consufions_matrix(dataset, model):
     from sklearn.metrics import confusion_matrix
     print("SKLEARN CM, Starting")
@@ -35,18 +36,14 @@ def log_sklearn_consufions_matrix(dataset, model):
         print(con_mat)
 
 
-
 def log_kappa(dataset, model):
     m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-    # model=tf.keras.models.load_model(path)
     y_pred = model.predict(dataset.ds_test)
+    y_pred = np.concatenate(np.where(y_pred > 0.5, 1, 0))
     labels = np.concatenate([y for x, y in dataset.ds_test], axis=0)
 
-    yp2 = np.argmax(y_pred, axis=1)
-    yp2 = np.expand_dims(yp2, axis=-1)
-    ya2 = labels
     print(y_pred.shape, labels.shape)
-    m.update_state(ya2, yp2)
+    m.update_state(y_pred, labels)
     print('Final Kappa result: ', m.result().numpy())
 
 
