@@ -23,7 +23,7 @@ class MuraDataset():
         self.ds_info = info
 
         self.train_classweights = self._calc_class_weights_for_ds(train)
-        self.valid_classweights = self._calc_class_weights_for_ds(validation)
+        self.valid_classweights = self._calc_class_weights_for_ds(test)
         self.ds_train = self._build_train_pipeline(train)
         self.ds_val = self._build_test_pipeline(validation)
         self.ds_test = self._build_test_pipeline(test)
@@ -49,9 +49,9 @@ class MuraDataset():
             label_distribution[class_num] = count
 
         total = label_distribution[0] + label_distribution[1]
-        print(f"Training negative: {label_distribution[0]}")
-        print(f"Training positive: {label_distribution[1]}")
-        print(f"Training total: {total}")
+        print(f"Negative: {label_distribution[0]}")
+        print(f"Positive: {label_distribution[1]}")
+        print(f"Total: {total}")
         weight_for_0 = (1 / label_distribution[0]) * (total / 2.0)
         weight_for_1 = (1 / label_distribution[1]) * (total / 2.0)
 
