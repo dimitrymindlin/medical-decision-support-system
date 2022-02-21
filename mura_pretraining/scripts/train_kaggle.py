@@ -18,11 +18,17 @@ checkpoint_filepath = f'checkpoints/kaggle_{model_name}/' + timestamp + '/cp.ckp
 
 dataset = MuraDataset(config, only_wrist_data=True)
 
+for index, example in enumerate(dataset.ds_test):
+    image_raw, label_raw = example[0].numpy(), example[1].numpy()
+    image, label = dataset.preprocess(image_raw, label_raw)
+    print()
+
 ##### Another model try: ########
 base_model = keras.applications.InceptionV3(
     #     weights='imagenet',  # Load weights pre-trained on ImageNet.,
     input_shape=(224, 224, 3),
     include_top=False)  # Do not include the ImageNet classifier at the top
+
 
 # odl from original
 # for layer in base_model.layers[:4]:
@@ -119,9 +125,9 @@ print("Evaluation Result: ", result)
 result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
     tf.summary.text(f"mura_evaluation", tf.convert_to_tensor(result_matrix), step=0)
-    log_confusion_matrix(dataset, model)
-    log_kappa(dataset, model)
-    log_sklearn_consufions_matrix(dataset, model)
+    #log_confusion_matrix(dataset, model)
+    #log_kappa(dataset, model)
+    #log_sklearn_consufions_matrix(dataset, model)
 
 print("Kaggel Evaluation")
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
