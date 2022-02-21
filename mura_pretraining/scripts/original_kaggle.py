@@ -18,6 +18,7 @@ from sklearn.utils import shuffle
 from matplotlib import pyplot as plt
 import datetime
 import numpy as np
+from keras.utils.all_utils import Sequence
 
 
 # ****Some utility functions****
@@ -131,7 +132,7 @@ plot_multiple_img(img_matrix_list, titles_list, ncols=4)"""
 # In[9]:
 
 
-class My_Custom_Generator(keras.utils.Sequence):
+class My_Custom_Generator(Sequence):
 
     def __init__(self, image_filenames, labels, batch_size, transform):
         self.image_filenames = image_filenames
