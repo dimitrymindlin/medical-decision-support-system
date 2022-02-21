@@ -130,6 +130,7 @@ with file_writer.as_default():
 print("Kaggel Evaluation")
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
 vy_data = np.array([y for x, y in dataset.ds_val])
+print(vy_data.shape)
 y_pred = model.predict(dataset.ds_val)
 yp2 = np.argmax(y_pred, axis=1)
 ya2 = np.argmax(vy_data, axis=1)
