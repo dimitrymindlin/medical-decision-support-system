@@ -44,9 +44,9 @@ input_image = keras.layers.Input((224, 224, 3))
 # We make sure that the base_model is running in inference mode here,
 # by passing `training=False`. This is important for fine-tuning, as you will
 # learn in a few paragraphs.
-x = tfa.image.equalize(input_image)
-x = resize_with_pad(x, config["data"]["image_height"], config["data"]["image_width"])
-x = tf.keras.applications.inception_v3.preprocess_input(x)  # Normalisation to [0,1]
+#x = tfa.image.equalize(input_image)
+#x = resize_with_pad(x, config["data"]["image_height"], config["data"]["image_width"])
+x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
 x = base_model(x)
 
 # Convert features of shape `base_model.output_shape[1:]` to vectors
