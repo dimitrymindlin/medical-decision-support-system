@@ -214,6 +214,11 @@ y_integers = np.argmax(y_data, axis=1)
 class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
 d_class_weights = dict(enumerate(class_weights))
 
+class_weights = compute_class_weight(class_weight="balanced",
+                                     classes=np.unique(y_integers),
+                                     y=y_integers
+                                     )
+class_weights = dict(zip(np.unique(y_integers), class_weights))
 # **Create Training and Test daat generator**
 
 # In[12]:
