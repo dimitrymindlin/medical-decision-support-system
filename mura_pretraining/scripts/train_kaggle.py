@@ -17,7 +17,7 @@ TF_LOG_DIR = f'kaggle/kaggle_{model_name}/' + timestamp + "/"
 checkpoint_filepath = f'checkpoints/kaggle_{model_name}/' + timestamp + '/cp.ckpt'
 
 dataset = MuraDataset(config, only_wrist_data=True)
-#ys = np.concatenate([y for x, y in dataset.ds_test], axis=0)
+# ys = np.concatenate([y for x, y in dataset.ds_test], axis=0)
 
 
 """for index, example in enumerate(dataset.ds_test):
@@ -44,8 +44,8 @@ input_image = keras.layers.Input((224, 224, 3))
 # We make sure that the base_model is running in inference mode here,
 # by passing `training=False`. This is important for fine-tuning, as you will
 # learn in a few paragraphs.
-#x = tfa.image.equalize(input_image)
-#x = resize_with_pad(x, config["data"]["image_height"], config["data"]["image_width"])
+# x = tfa.image.equalize(input_image)
+# x = resize_with_pad(x, config["data"]["image_height"], config["data"]["image_width"])
 x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
 x = base_model(x)
 
@@ -68,9 +68,13 @@ metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
 
+metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
+                                threshold=config["test"]["F1_threshold"], average='macro')
+kappa = tfa.metrics.CohenKappa(num_classes=2)
+
 model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
               loss='categorical_crossentropy',
-              metrics=["accuracy", metric_auc, metric_bin_accuracy])
+              metrics=["accuracy", metric_auc, metric_bin_accuracy, metric_f1, kappa])
 
 # Tensorboard Callback and config logging
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
@@ -79,19 +83,19 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     save_weights_only=True,
-    monitor=metric_auc.name,
+    monitor="val_accuracy",
     mode='max',
     save_best_only=False)
 
 # Early Stopping if loss plateaus
 early_stopping = tf.keras.callbacks.EarlyStopping(
-    monitor="val_loss",
+    monitor="val_accuracy",
     min_delta=0,
     patience=config['train']['early_stopping_patience'])
 
 # Dynamic Learning Rate
 dyn_lr = tf.keras.callbacks.ReduceLROnPlateau(
-    monitor="val_loss",
+    monitor="val_accuracy",
     factor=config['train']['factor_learning_rate'],
     patience=config['train']['patience_learning_rate'],
     mode="min",
@@ -108,7 +112,7 @@ with file_writer.as_default():
     tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
 
 # Model Training
-#model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
+# model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
 model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
