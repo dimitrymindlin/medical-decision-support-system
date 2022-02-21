@@ -17,10 +17,10 @@ checkpoint_filepath = f'checkpoints/kaggle_{model_name}/' + timestamp + '/cp.ckp
 
 dataset = MuraDataset(config, only_wrist_data=True)
 
-for index, example in enumerate(dataset.ds_test):
+"""for index, example in enumerate(dataset.ds_test):
     image_raw, label_raw = example[0].numpy(), example[1].numpy()
     image, label = dataset.preprocess(image_raw, label_raw)
-    print()
+    print()"""
 
 ##### Another model try: ########
 base_model = keras.applications.InceptionV3(
