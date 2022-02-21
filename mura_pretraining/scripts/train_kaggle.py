@@ -9,7 +9,6 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
 from configs.direct_training_config import direct_training_config as config
 from mura_pretraining.dataloader import MuraDataset
-from utils.eval_metrics import log_confusion_matrix, log_kappa, log_sklearn_consufions_matrix
 
 model_name = "inception"
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
@@ -28,7 +27,6 @@ base_model = keras.applications.InceptionV3(
     #     weights='imagenet',  # Load weights pre-trained on ImageNet.,
     input_shape=(224, 224, 3),
     include_top=False)  # Do not include the ImageNet classifier at the top
-
 
 # odl from original
 # for layer in base_model.layers[:4]:
@@ -63,11 +61,10 @@ model = keras.Model(inputs=input_image, outputs=out)
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
-kappa = tfa.metrics.CohenKappa(num_classes=2)
 
 model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
               loss='categorical_crossentropy',
-              metrics=["accuracy", metric_auc, metric_bin_accuracy, kappa])
+              metrics=["accuracy", metric_auc, metric_bin_accuracy])
 
 # Tensorboard Callback and config logging
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
@@ -125,14 +122,13 @@ print("Evaluation Result: ", result)
 result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
     tf.summary.text(f"mura_evaluation", tf.convert_to_tensor(result_matrix), step=0)
-    #log_confusion_matrix(dataset, model)
-    #log_kappa(dataset, model)
-    #log_sklearn_consufions_matrix(dataset, model)
+    # log_confusion_matrix(dataset, model)
+    # log_kappa(dataset, model)
+    # log_sklearn_consufions_matrix(dataset, model)
 
 print("Kaggel Evaluation")
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-labels = np.concatenate([y for x, y in dataset.ds_val], axis=0)
-vy_data = keras.utils.to_categorical(labels)
+vy_data = np.array([y for x, y in dataset.ds_val])
 y_pred = model.predict(dataset.ds_val)
 yp2 = np.argmax(y_pred, axis=1)
 ya2 = np.argmax(vy_data, axis=1)
