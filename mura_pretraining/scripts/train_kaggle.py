@@ -16,6 +16,8 @@ TF_LOG_DIR = f'kaggle/kaggle_{model_name}/' + timestamp + "/"
 checkpoint_filepath = f'checkpoints/kaggle_{model_name}/' + timestamp + '/cp.ckpt'
 
 dataset = MuraDataset(config, only_wrist_data=True)
+#ys = np.concatenate([y for x, y in dataset.ds_test], axis=0)
+
 
 """for index, example in enumerate(dataset.ds_test):
     image_raw, label_raw = example[0].numpy(), example[1].numpy()
@@ -129,8 +131,7 @@ with file_writer.as_default():
 
 print("Kaggel Evaluation")
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-vy_data = np.array([y for x, y in dataset.ds_val])
-print(vy_data.shape)
+vy_data = np.concatenate([y for x, y in dataset.ds_test], axis=0)
 y_pred = model.predict(dataset.ds_val)
 yp2 = np.argmax(y_pred, axis=1)
 ya2 = np.argmax(vy_data, axis=1)
