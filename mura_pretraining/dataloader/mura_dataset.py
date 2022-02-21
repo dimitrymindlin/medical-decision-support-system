@@ -64,8 +64,9 @@ class MuraDataset():
         height = self.config['data']['image_height']
         width = self.config['data']['image_width']
         image = tf.image.resize_with_pad(tf.convert_to_tensor(image), height, width)
-        label = tf.one_hot(tf.cast(label, tf.int32), 3)
+        label = tf.one_hot(tf.cast(label, tf.int32), 2)
         label = tf.cast(label, tf.float32)
+        print(label.shape)
         return tf.cast(image, tf.float32), label  # normalize pixel values
 
     def benchmark(self):
