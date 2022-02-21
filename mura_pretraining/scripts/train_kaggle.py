@@ -12,7 +12,7 @@ from mura_pretraining.dataloader import MuraDataset
 from utils.eval_metrics import log_confusion_matrix, log_kappa, log_sklearn_consufions_matrix
 
 model_name = "inception"
-timestamp = timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
+timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 TF_LOG_DIR = f'kaggle/kaggle_{model_name}/' + timestamp + "/"
 checkpoint_filepath = f'checkpoints/kaggle_{model_name}/' + timestamp + '/cp.ckpt'
 
@@ -54,7 +54,7 @@ out = keras.layers.Activation(activation='softmax')(x)
 
 model = keras.Model(inputs=input_image, outputs=out)
 
-metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
+metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=2,
                                   from_logits=False)
 metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
 kappa = tfa.metrics.CohenKappa(num_classes=2)
