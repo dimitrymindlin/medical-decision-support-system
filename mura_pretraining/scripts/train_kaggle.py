@@ -90,8 +90,10 @@ checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
 # Early Stopping if loss plateaus
 early_stopping = tf.keras.callbacks.EarlyStopping(
     monitor="val_accuracy",
-    min_delta=0,
-    patience=config['train']['early_stopping_patience'])
+    mode="max",
+    baseline=None,
+    patience=config['train']['early_stopping_patience'],
+    restore_best_weights=True)
 
 # Dynamic Learning Rate
 dyn_lr = tf.keras.callbacks.ReduceLROnPlateau(
@@ -99,6 +101,7 @@ dyn_lr = tf.keras.callbacks.ReduceLROnPlateau(
     factor=config['train']['factor_learning_rate'],
     patience=config['train']['patience_learning_rate'],
     mode="min",
+    min_delta=0.001,
     min_lr=config['train']['min_learning_rate'],
 )
 
