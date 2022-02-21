@@ -10,7 +10,7 @@ direct_training_config = {
         "image_channel": 3,
     },
     "train": {
-        "config_name": "pretraining_config",
+        "config_name": "direct_training_config",
         "train_base": True,
         "augmentation": True,
         "use_class_weights": False,
