@@ -104,17 +104,17 @@ with file_writer.as_default():
     tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
 
 # Model Training
-model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
-"""model.fit(
+#model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
+model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_val,
     callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr],
     class_weight=class_weight
-)"""
+)
 
 # Model Test
-#model.load_weights(checkpoint_filepath)  # best
+model.load_weights(checkpoint_filepath)  # best
 result = model.evaluate(
     dataset.ds_test,
     batch_size=config['test']['batch_size'],
