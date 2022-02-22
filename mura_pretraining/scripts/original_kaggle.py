@@ -80,51 +80,6 @@ AUGMENTATIONS_TEST = Compose([
     ToFloat(max_value=255)
 ])
 
-# **Plotting the augmentations**
-
-# In[8]:
-
-
-albumentation_list = [
-    HorizontalFlip(p=0.5),
-    RandomContrast(limit=0.2, p=0.5),
-    RandomGamma(gamma_limit=(80, 120), p=0.5),
-    RandomBrightness(limit=0.2, p=0.5),
-    ShiftScaleRotate(
-        shift_limit=0.0625, scale_limit=0.1,
-        rotate_limit=15, border_mode=cv2.BORDER_REFLECT_101, p=0.8),
-    ToFloat(max_value=255)
-]
-"""root = '../input/mura-v11/'
-chosen_image = imread(root + 'MURA-v1.1/train/XR_WRIST/patient07988/study1_negative/image3.png')
-img_matrix_list = []
-bboxes_list = []
-for aug_type in albumentation_list:
-    img = aug_type(image=chosen_image)['image']
-    img_matrix_list.append(img)
-img = resize(chosen_image, (300, 300, 3))
-img_matrix_list.append(img)
-img_matrix_list.append(crop_center(img, 224, 224))
-
-img_matrix_list.insert(0, chosen_image)
-
-titles_list = ["Original", "Horizontal Flip", "Random Contrast", "Random Gamma", "RandomBrightness",
-               "Shift Scale Rotate", "Resizing", "Cropping"]
-
-
-def plot_multiple_img(img_matrix_list, title_list, ncols, main_title="Data Augmentation"):
-    fig, myaxes = plt.subplots(figsize=(20, 15), nrows=2, ncols=ncols, squeeze=True)
-    fig.suptitle(main_title, fontsize=30)
-    # fig.subplots_adjust(wspace=0.3)
-    # fig.subplots_adjust(hspace=0.3)
-    for i, (img, title) in enumerate(zip(img_matrix_list, title_list)):
-        myaxes[i // ncols][i % ncols].imshow(img)
-        myaxes[i // ncols][i % ncols].set_title(title, fontsize=15)
-    plt.show()
-
-
-plot_multiple_img(img_matrix_list, titles_list, ncols=4)"""
-
 
 # **Creating data generator for training and testiing with augmentation:**
 
@@ -149,88 +104,44 @@ class My_Custom_Generator(Sequence):
         for file in batch_x:
             img = imread(file)
             img = self.t(image=img)["image"]
-            img = resize(img, (300, 300, 3))
-            img = crop_center(img, 224, 224)
+            #img = resize(img, (300, 300, 3))
+            #img = crop_center(img, 224, 224)
+            img = tf.image.resize_with_pad(img, 224, 224)
             x.append(img)
         x = np.array(x) / 255.0
         y = np.array(batch_y)
         return x, y
 
-
-# **Some information about data:**
-
-# In[74]:
-
-
 train_dir = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train"
 validation_dir = '../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid'
-
-# **Getting data using the utility functions**
-
-# In[76]:
-
-
-########################################
-# One of the seven listed below:
-"""
-XR_ELBOW
-XR_FINGER
-XR_FOREARM
-XR_HAND
-XR_HUMERUS
-XR_SHOULDER
-XR_WRIST
-"""
-# training_bone = 'XR_HUMERUS'
-########################################
 
 part = 'XR_WRIST'  # part to work with
 imgs, labels = filenames(part=part)  # train data
 vimgs, vlabels = filenames(part=part, train=False)  # validation data
 
-print('{} Training positive :'.format(part), labels.count('positive'), '\n', '{} Training negative :'.format(part),
-      labels.count('negative'))
+
 training_data = labels.count('positive') + labels.count('negative')
-print("Total Training Data at {}: ".format(part), training_data)
-print('\n')
-print('{} Validation positive :'.format(part), vlabels.count('positive'), '\n', '{} Validation negative :'.format(part),
-      vlabels.count('negative'))
 validation_data = vlabels.count('positive') + vlabels.count('negative')
-print("Total Validation Data: ", validation_data)
 
 y_data = [0 if x == 'positive' else 1 for x in labels]
 y_data = keras.utils.to_categorical(y_data)
-vy_data = [0 if x == 'positive' else 1 for x in vlabels]
-vy_data = keras.utils.to_categorical(vy_data)
-
-# **Calculate class-weight to avoid class-imbalance :**
-
-# In[11]:
-
+y_data_valid = [0 if x == 'positive' else 1 for x in vlabels]
+y_data_valid = keras.utils.to_categorical(y_data_valid)
 
 from sklearn.utils.class_weight import compute_class_weight
 
 y_integers = np.argmax(y_data, axis=1)
 
-class_weights = compute_class_weight(class_weight="balanced",
+"""class_weights = compute_class_weight(class_weight="balanced",
                                      classes=np.unique(y_integers),
                                      y=y_integers
                                      )
-d_class_weights = dict(zip(np.unique(y_integers), class_weights))
-# **Create Training and Test daat generator**
-
-# In[12]:
-
+d_class_weights = dict(zip(np.unique(y_integers), class_weights))"""
 
 batch_size = 32
 imgs, y_data = shuffle(imgs, y_data)
-# vimgs, vy_data = shuffle(vimgs, vy_data)
 my_training_batch_generator = My_Custom_Generator(imgs, y_data, batch_size, AUGMENTATIONS_TRAIN)
-my_validation_batch_generator = My_Custom_Generator(vimgs, vy_data, batch_size, AUGMENTATIONS_TEST)
-
-# **Training callbacks**
-
-# In[13]:
+my_validation_batch_generator = My_Custom_Generator(vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST)
 
 
 part = 'XR_WRIST'
@@ -314,34 +225,15 @@ print(model.summary())
 
 
 history = model.fit_generator(generator=my_training_batch_generator,
-                              steps_per_epoch=int(training_data // batch_size),
                               epochs=40,
                               verbose=1,
-                              class_weight=d_class_weights,
+                              class_weight=None, #d_class_weights
                               validation_data=my_validation_batch_generator,
-                              validation_steps=int(validation_data // batch_size),
                               callbacks=my_callbacks)
-
-# In[33]:
-
-
-# %load_ext tensorboard
-# %tensorboard --logdir logs/fit
-# !kill 4805
-
-
-# In[26]:
 
 
 # list all data in history
 print(history.history.keys())
-# history.history
-
-
-# **summarize history for accuracy**
-
-# In[27]:
-
 
 # summarize history for accuracy
 plt.plot(history.history['accuracy'])
@@ -360,72 +252,23 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
 
-# **Extracting some log to csv and json forms**
 
-# In[29]:
-
-
-# convert the history.history dict to a pandas DataFrame:     
 hist_df = pd.DataFrame(history.history)
 
-# save to json:  
-hist_json_file = 'history.json'
-with open(hist_json_file, mode='w') as f:
-    hist_df.to_json(f)
-
-# or save to csv: 
-hist_csv_file = 'history.csv'
-with open(hist_csv_file, mode='w') as f:
-    hist_df.to_csv(f)
-
-# In[67]:
-
-
-# model.get_weights()
-
-
-# In[68]:
-
-
-# convert the model.get_weights() dict to a pandas DataFrame:     
 model_weights_df = pd.DataFrame(model.get_weights())
 
-# In[78]:
-
-
-# from distutils.dir_util import copy_tree
-# fromDirectory = '../kaggle/working'
-# toDirectory = '../tempTry'
-# copy_tree(fromDirectory,toDirectory)
-
-
-# In[48]:
-
-
-# path = 'MURA_model@XR_WRIST-2.h5' 
-# model.save("MURA_model@XR_WRIST.h5")
-
-
-# **Evaluate the performance by cohen's kappa score**
-
-# In[54]:
-
-
-# model.save('MURA_model@XR_WRIST.h5')
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-# model=tf.keras.models.load_model(path)
 y_pred = model.predict(my_validation_batch_generator)
 
 yp2 = np.argmax(y_pred, axis=1)
-ya2 = np.argmax(vy_data, axis=1)
-print(y_pred.shape, vy_data.shape)
+ya2 = np.argmax(y_data_valid, axis=1)
+print(y_pred.shape, y_data_valid.shape)
 m.update_state(ya2, yp2)
 print('Final result: ', m.result().numpy())
 
-# In[55]:
 
 
-vy_data2 = np.argmax(vy_data, axis=1)
+vy_data2 = np.argmax(y_data_valid, axis=1)
 
 from sklearn.metrics import confusion_matrix, classification_report
 
@@ -434,29 +277,13 @@ print(cm)
 
 print(classification_report(vy_data2, yp2))
 
-# **Confusion matrix for trainning data**
-
-# In[62]:
-
-
 y_pred = model.predict(my_training_batch_generator)
-
-# In[63]:
-
 
 yp3 = np.argmax(y_pred, axis=1)
 y_true3 = np.argmax(y_data, axis=1)
 
-# In[64]:
-
-
 cm2 = confusion_matrix(y_true3, yp3)
 print(cm2)
-plt.show()
-
-# In[65]:
-
 
 print(classification_report(y_true3, yp3))
 
-# In[ ]:
