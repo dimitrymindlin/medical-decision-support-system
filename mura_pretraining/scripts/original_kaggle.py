@@ -104,9 +104,9 @@ class My_Custom_Generator(Sequence):
         for file in batch_x:
             img = imread(file)
             img = self.t(image=img)["image"]
-            #img = resize(img, (300, 300, 3))
+            img = resize(img, (224, 224, 3))
             #img = crop_center(img, 224, 224)
-            img = tf.image.resize_with_pad(img, 224, 224)
+            #img = tf.image.resize_with_pad(img, 224, 224)
             x.append(img)
         x = np.array(x) / 255.0
         y = np.array(batch_y)
