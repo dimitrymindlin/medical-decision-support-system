@@ -67,14 +67,15 @@ class MuraDataset():
         return {0: weight_for_0, 1: weight_for_1}
 
     def preprocess(self, image, label):
+        print("LABEL", label)
         height = self.config['data']['image_height']
         width = self.config['data']['image_width']
+        if self.config["train"]["augmentation"]:
+            image = tf.numpy_function(func=aug_fn, inp=[image], Tout=tf.float32)
         image = tf.image.resize_with_pad(tf.convert_to_tensor(image), height, width)
         label = tf.one_hot(tf.cast(label, tf.int32), 2)
         label = tf.cast(label, tf.float32)
-        if self.config["train"]["augmentation"]:
-            image = tf.numpy_function(func=aug_fn, inp=[image, self.config["data"]["image_height"]], Tout=tf.float32)
-        return tf.cast(image, tf.float32), label  # normalize pixel values
+        return tf.cast(image, tf.float32) / 255.0, label
 
     def benchmark(self):
         tfds.benchmark(self.ds_train, batch_size=self.config['train']['batch_size'])
@@ -100,10 +101,8 @@ transforms = Compose([
 ])
 
 
-def aug_fn(image, img_size):
+def aug_fn(image):
     data = {"image": image}
     aug_data = transforms(**data)
     aug_img = aug_data["image"]
-    aug_img = tf.cast(aug_img / 255.0, tf.float32)
-    aug_img = tf.image.resize(aug_img, size=[img_size, img_size])
     return aug_img
