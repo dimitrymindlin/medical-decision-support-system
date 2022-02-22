@@ -31,7 +31,7 @@ class MuraDataset():
         self.train_classweights = self._calc_class_weights_for_ds(train)
         self.valid_classweights = self._calc_class_weights_for_ds(test)
         self.ds_train = self._build_train_pipeline(train)
-        self.ds_val = self._build_test_pipeline(validation)
+        #self.ds_val = self._build_test_pipeline(validation)
         self.ds_test = self._build_test_pipeline(test)
 
     def _build_train_pipeline(self, ds):
