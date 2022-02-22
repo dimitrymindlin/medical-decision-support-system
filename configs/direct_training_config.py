@@ -23,7 +23,7 @@ direct_training_config = {
         "early_stopping_patience": 5
     },
     "test": {
-        "batch_size": 8,
+        "batch_size": 32,
         "F1_threshold": 0.5,
     },
     "model": {

@@ -16,6 +16,32 @@ from sklearn.metrics import confusion_matrix, classification_report, cohen_kappa
 from configs.direct_training_config import direct_training_config as config
 from mura_pretraining.dataloader import MuraDataset
 
+# To get the filenames for a task
+def filenames(part, train=True):
+    root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
+    if train:
+        csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+    else:
+        csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+
+    with open(csv_path, 'rb') as F:
+        d = F.readlines()
+        if part == 'all':
+            imgs = [root + str(x, encoding='utf-8').strip() for x in d]
+        else:
+            imgs = [root + str(x, encoding='utf-8').strip() for x in d if
+                    str(x, encoding='utf-8').strip().split('/')[2] == part]
+
+    # imgs= [x.replace("/", "\\") for x in imgs]
+    labels = [x.split('_')[-1].split('/')[0] for x in imgs]
+    return imgs, labels
+
+def crop_center(img, cropx, cropy):
+    y, x, _ = img.shape
+    startx = x // 2 - (cropx // 2)
+    starty = y // 2 - (cropy // 2)
+    return img[starty:starty + cropy, startx:startx + cropx]
+
 model_name = "inception"
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 TF_LOG_DIR = f'kaggle/kaggle_{model_name}/' + timestamp + "/"
@@ -43,25 +69,6 @@ AUGMENTATIONS_TEST = Compose([
 ])
 
 
-# To get the filenames for a task
-def filenames(part, train=True):
-    root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
-    if train:
-        csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
-    else:
-        csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
-
-    with open(csv_path, 'rb') as F:
-        d = F.readlines()
-        if part == 'all':
-            imgs = [root + str(x, encoding='utf-8').strip() for x in d]
-        else:
-            imgs = [root + str(x, encoding='utf-8').strip() for x in d if
-                    str(x, encoding='utf-8').strip().split('/')[2] == part]
-
-    # imgs= [x.replace("/", "\\") for x in imgs]
-    labels = [x.split('_')[-1].split('/')[0] for x in imgs]
-    return imgs, labels
 
 
 # **Creating data generator for training and testiing with augmentation:**
@@ -88,8 +95,8 @@ class My_Custom_Generator(Sequence):
             img = imread(file)
             img = self.t(image=img)["image"]
             img = resize(img, (224, 224, 3))
-            # img = crop_center(img, 224, 224)
-            # img = tf.image.resize_with_pad(img, 224, 224)
+            img = crop_center(img, 224, 224)
+            img = tf.image.resize_with_pad(img, 224, 224)
             x.append(img)
         x = np.array(x) / 255.0
         y = np.array(batch_y)
@@ -115,21 +122,50 @@ from sklearn.utils.class_weight import compute_class_weight
 
 y_integers = np.argmax(y_data, axis=1)
 
-"""class_weights = compute_class_weight(class_weight="balanced",
+class_weights = compute_class_weight(class_weight="balanced",
                                      classes=np.unique(y_integers),
                                      y=y_integers
                                      )
-d_class_weights = dict(zip(np.unique(y_integers), class_weights))"""
+d_class_weights = dict(zip(np.unique(y_integers), class_weights))
 
 batch_size = 32
 imgs, y_data = shuffle(imgs, y_data)
 my_training_batch_generator = My_Custom_Generator(imgs, y_data, batch_size, AUGMENTATIONS_TRAIN)
 my_validation_batch_generator = My_Custom_Generator(vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST)
 
-"""for index, example in enumerate(dataset.ds_test):
-    image_raw, label_raw = example[0].numpy(), example[1].numpy()
-    image, label = dataset.preprocess(image_raw, label_raw)
-    print()"""
+# Tensorboard Callback and config logging
+my_callbacks = [
+    keras.callbacks.ModelCheckpoint(filepath=checkpoint_filepath,
+                                    # Callback to save the Keras model or model weights at some frequency.
+                                    monitor='val_accuracy',
+                                    verbose=0,
+                                    save_best_only=True,
+                                    save_weights_only=False,
+                                    mode='auto',
+                                    save_freq='epoch'),
+    keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
+                                      # Reduce learning rate when a metric has stopped improving.
+                                      factor=0.1,
+                                      patience=3,
+                                      min_delta=0.001,
+                                      verbose=1,
+                                      min_lr=0.000000001),
+    keras.callbacks.TensorBoard(log_dir="logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S"),
+                                histogram_freq=1,
+                                write_graph=True,
+                                write_images=False,
+                                update_freq='epoch',
+                                profile_batch=30,
+                                embeddings_freq=1,
+                                embeddings_metadata=None
+                                ),
+    keras.callbacks.EarlyStopping(monitor="val_accuracy",
+                                  patience=5,
+                                  mode="max",
+                                  baseline=None,
+                                  restore_best_weights=True,
+                                  )
+]
 
 base_model = keras.applications.InceptionV3(
     input_shape=(224, 224, 3),
@@ -137,8 +173,8 @@ base_model = keras.applications.InceptionV3(
 
 # Create a new model on top
 input_image = keras.layers.Input((224, 224, 3))
-x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
-x = base_model(x)
+#x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
+x = base_model(input_image)
 
 # Convert features of shape `base_model.output_shape[1:]` to vectors
 x = keras.layers.GlobalAveragePooling2D()(x)  ##### <-
@@ -166,49 +202,14 @@ model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
               loss='categorical_crossentropy',
               metrics=["accuracy", metric_auc, metric_f1, kappa])
 
-# Tensorboard Callback and config logging
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
-
-# Checkpoint Callback to only save best checkpoint
-
-checkpoint_clb = keras.callbacks.ModelCheckpoint(filepath=checkpoint_filepath,
-                                                 # Callback to save the Keras model or model weights at some frequency.
-                                                 monitor='val_accuracy',
-                                                 verbose=0,
-                                                 save_best_only=True,
-                                                 save_weights_only=True,
-                                                 mode='auto',
-                                                 save_freq='epoch'),
-reduce_on_plt_clb = keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
-                                                      # Reduce learning rate when a metric has stopped improving.
-                                                      factor=0.1,
-                                                      patience=3,
-                                                      min_delta=0.001,
-                                                      verbose=1,
-                                                      min_lr=0.000000001),
-early_stopping_clk = keras.callbacks.EarlyStopping(monitor="val_accuracy",
-                                                   patience=5,
-                                                   mode="max",
-                                                   baseline=None,
-                                                   restore_best_weights=True,
-                                                   )
-
-# Class weights for training underrepresented classes
-
-# Log Text like config and evaluation
-config_matrix = [[k, str(w)] for k, w in config["train"].items()]
-file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
-with file_writer.as_default():
-    tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
-
 # Model Training
 # model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
 history = model.fit_generator(generator=my_training_batch_generator,
                               epochs=40,
                               verbose=1,
-                              class_weight=None,  # d_class_weights
+                              class_weight=d_class_weights,  # d_class_weights
                               validation_data=my_validation_batch_generator,
-                              callbacks=[tensorboard_callback, checkpoint_clb, reduce_on_plt_clb, early_stopping_clk])
+                              callbacks=my_callbacks)
 
 print("Kaggel Test Evaluation")
 print(history.history.keys())
