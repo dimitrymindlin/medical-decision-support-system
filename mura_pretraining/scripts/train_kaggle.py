@@ -16,13 +16,6 @@ TF_LOG_DIR = f'kaggle/kaggle_{model_name}/' + timestamp + "/"
 checkpoint_filepath = f'checkpoints/kaggle_{model_name}/' + timestamp + '/cp.ckpt'
 
 dataset = MuraDataset(config, only_wrist_data=True)
-ys = np.concatenate([y for x, y in dataset.ds_test], axis=0)
-
-
-for index, example in enumerate(dataset.ds_test):
-    image_raw, label_raw = example[0].numpy(), example[1].numpy()
-    image, label = dataset.preprocess(image_raw, label_raw)
-    print()
 
 base_model = keras.applications.InceptionV3(
     input_shape=(224, 224, 3),
@@ -48,15 +41,12 @@ out = keras.layers.Activation(activation='softmax')(x)
 
 model = keras.Model(inputs=input_image, outputs=out)
 
-metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=2,
-                                  from_logits=False)
+metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=2, from_logits=False)
 
-metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=config["test"]["F1_threshold"], average='macro')
-kappa = tfa.metrics.CohenKappa(num_classes=2)
 
 model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
               loss='categorical_crossentropy',
-              metrics=["accuracy", metric_auc, metric_f1, kappa])
+              metrics=["accuracy", metric_auc])
 
 # Tensorboard Callback and config logging
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
