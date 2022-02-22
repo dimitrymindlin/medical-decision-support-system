@@ -25,18 +25,11 @@ dataset = MuraDataset(config, only_wrist_data=True)
     print()"""
 
 base_model = keras.applications.InceptionV3(
-    #     weights='imagenet',  # Load weights pre-trained on ImageNet.,
     input_shape=(224, 224, 3),
     include_top=False)  # Do not include the ImageNet classifier at the top
 
 # Create a new model on top
 input_image = keras.layers.Input((224, 224, 3))
-
-# We make sure that the base_model is running in inference mode here,
-# by passing `training=False`. This is important for fine-tuning, as you will
-# learn in a few paragraphs.
-# x = tfa.image.equalize(input_image)
-# x = resize_with_pad(x, config["data"]["image_height"], config["data"]["image_width"])
 x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
 x = base_model(x)
 
@@ -57,7 +50,6 @@ model = keras.Model(inputs=input_image, outputs=out)
 
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
-metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
 
 metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
                                 threshold=config["test"]["F1_threshold"], average='macro')
@@ -65,7 +57,7 @@ kappa = tfa.metrics.CohenKappa(num_classes=2)
 
 model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
               loss='categorical_crossentropy',
-              metrics=["accuracy", metric_auc, metric_bin_accuracy, metric_f1, kappa])
+              metrics=["accuracy", metric_auc, metric_f1, kappa])
 
 # Tensorboard Callback and config logging
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
@@ -108,13 +100,13 @@ with file_writer.as_default():
 model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
-    validation_data=dataset.ds_val,
+    validation_data=dataset.ds_test,
     callbacks=[tensorboard_callback, checkpoint_clb,  reduce_on_plt_clb, early_stopping_clk],
     class_weight=class_weight
 )
 
 # Model Test
-model.load_weights(checkpoint_filepath)  # best
+#model.load_weights(checkpoint_filepath)  # best
 result = model.evaluate(
     dataset.ds_test,
     batch_size=config['test']['batch_size'],

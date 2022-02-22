@@ -20,7 +20,7 @@ class MuraDataset():
         dataset = 'MuraImages' if not only_wrist_data else 'MuraWristImages'
         (train, validation, test), info = tfds.load(
             dataset,
-            split=['train[:80%]', 'train[80%:]', 'test'],
+            split=['train','test'],
             shuffle_files=True,
             as_supervised=True,
             download=self.config["dataset"]["download"],
