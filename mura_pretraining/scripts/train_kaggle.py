@@ -6,9 +6,8 @@ import tensorflow_addons as tfa
 import numpy as np
 
 # Get Dataset
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix, classification_report, cohen_kappa_score
 from configs.direct_training_config import direct_training_config as config
-from models.mura_model import resize_with_pad
 from mura_pretraining.dataloader import MuraDataset
 
 model_name = "inception"
@@ -25,18 +24,10 @@ dataset = MuraDataset(config, only_wrist_data=True)
     image, label = dataset.preprocess(image_raw, label_raw)
     print()"""
 
-##### Another model try: ########
 base_model = keras.applications.InceptionV3(
     #     weights='imagenet',  # Load weights pre-trained on ImageNet.,
     input_shape=(224, 224, 3),
     include_top=False)  # Do not include the ImageNet classifier at the top
-
-# odl from original
-# for layer in base_model.layers[:4]:
-#  layer.trainable=False
-
-# Freeze base model
-# base_model.trainable = False
 
 # Create a new model on top
 input_image = keras.layers.Input((224, 224, 3))
@@ -80,30 +71,28 @@ model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR)
 
 # Checkpoint Callback to only save best checkpoint
-checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    filepath=checkpoint_filepath,
-    save_weights_only=True,
-    monitor="val_accuracy",
-    mode='max',
-    save_best_only=False)
 
-# Early Stopping if loss plateaus
-early_stopping = tf.keras.callbacks.EarlyStopping(
-    monitor="val_accuracy",
-    mode="max",
-    baseline=None,
-    patience=config['train']['early_stopping_patience'],
-    restore_best_weights=True)
-
-# Dynamic Learning Rate
-dyn_lr = tf.keras.callbacks.ReduceLROnPlateau(
-    monitor="val_accuracy",
-    factor=config['train']['factor_learning_rate'],
-    patience=config['train']['patience_learning_rate'],
-    mode="min",
-    min_delta=0.001,
-    min_lr=config['train']['min_learning_rate'],
-)
+checkpoint_clb = keras.callbacks.ModelCheckpoint(filepath=checkpoint_filepath,
+                                                 # Callback to save the Keras model or model weights at some frequency.
+                                                 monitor='val_accuracy',
+                                                 verbose=0,
+                                                 save_best_only=True,
+                                                 save_weights_only=False,
+                                                 mode='auto',
+                                                 save_freq='epoch'),
+reduce_on_plt_clb = keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
+                                                      # Reduce learning rate when a metric has stopped improving.
+                                                      factor=0.1,
+                                                      patience=3,
+                                                      min_delta=0.001,
+                                                      verbose=1,
+                                                      min_lr=0.000000001),
+early_stopping_clk = keras.callbacks.EarlyStopping(monitor="val_accuracy",
+                                                   patience=5,
+                                                   mode="max",
+                                                   baseline=None,
+                                                   restore_best_weights=True,
+                                                   )
 
 # Class weights for training underrepresented classes
 class_weight = dataset.train_classweights if config["train"]["use_class_weights"] else None
@@ -120,7 +109,7 @@ model.fit(
     dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_val,
-    callbacks=[tensorboard_callback, checkpoint_callback, early_stopping, dyn_lr],
+    callbacks=[tensorboard_callback, checkpoint_clb,  reduce_on_plt_clb, early_stopping_clk],
     class_weight=class_weight
 )
 
@@ -149,7 +138,6 @@ y_true_1d = np.argmax(y_true_2d, axis=1)
 print(y_pred_2d.shape, y_true_2d.shape)
 m.update_state(y_true=y_true_1d, y_pred=y_pred_1d)
 print('Final result: ', m.result().numpy())
-from sklearn.metrics import confusion_matrix, classification_report, cohen_kappa_score
 print("SKlearn kappa ", cohen_kappa_score(y_true_1d, y_pred_1d))
 print(y_true_1d.shape)
 print(y_pred_1d.shape)
