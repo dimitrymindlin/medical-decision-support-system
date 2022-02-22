@@ -214,6 +214,15 @@ x = keras.layers.Dense(2)(x)
 out = keras.layers.Activation(activation='softmax')(x)
 
 model = keras.Model(inputs=input_image, outputs=out)
+
+metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=2,
+                                  from_logits=False)
+metric_bin_accuracy = tf.keras.metrics.BinaryAccuracy()
+
+metric_f1 = tfa.metrics.F1Score(num_classes=2,
+                                threshold=0.5, average='macro')
+kappa = tfa.metrics.CohenKappa(num_classes=2)
+
 model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
