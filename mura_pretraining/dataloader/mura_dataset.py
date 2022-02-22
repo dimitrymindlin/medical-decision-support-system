@@ -20,7 +20,7 @@ class MuraDataset():
         dataset = 'MuraImages' if not only_wrist_data else 'MuraWristImages'
         (train, test), info = tfds.load(
             dataset,
-            split=['train','test'],
+            split=['train', 'test'],
             shuffle_files=True,
             as_supervised=True,
             download=self.config["dataset"]["download"],
@@ -36,6 +36,8 @@ class MuraDataset():
 
     def _build_train_pipeline(self, ds):
         ds = ds.map(self.preprocess, num_parallel_calls=tf.data.AUTOTUNE)
+        if self.config["train"]["augmentation"]:
+            ds = ds.map(self.augment, num_parallel_calls=tf.data.AUTOTUNE)
         ds = ds.shuffle(self.ds_info.splits['train'].num_examples)
         ds = ds.batch(self.config['train']['batch_size'])
         ds = ds.prefetch(tf.data.AUTOTUNE)
@@ -67,15 +69,16 @@ class MuraDataset():
         return {0: weight_for_0, 1: weight_for_1}
 
     def preprocess(self, image, label):
-        print("LABEL", label)
         height = self.config['data']['image_height']
         width = self.config['data']['image_width']
-        if self.config["train"]["augmentation"]:
-            image = tf.numpy_function(func=aug_fn, inp=[image], Tout=tf.float32)
         image = tf.image.resize_with_pad(tf.convert_to_tensor(image), height, width)
         label = tf.one_hot(tf.cast(label, tf.int32), 2)
         label = tf.cast(label, tf.float32)
         return tf.cast(image, tf.float32) / 255.0, label
+
+    def augment(self, image, label):
+        image = tf.numpy_function(func=aug_fn, inp=[image], Tout=tf.float32)
+        return image
 
     def benchmark(self):
         tfds.benchmark(self.ds_train, batch_size=self.config['train']['batch_size'])
