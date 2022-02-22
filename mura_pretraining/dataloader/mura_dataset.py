@@ -18,7 +18,7 @@ class MuraDataset():
         low, high = resource.getrlimit(resource.RLIMIT_NOFILE)
         resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
         dataset = 'MuraImages' if not only_wrist_data else 'MuraWristImages'
-        (train, validation, test), info = tfds.load(
+        (train, test), info = tfds.load(
             dataset,
             split=['train','test'],
             shuffle_files=True,
