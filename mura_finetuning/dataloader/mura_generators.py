@@ -84,9 +84,9 @@ def get_mura_data():
     training_data = labels.count('positive') + labels.count('negative')
     validation_data = vlabels.count('positive') + vlabels.count('negative')
 
-    y_data = [0 if x == 'positive' else 1 for x in labels]
+    y_data = [0 if x == 'negative' else 1 for x in labels]
     y_data = keras.utils.to_categorical(y_data)
-    y_data_valid = [0 if x == 'positive' else 1 for x in vlabels]
+    y_data_valid = [0 if x == 'negative' else 1 for x in vlabels]
     y_data_valid = keras.utils.to_categorical(y_data_valid)
 
     batch_size = 32
