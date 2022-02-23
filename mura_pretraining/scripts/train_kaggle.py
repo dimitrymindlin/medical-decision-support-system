@@ -86,7 +86,7 @@ model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001),
 
 # Model Training
 # model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
-history = model.fit(dataset.ds_train,
+model.fit(dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_test,
     callbacks=my_callbacks,
@@ -94,7 +94,6 @@ history = model.fit(dataset.ds_train,
     class_weight=None
 )
 
-print(history.history)
 print("Kaggel Test Evaluation")
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
 y_true_2d = np.concatenate([y for x, y in dataset.ds_test], axis=0)

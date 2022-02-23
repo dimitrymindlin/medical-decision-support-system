@@ -3,9 +3,9 @@ import os
 
 
 class MuraWristImages(tfds.core.GeneratorBasedBuilder):
-    VERSION = tfds.core.Version('1.0.1')
+    VERSION = tfds.core.Version('1.0.2')
     RELEASE_NOTES = {
-        '1.0.1': 'Initial release.',
+        '1.0.2': 'Initial release.',
     }
 
     def _info(self) -> tfds.core.DatasetInfo:
