@@ -70,11 +70,10 @@ def get_mura_data():
                 img = tf.expand_dims(img, axis=-1)
                 img = tf.image.grayscale_to_rgb(img)
                 img = tf.image.resize_with_pad(img, 224, 224).numpy()
-
                 # img = crop_center(img, 224, 224)
                 # img = tf.image.resize_with_pad(img, 224, 224)
                 x.append(img)
-            x = tf.convert_to_tensor(x)
+            x = tf.stack(x)
             y = np.array(batch_y)
             return x, y
 
