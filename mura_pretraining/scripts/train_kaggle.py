@@ -56,7 +56,8 @@ base_model = keras.applications.InceptionV3(
 
 # Create a new model on top
 input_image = keras.layers.Input((224, 224, 3))
-x = base_model(input_image)
+x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [-1,1]
+x = base_model(x)
 
 # Convert features of shape `base_model.output_shape[1:]` to vectors
 x = keras.layers.GlobalAveragePooling2D()(x)  ##### <-
@@ -85,8 +86,7 @@ model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001),
 
 # Model Training
 # model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
-history = model.fit(
-    dataset.ds_train,
+history = model.fit(dataset.ds_train,
     epochs=config["train"]["epochs"],
     validation_data=dataset.ds_test,
     callbacks=my_callbacks,
