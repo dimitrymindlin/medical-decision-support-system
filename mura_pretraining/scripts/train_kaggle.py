@@ -110,7 +110,6 @@ cm = confusion_matrix(y_true_1d, y_pred_1d)
 print(cm)
 print(classification_report(y_true_1d, y_pred_1d))
 
-print(history.history)
 print("Test Evaluation")
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
 y_pred_valid_2d = model.predict(dataset.ds_test)
