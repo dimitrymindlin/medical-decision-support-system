@@ -36,12 +36,6 @@ def filenames(part, train=True):
     labels = [x.split('_')[-1].split('/')[0] for x in imgs]
     return imgs, labels
 
-def crop_center(img, cropx, cropy):
-    y, x, _ = img.shape
-    startx = x // 2 - (cropx // 2)
-    starty = y // 2 - (cropy // 2)
-    return img[starty:starty + cropy, startx:startx + cropx]
-
 model_name = "inception"
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
@@ -94,8 +88,6 @@ class My_Custom_Generator(Sequence):
         for file in batch_x:
             img = imread(file)
             img = self.t(image=img)["image"]
-            img = resize(img, (224, 224, 3))
-            img = crop_center(img, 224, 224)
             img = tf.image.resize_with_pad(img, 224, 224)
             x.append(img)
         x = np.array(x) / 255.0
@@ -140,7 +132,7 @@ my_callbacks = [
                                     monitor='val_accuracy',
                                     verbose=0,
                                     save_best_only=True,
-                                    save_weights_only=False,
+                                    save_weights_only=True,
                                     mode='auto',
                                     save_freq='epoch'),
     keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
@@ -211,8 +203,12 @@ history = model.fit_generator(generator=my_training_batch_generator,
                               validation_data=my_validation_batch_generator,
                               callbacks=my_callbacks)
 
+print("Train History")
+print(history)
 print("Kaggel Test Evaluation")
-print(history.history.keys())
+result = model.evaluate(my_validation_batch_generator)
+for metric, value in zip(model.metrics_names, result):
+    print(metric, ": ", value)
 
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
 y_pred = model.predict(my_validation_batch_generator)
