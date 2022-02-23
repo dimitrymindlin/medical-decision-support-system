@@ -44,8 +44,8 @@ def crop_center(img, cropx, cropy):
 
 model_name = "inception"
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
-TF_LOG_DIR = f'kaggle/kaggle_{model_name}/' + timestamp + "/"
-checkpoint_filepath = f'checkpoints/kaggle_{model_name}/' + timestamp + '/cp.ckpt'
+TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
+checkpoint_filepath = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
 
 from albumentations import (
     Compose, HorizontalFlip, CLAHE, HueSaturationValue,
