@@ -1,3 +1,4 @@
+from skimage.transform import resize
 from tensorflow import keras
 import tensorflow as tf
 import cv2
@@ -66,9 +67,12 @@ def get_mura_data():
             for file in batch_x:
                 img = imread(file)
                 img = self.t(image=img)["image"]
-                img = tf.expand_dims(img, axis=-1)
+                """img = tf.expand_dims(img, axis=-1)
                 img = tf.image.grayscale_to_rgb(img)
-                img = tf.image.resize_with_pad(img, 224, 224)
+                img = tf.image.resize_with_pad(img, 224, 224)"""
+                img = resize(img, (224, 224, 3))
+                # img = crop_center(img, 224, 224)
+                # img = tf.image.resize_with_pad(img, 224, 224)
                 x.append(img)
             x = np.array(x) / 255.0
             y = np.array(batch_y)
