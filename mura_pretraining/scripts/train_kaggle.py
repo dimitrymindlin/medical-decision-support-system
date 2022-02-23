@@ -81,7 +81,7 @@ model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001),
               metrics=["accuracy", metric_auc])
 
 # Class weights for training underrepresented classes
-class_weight = dataset.train_classweights if config["train"]["use_class_weights"] else None
+#class_weight = dataset.train_classweights if config["train"]["use_class_weights"] else None
 
 # Model Training
 # model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
@@ -91,7 +91,7 @@ history = model.fit(
     validation_data=dataset.ds_test,
     callbacks=my_callbacks,
     verbose=1,
-    class_weight=class_weight
+    class_weight=None
 )
 
 print(history.history)
