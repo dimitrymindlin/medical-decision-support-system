@@ -10,107 +10,22 @@ from sklearn.utils import shuffle
 from datetime import datetime
 import numpy as np
 from keras.utils.all_utils import Sequence
-
+from sklearn.utils.class_weight import compute_class_weight
 # Get Dataset
 from sklearn.metrics import confusion_matrix, classification_report, cohen_kappa_score
 from configs.direct_training_config import direct_training_config as config
+from mura_finetuning.dataloader.mura_generators import get_mura_data
 from mura_pretraining.dataloader import MuraDataset
 
-# To get the filenames for a task
-def filenames(part, train=True):
-    root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
-    if train:
-        csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
-    else:
-        csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
-
-    with open(csv_path, 'rb') as F:
-        d = F.readlines()
-        if part == 'all':
-            imgs = [root + str(x, encoding='utf-8').strip() for x in d]
-        else:
-            imgs = [root + str(x, encoding='utf-8').strip() for x in d if
-                    str(x, encoding='utf-8').strip().split('/')[2] == part]
-
-    # imgs= [x.replace("/", "\\") for x in imgs]
-    labels = [x.split('_')[-1].split('/')[0] for x in imgs]
-    return imgs, labels
 
 model_name = "inception"
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
 checkpoint_filepath = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
 
-from albumentations import (
-    Compose, HorizontalFlip, CLAHE, HueSaturationValue,
-    RandomBrightness, RandomContrast, RandomGamma,
-    ToFloat, ShiftScaleRotate
-)
-
-AUGMENTATIONS_TRAIN = Compose([
-    HorizontalFlip(p=0.5),
-    RandomContrast(limit=0.2, p=0.5),
-    RandomGamma(gamma_limit=(80, 120), p=0.5),
-    RandomBrightness(limit=0.2, p=0.5),
-    ShiftScaleRotate(
-        shift_limit=0.0625, scale_limit=0.1,
-        rotate_limit=15, border_mode=cv2.BORDER_REFLECT_101, p=0.8),
-    ToFloat(max_value=255)
-])
-AUGMENTATIONS_TEST = Compose([
-    # CLAHE(p=1.0, clip_limit=2.0),
-    ToFloat(max_value=255)
-])
 
 
-
-
-# **Creating data generator for training and testiing with augmentation:**
-
-# In[9]:
-
-
-class My_Custom_Generator(Sequence):
-
-    def __init__(self, image_filenames, labels, batch_size, transform):
-        self.image_filenames = image_filenames
-        self.labels = labels
-        self.batch_size = batch_size
-        self.t = transform
-
-    def __len__(self):
-        return (np.ceil(len(self.image_filenames) / float(self.batch_size))).astype(np.int)
-
-    def __getitem__(self, idx):
-        batch_x = self.image_filenames[idx * self.batch_size: (idx + 1) * self.batch_size]
-        batch_y = self.labels[idx * self.batch_size: (idx + 1) * self.batch_size]
-        x = []
-        for file in batch_x:
-            img = imread(file)
-            img = self.t(image=img)["image"]
-            img = tf.image.resize_with_pad(img, 224, 224)
-            x.append(img)
-        x = np.array(x) / 255.0
-        y = np.array(batch_y)
-        return x, y
-
-
-train_dir = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train"
-validation_dir = '../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid'
-
-part = 'XR_WRIST'  # part to work with
-imgs, labels = filenames(part=part)  # train data
-vimgs, vlabels = filenames(part=part, train=False)  # validation data
-
-training_data = labels.count('positive') + labels.count('negative')
-validation_data = vlabels.count('positive') + vlabels.count('negative')
-
-y_data = [0 if x == 'positive' else 1 for x in labels]
-y_data = keras.utils.to_categorical(y_data)
-y_data_valid = [0 if x == 'positive' else 1 for x in vlabels]
-y_data_valid = keras.utils.to_categorical(y_data_valid)
-
-from sklearn.utils.class_weight import compute_class_weight
+training_data, validation_data, y_data, y_data_valid, my_training_batch_generator, my_validation_batch_generator = get_mura_data()
 
 y_integers = np.argmax(y_data, axis=1)
 
@@ -119,11 +34,6 @@ class_weights = compute_class_weight(class_weight="balanced",
                                      y=y_integers
                                      )
 d_class_weights = dict(zip(np.unique(y_integers), class_weights))
-
-batch_size = 32
-imgs, y_data = shuffle(imgs, y_data)
-my_training_batch_generator = My_Custom_Generator(imgs, y_data, batch_size, AUGMENTATIONS_TRAIN)
-my_validation_batch_generator = My_Custom_Generator(vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST)
 
 # Tensorboard Callback and config logging
 my_callbacks = [
@@ -165,8 +75,8 @@ base_model = keras.applications.InceptionV3(
 
 # Create a new model on top
 input_image = keras.layers.Input((224, 224, 3))
-#x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
-x = base_model(input_image)
+x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
+x = base_model(x)
 
 # Convert features of shape `base_model.output_shape[1:]` to vectors
 x = keras.layers.GlobalAveragePooling2D()(x)  ##### <-
