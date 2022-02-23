@@ -67,11 +67,11 @@ def get_mura_data():
             for file in batch_x:
                 img = imread(file)
                 img = self.t(image=img)["image"]
-                img = tf.expand_dims(img, axis=-1)
-                img = tf.image.grayscale_to_rgb(img)
-                img = tf.image.resize_with_pad(img, 224, 224).numpy()
-                # img = crop_center(img, 224, 224)
-                # img = tf.image.resize_with_pad(img, 224, 224)
+                if len(img.shape) < 3:
+                    img = tf.expand_dims(img, axis=-1)
+                if img.shape[-1] != 3:
+                    img = tf.image.grayscale_to_rgb(img)
+                img = tf.image.resize_with_pad(img, 224, 224)
                 x.append(img)
             x = tf.stack(x)
             y = np.array(batch_y)
