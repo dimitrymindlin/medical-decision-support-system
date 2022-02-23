@@ -74,7 +74,7 @@ def get_mura_data():
                 # img = crop_center(img, 224, 224)
                 # img = tf.image.resize_with_pad(img, 224, 224)
                 x.append(img)
-            x = np.array(x)
+            x = tf.convert_to_tensor(x)
             y = np.array(batch_y)
             return x, y
 
