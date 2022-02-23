@@ -3,9 +3,9 @@ import os
 
 
 class MuraWristImages(tfds.core.GeneratorBasedBuilder):
-    VERSION = tfds.core.Version('1.0.0')
+    VERSION = tfds.core.Version('1.0.1')
     RELEASE_NOTES = {
-        '1.0.0': 'Initial release.',
+        '1.0.1': 'Initial release.',
     }
 
     def _info(self) -> tfds.core.DatasetInfo:
@@ -62,4 +62,5 @@ class MuraWristImages(tfds.core.GeneratorBasedBuilder):
                         'image_num': img_path.split("/")[-1].split(".")[0].replace("image", ""),
                         # image count for patient
                         'label': img_path.split('_')[-1].split('/')[0],
+                        #'label': 0 if 'positive' in img_path else 1
                     }

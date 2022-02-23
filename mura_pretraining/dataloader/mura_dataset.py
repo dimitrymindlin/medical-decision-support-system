@@ -71,10 +71,15 @@ class MuraDataset():
     def preprocess(self, image, label):
         height = self.config['data']['image_height']
         width = self.config['data']['image_width']
-        image = tf.image.resize_with_pad(tf.convert_to_tensor(image), height, width)
-        label = tf.one_hot(tf.cast(label, tf.int32), 2)
+        img = tf.convert_to_tensor(image)
+        if len(img.shape) < 3:
+            img = tf.expand_dims(img, axis=-1)
+        if img.shape[-1] != 3:
+            img = tf.image.grayscale_to_rgb(img)
+        img = tf.image.resize_with_pad(img, height, width)
+        label = tf.keras.utils.to_categorical(label)
         label = tf.cast(label, tf.float32)
-        return tf.cast(image, tf.float32) / 255.0, label
+        return img, label
 
     def augment(self, image, label):
         image = tf.numpy_function(func=aug_fn, inp=[image], Tout=tf.float32)
