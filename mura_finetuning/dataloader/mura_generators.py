@@ -69,8 +69,8 @@ def get_mura_data():
                 img = tf.expand_dims(img, axis=-1)
                 img = tf.image.grayscale_to_rgb(img)
                 img = tf.image.resize_with_pad(img, 224, 224)
-                x.append(img)
-            x = np.array(x).astype('float32')
+                x.append(img.astype('float32'))
+            x = np.array(x)
             y = np.array(batch_y)
             return x, y
 
