@@ -75,8 +75,8 @@ base_model = keras.applications.InceptionV3(
 
 # Create a new model on top
 input_image = keras.layers.Input((224, 224, 3))
-x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
-x = base_model(x)
+#x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
+x = base_model(input_image)
 
 # Convert features of shape `base_model.output_shape[1:]` to vectors
 x = keras.layers.GlobalAveragePooling2D()(x)  ##### <-
