@@ -70,7 +70,7 @@ def get_mura_data():
                 img = tf.image.grayscale_to_rgb(img)
                 img = tf.image.resize_with_pad(img, 224, 224)
                 x.append(img)
-            x = np.array(x)
+            x = np.array(x).astype('float32')
             y = np.array(batch_y)
             return x, y
 
