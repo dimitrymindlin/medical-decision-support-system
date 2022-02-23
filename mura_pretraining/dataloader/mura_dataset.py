@@ -77,13 +77,13 @@ class MuraDataset():
         if img.shape[-1] != 3:
             img = tf.image.grayscale_to_rgb(img)
         img = tf.image.resize_with_pad(img, height, width)
-        label = tf.keras.utils.to_categorical(label)
+        label = tf.one_hot(tf.cast(label, tf.int32), 2)
         label = tf.cast(label, tf.float32)
         return img, label
 
     def augment(self, image, label):
         image = tf.numpy_function(func=aug_fn, inp=[image], Tout=tf.float32)
-        return image
+        return image, label
 
     def benchmark(self):
         tfds.benchmark(self.ds_train, batch_size=self.config['train']['batch_size'])
