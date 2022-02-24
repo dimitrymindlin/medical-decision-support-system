@@ -72,6 +72,7 @@ def get_mura_data():
                 if img.shape[-1] != 3:
                     img = tf.image.grayscale_to_rgb(img)
                 img = tf.image.resize_with_pad(img, 224, 224)
+                img = tf.cast(img, tf.float32) / 127.5 - 1.
                 x.append(img)
             x = tf.stack(x)
             y = np.array(batch_y)
