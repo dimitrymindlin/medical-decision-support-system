@@ -7,15 +7,14 @@ from sklearn.utils.class_weight import compute_class_weight
 from configs.direct_training_config import direct_training_config as config
 from models.mura_model import WristPredictNet
 from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
-from utils.model_utils import get_input_shape_from_config
 
-model_name = "inception"
+model_name = config["model"]["name"]
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
 checkpoint_filepath = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
 
 
-"""mura_data = MuraGeneratorDataset()
+mura_data = MuraGeneratorDataset()
 
 y_integers = np.argmax(mura_data.y_data, axis=1)
 
@@ -23,7 +22,7 @@ class_weights = compute_class_weight(class_weight="balanced",
                                      classes=np.unique(y_integers),
                                      y=y_integers
                                      )
-d_class_weights = dict(zip(np.unique(y_integers), class_weights))"""
+d_class_weights = dict(zip(np.unique(y_integers), class_weights))
 
 # Tensorboard Callback and config logging
 my_callbacks = [
@@ -32,7 +31,7 @@ my_callbacks = [
                                     monitor='val_accuracy',
                                     verbose=0,
                                     save_best_only=True,
-                                    save_weights_only=True,
+                                    save_weights_only=False,
                                     mode='auto',
                                     save_freq='epoch'),
     keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
@@ -59,7 +58,6 @@ my_callbacks = [
                                   )
 ]
 
-#model = get_working_mura_model()
 model = WristPredictNet(config).model()
 
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
@@ -73,29 +71,6 @@ model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
               loss='categorical_crossentropy',
               metrics=["accuracy", metric_auc, metric_f1, kappa])
 
-def find_target_layer(model):
-    # attempt to find the final convolutional layer in the network
-    # by looping over the layers of the network in reverse order
-    for layer in reversed(model.layers):
-        # check to see if the layer has a 4D output
-        try:
-            if len(layer.output_shape) == 4:
-                return layer.name
-        except AttributeError:
-            print("Output ...")
-    # otherwise, we could not find a 4D layer so the GradCAM
-    # algorithm cannot be applied
-    raise ValueError("Could not find 4D layer. Cannot apply GradCAM.")
-
-#name = find_target_layer(model)
-base_model = model.get_layer(index=0)
-print(base_model.summary())
-grad_model = tf.keras.models.Model(
-        [base_model.get_layer(index=0)], [base_model.get_layer(name="conv5_block16_2_conv").output, model.output]
-    )
-print(model.summary())
-
-quit()
 # Model Training
 # model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
 history = model.fit_generator(generator=mura_data.train_loader,
