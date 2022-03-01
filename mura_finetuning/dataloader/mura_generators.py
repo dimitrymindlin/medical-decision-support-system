@@ -32,8 +32,7 @@ class MuraGeneratorDataset():
         self.preprocess_img = preprocess_img
         self.augment_train = AUGMENTATIONS_TRAIN
         self.augment_valid = AUGMENTATIONS_TEST
-        self.train_loader, self.valid_loader, self.y_data, self.y_data_valid = get_mura_loaders()
-        _, self.raw_valid_loader, _, _ = get_mura_loaders(preprocess=False)
+        self.train_loader, self.valid_loader, self.raw_valid_loader, self.y_data, self.y_data_valid = get_mura_loaders()
 
 class MuraGenerator(Sequence):
 
@@ -53,6 +52,11 @@ class MuraGenerator(Sequence):
         x = []
         for file in batch_x:
             img = imread(file)
+            if len(img.shape) < 3:
+                img = tf.expand_dims(img, axis=-1)
+            if img.shape[-1] != 3:
+                img = tf.image.grayscale_to_rgb(img)
+            img = tf.image.resize_with_pad(img, 224, 224)
             if self.preprocess:
                 img = self.t(image=img)["image"]
                 img = preprocess_img(img)
@@ -65,14 +69,14 @@ class MuraGenerator(Sequence):
 def get_mura_loaders(preprocess=True):
     # To get the filenames for a task
     def filenames(part, train=True):
-        # root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
-        root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
+        root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
+        #root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
         if train:
-            # csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
-            csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
         else:
-            # csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
-            csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
 
         with open(csv_path, 'rb') as F:
             d = F.readlines()
@@ -105,14 +109,10 @@ def get_mura_loaders(preprocess=True):
     imgs, y_data = shuffle(imgs, y_data)
     train_gen = MuraGenerator(imgs, y_data, batch_size, AUGMENTATIONS_TRAIN, preprocess)
     valid_gen = MuraGenerator(vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST, preprocess)
+    valid_gen_raw = MuraGenerator(vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST, preprocess=False)
 
-    return train_gen, valid_gen, y_data, y_data_valid
+    return train_gen, valid_gen, valid_gen_raw, y_data, y_data_valid
 
 
 def preprocess_img(img):
-    if len(img.shape) < 3:
-        img = tf.expand_dims(img, axis=-1)
-    if img.shape[-1] != 3:
-        img = tf.image.grayscale_to_rgb(img)
-    img = tf.image.resize_with_pad(img, 224, 224)
     return tf.cast(img, tf.float32) / 127.5 - 1.
