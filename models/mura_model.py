@@ -3,21 +3,24 @@
 
 # external
 import tensorflow as tf
-import tensorflow_addons as tfa
-from utils.model_utils import get_model_by_name, get_input_shape_from_config, get_preprocessing_by_name
+
+from utils.model_utils import get_input_shape_from_config, get_model_by_name
 
 
 class WristPredictNet(tf.keras.Model):
-    """MuraNet Model Class with various base models"""
+    "MuraNet Model Class with various base models"
 
     def __init__(self, config, weights='imagenet', include_top=True):
         super(WristPredictNet, self).__init__(name='WristPredictNet')
+
         self.config = config
         self.include_top = include_top
         self._input_shape = get_input_shape_from_config(self.config)
-        self.base_model = get_model_by_name(self.config, self._input_shape, weights)
+        self.img_input = tf.keras.Input(shape=self._input_shape)
+        self.base_model = get_model_by_name(self.config, self._input_shape, weights, self.img_input)
         self.base_model.trainable = self.config['train']['train_base']
-        self.classifier = tf.keras.layers.Dense(len(self.config['data']['class_names']), activation="sigmoid",
+
+        self.classifier = tf.keras.layers.Dense(len(self.config['data']['class_names']), activation="softmax",
                                                 name="predictions")
 
     def call(self, x):
@@ -28,66 +31,25 @@ class WristPredictNet(tf.keras.Model):
             return x
 
 
-class PreprocessNet(tf.keras.Model):
-    """Mura data preprocessing"""
-
-    def __init__(self, config):
-        super(PreprocessNet, self).__init__(name='PreprocessNet')
-        self.config = config
-        self._input_shape = get_input_shape_from_config(self.config)
-        self.preprocessing_layer = get_preprocessing_by_name(self.config, self._input_shape)
-        self.random_flipping_aug = tf.keras.layers.RandomFlip(mode="vertical")
-        self.random_rotation_aug = tf.keras.layers.experimental.preprocessing.RandomRotation(0.3)
-
-    def call(self, inputs):
-        x = tfa.image.equalize(inputs)
-        x = resize_with_pad(x, self.config["data"]["image_height"], self.config["data"]["image_width"])
-        x = self.preprocessing_layer(x)  # Normalisation to [0,1]
-        if self.config['train']['augmentation']:
-            x = self.random_flipping_aug(x)
-            x = self.random_rotation_aug(x)
-        return x
+    def model(self):
+        x = self.base_model.output
+        predictions = self.classifier(x)
+        return tf.keras.Model(inputs=self.img_input, outputs=predictions)
 
 
-def resize_with_pad(image, height, width):
-    return tf.image.resize_with_pad(image, height, width)
+def get_working_mura_model():
+    base_model = tf.keras.applications.InceptionV3(
+        input_shape=(224, 224, 3),
+        include_top=False)  # Do not include the ImageNet classifier at the top
 
+    # Create a new model on top
+    input_image = tf.keras.layers.Input((224, 224, 3))
+    # x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [0,1]
+    x = base_model(input_image)
 
-def get_mura_model(config, include_top=True):
-    input_shape = get_input_shape_from_config(config)
-    inputs = tf.keras.Input(shape=input_shape)
-    pre = PreprocessNet(config)(inputs)
-    wrist_net = WristPredictNet(config, include_top=include_top)(pre)
-    return tf.keras.Model(inputs, wrist_net)
-
-
-def get_sequential_model(config, weights='imagenet', include_top=True):
-    input_shape = get_input_shape_from_config(config)
-    preprocessing_layer = get_preprocessing_by_name(config, input_shape)
-    classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
-                                       name="predictions")
-
-    original_inputs = tf.keras.Input(shape=(input_shape,), name="input")
-    base_model = get_model_by_name(config, input_shape, weights)
-    x = tfa.image.equalize(original_inputs)
-    x = resize_with_pad(x, config["data"]["image_height"], config["data"]["image_width"])
-    x = preprocessing_layer(x)
-    if config['train']['augmentation']:
-        x = tf.keras.layers.RandomFlip(mode="vertical")(x)
-        x = tf.keras.layers.experimental.preprocessing.RandomRotation(0.3)(x)
-    x = base_model(x)
-    if include_top:
-        return classifier(x)
-    else:
-        return x
-
-
-def get_fancy_mura_model(config):
-    input_shape = get_input_shape_from_config(config)
-    inputs = tf.keras.Input(shape=input_shape)
-    #pre = PreprocessNet(config)(inputs)
-    wrist_net = WristPredictNet(config, include_top=False)(inputs)
-    x = tf.keras.layers.GlobalAveragePooling2D()(wrist_net)
+    # Convert features of shape `base_model.output_shape[1:]` to vectors
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)  ##### <-
+    # x=keras.layers.Flatten()(x)
 
     x = tf.keras.layers.Dense(1024)(x)  ###
     x = tf.keras.layers.Activation(activation='relu')(x)  ###
@@ -95,6 +57,7 @@ def get_fancy_mura_model(config):
     x = tf.keras.layers.Dense(256)(x)
     x = tf.keras.layers.Activation(activation='relu')(x)
     x = tf.keras.layers.Dropout(0.5)(x)
-    out = tf.keras.layers.Dense(len(config['data']['class_names']), activation="sigmoid",
-                                name="predictions")(x)
-    return tf.keras.Model(inputs=inputs, outputs=out)
+    x = tf.keras.layers.Dense(2)(x)
+    out = tf.keras.layers.Activation(activation='softmax')(x)
+
+    return tf.keras.Model(inputs=input_image, outputs=out)
