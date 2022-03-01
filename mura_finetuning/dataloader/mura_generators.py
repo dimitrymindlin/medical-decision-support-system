@@ -52,13 +52,14 @@ class MuraGenerator(Sequence):
         x = []
         for file in batch_x:
             img = imread(file)
+            if self.preprocess:
+                img = self.t(image=img)["image"]
             if len(img.shape) < 3:
                 img = tf.expand_dims(img, axis=-1)
             if img.shape[-1] != 3:
                 img = tf.image.grayscale_to_rgb(img)
             img = tf.image.resize_with_pad(img, 224, 224)
             if self.preprocess:
-                img = self.t(image=img)["image"]
                 img = preprocess_img(img)
             x.append(img)
         x = tf.stack(x)
@@ -69,14 +70,14 @@ class MuraGenerator(Sequence):
 def get_mura_loaders(preprocess=True):
     # To get the filenames for a task
     def filenames(part, train=True):
-        root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
-        #root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
+        #root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
+        root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
         if train:
-            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
-            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+            #csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+            csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
         else:
-            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
-            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+            #csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+            csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
 
         with open(csv_path, 'rb') as F:
             d = F.readlines()

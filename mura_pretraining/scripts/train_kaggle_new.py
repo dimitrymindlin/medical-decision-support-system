@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
 from configs.direct_training_config import direct_training_config as config
-from models.mura_model import WristPredictNet
+from models.mura_model import WristPredictNet, get_working_mura_model
 from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
 
 model_name = config["model"]["name"]
@@ -59,6 +59,8 @@ my_callbacks = [
 ]
 
 model = WristPredictNet(config).model()
+#model = get_working_mura_model()
+
 
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
@@ -67,13 +69,12 @@ metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
                                 threshold=config["test"]["F1_threshold"], average='macro')
 kappa = tfa.metrics.CohenKappa(num_classes=2)
 
-model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
+model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001),
               loss='categorical_crossentropy',
               metrics=["accuracy", metric_auc, metric_f1, kappa])
-
 # Model Training
 # model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
-history = model.fit_generator(generator=mura_data.train_loader,
+history = model.fit(mura_data.train_loader,
                               epochs=40,
                               verbose=1,
                               class_weight=d_class_weights,  # d_class_weights

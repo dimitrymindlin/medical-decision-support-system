@@ -19,21 +19,40 @@ class WristPredictNet(tf.keras.Model):
         self.img_input = tf.keras.Input(shape=self._input_shape)
         self.base_model = get_model_by_name(self.config, self._input_shape, weights, self.img_input)
         self.base_model.trainable = self.config['train']['train_base']
-
         self.classifier = tf.keras.layers.Dense(len(self.config['data']['class_names']), activation="softmax",
                                                 name="predictions")
 
     def call(self, x):
         x = self.base_model(x)
-        if self.include_top:
+        x = tf.keras.layers.GlobalAveragePooling2D()(x)  ##### <-
+        # x=keras.layers.Flatten()(x)
+
+        x = tf.keras.layers.Dense(1024)(x)  ###
+        x = tf.keras.layers.Activation(activation='relu')(x)  ###
+        x = tf.keras.layers.Dropout(0.5)(x)  ###
+        x = tf.keras.layers.Dense(256)(x)
+        x = tf.keras.layers.Activation(activation='relu')(x)
+        x = tf.keras.layers.Dropout(0.5)(x)
+        x = tf.keras.layers.Dense(2)(x)
+        return tf.keras.layers.Activation(activation='softmax')(x)
+        """if self.include_top:
             return self.classifier(x)
         else:
-            return x
+            return x"""
 
 
     def model(self):
         x = self.base_model.output
-        predictions = self.classifier(x)
+        x = tf.keras.layers.GlobalAveragePooling2D()(x)  ##### <-
+        # x=keras.layers.Flatten()(x)
+        x = tf.keras.layers.Dense(1024)(x)  ###
+        x = tf.keras.layers.Activation(activation='relu')(x)  ###
+        x = tf.keras.layers.Dropout(0.5)(x)  ###
+        x = tf.keras.layers.Dense(256)(x)
+        x = tf.keras.layers.Activation(activation='relu')(x)
+        x = tf.keras.layers.Dropout(0.5)(x)
+        x = tf.keras.layers.Dense(2)(x)
+        predictions = tf.keras.layers.Activation(activation='softmax')(x)
         return tf.keras.Model(inputs=self.img_input, outputs=predictions)
 
 
