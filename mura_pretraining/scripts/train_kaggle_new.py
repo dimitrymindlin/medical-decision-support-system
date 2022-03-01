@@ -1,22 +1,13 @@
-from datetime import datetime
-
 from tensorflow import keras
 import tensorflow as tf
-import cv2
-from skimage.transform import resize
 import tensorflow_addons as tfa
-from skimage.io import imread
-from sklearn.utils import shuffle
 from datetime import datetime
 import numpy as np
-from keras.utils.all_utils import Sequence
 from sklearn.utils.class_weight import compute_class_weight
-# Get Dataset
-from sklearn.metrics import confusion_matrix, classification_report, cohen_kappa_score
 from configs.direct_training_config import direct_training_config as config
-from mura_finetuning.dataloader.mura_generators import get_mura_data
-from mura_pretraining.dataloader import MuraDataset
-
+from models.mura_model import WristPredictNet
+from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
+from utils.model_utils import get_input_shape_from_config
 
 model_name = "inception"
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
@@ -24,16 +15,15 @@ TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
 checkpoint_filepath = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
 
 
+"""mura_data = MuraGeneratorDataset()
 
-training_data, validation_data, y_data, y_data_valid, my_training_batch_generator, my_validation_batch_generator = get_mura_data()
-
-y_integers = np.argmax(y_data, axis=1)
+y_integers = np.argmax(mura_data.y_data, axis=1)
 
 class_weights = compute_class_weight(class_weight="balanced",
                                      classes=np.unique(y_integers),
                                      y=y_integers
                                      )
-d_class_weights = dict(zip(np.unique(y_integers), class_weights))
+d_class_weights = dict(zip(np.unique(y_integers), class_weights))"""
 
 # Tensorboard Callback and config logging
 my_callbacks = [
@@ -69,29 +59,8 @@ my_callbacks = [
                                   )
 ]
 
-base_model = keras.applications.InceptionV3(
-    input_shape=(224, 224, 3),
-    include_top=False)  # Do not include the ImageNet classifier at the top
-
-# Create a new model on top
-input_image = keras.layers.Input((224, 224, 3))
-#x = tf.keras.applications.inception_v3.preprocess_input(input_image)  # Normalisation to [-1,1]
-x = base_model(input_image)
-
-# Convert features of shape `base_model.output_shape[1:]` to vectors
-x = keras.layers.GlobalAveragePooling2D()(x)  ##### <-
-# x=keras.layers.Flatten()(x)
-
-x = keras.layers.Dense(1024)(x)  ###
-x = keras.layers.Activation(activation='relu')(x)  ###
-x = keras.layers.Dropout(0.5)(x)  ###
-x = keras.layers.Dense(256)(x)
-x = keras.layers.Activation(activation='relu')(x)
-x = keras.layers.Dropout(0.5)(x)
-x = keras.layers.Dense(2)(x)
-out = keras.layers.Activation(activation='softmax')(x)
-
-model = keras.Model(inputs=input_image, outputs=out)
+#model = get_working_mura_model()
+model = WristPredictNet(config).model()
 
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
@@ -104,32 +73,55 @@ model.compile(optimizer=keras.optimizers.Adam(lr=0.0001),
               loss='categorical_crossentropy',
               metrics=["accuracy", metric_auc, metric_f1, kappa])
 
+def find_target_layer(model):
+    # attempt to find the final convolutional layer in the network
+    # by looping over the layers of the network in reverse order
+    for layer in reversed(model.layers):
+        # check to see if the layer has a 4D output
+        try:
+            if len(layer.output_shape) == 4:
+                return layer.name
+        except AttributeError:
+            print("Output ...")
+    # otherwise, we could not find a 4D layer so the GradCAM
+    # algorithm cannot be applied
+    raise ValueError("Could not find 4D layer. Cannot apply GradCAM.")
+
+#name = find_target_layer(model)
+base_model = model.get_layer(index=0)
+print(base_model.summary())
+grad_model = tf.keras.models.Model(
+        [base_model.get_layer(index=0)], [base_model.get_layer(name="conv5_block16_2_conv").output, model.output]
+    )
+print(model.summary())
+
+quit()
 # Model Training
 # model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
-history = model.fit_generator(generator=my_training_batch_generator,
+history = model.fit_generator(generator=mura_data.train_loader,
                               epochs=40,
                               verbose=1,
                               class_weight=d_class_weights,  # d_class_weights
-                              validation_data=my_validation_batch_generator,
+                              validation_data=mura_data.valid_loader,
                               callbacks=my_callbacks)
 
 print("Train History")
 print(history)
 print("Kaggel Test Evaluation")
-result = model.evaluate(my_validation_batch_generator)
+result = model.evaluate(mura_data.valid_loader)
 for metric, value in zip(model.metrics_names, result):
     print(metric, ": ", value)
 
 m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-y_pred = model.predict(my_validation_batch_generator)
+y_pred = model.predict(mura_data.valid_loader)
 
 yp2 = np.argmax(y_pred, axis=1)
-ya2 = np.argmax(y_data_valid, axis=1)
-print(y_pred.shape, y_data_valid.shape)
+ya2 = np.argmax(mura_data.y_data, axis=1)
+print(y_pred.shape, mura_data.y_data_valid.shape)
 m.update_state(ya2, yp2)
 print('Final result: ', m.result().numpy())
 
-vy_data2 = np.argmax(y_data_valid, axis=1)
+vy_data2 = np.argmax(mura_data.y_data_valid, axis=1)
 
 from sklearn.metrics import confusion_matrix, classification_report
 
@@ -138,10 +130,10 @@ print(cm)
 
 print(classification_report(vy_data2, yp2))
 
-y_pred = model.predict(my_training_batch_generator)
+y_pred = model.predict(mura_data.train_loader)
 
 yp3 = np.argmax(y_pred, axis=1)
-y_true3 = np.argmax(y_data, axis=1)
+y_true3 = np.argmax(mura_data.y_data, axis=1)
 
 cm2 = confusion_matrix(y_true3, yp3)
 print(cm2)
