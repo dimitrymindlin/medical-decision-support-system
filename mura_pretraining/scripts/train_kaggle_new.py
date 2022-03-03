@@ -11,7 +11,7 @@ from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
 model_name = config["model"]["name"]
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
-checkpoint_filepath = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
+checkpoint_dir = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
 
 
 mura_data = MuraGeneratorDataset(config)
@@ -26,12 +26,12 @@ d_class_weights = dict(zip(np.unique(y_integers), class_weights))
 
 # Tensorboard Callback and config logging
 my_callbacks = [
-    keras.callbacks.ModelCheckpoint(filepath=checkpoint_filepath,
+    keras.callbacks.ModelCheckpoint(filepath=checkpoint_dir,
                                     # Callback to save the Keras model or model weights at some frequency.
                                     monitor='val_accuracy',
                                     verbose=0,
                                     save_best_only=True,
-                                    save_weights_only=False,
+                                    save_weights_only=True,
                                     mode='auto',
                                     save_freq='epoch'),
     keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
@@ -116,3 +116,6 @@ cm2 = confusion_matrix(y_true3, yp3)
 print(cm2)
 
 print(classification_report(y_true3, yp3))
+
+#Save whole model
+model.save(checkpoint_dir + 'model')
