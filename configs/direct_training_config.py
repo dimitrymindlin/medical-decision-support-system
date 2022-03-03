@@ -4,10 +4,11 @@ direct_training_config = {
     },
     "data": {
         "class_names": ["negative", "positive"],
-        "input_size": (224, 224),
-        "image_height": 224,
-        "image_width": 224,
+        "input_size": (512, 512),
+        "image_height": 512,
+        "image_width": 512,
         "image_channel": 3,
+        "input_shape": (521, 521, 3)
     },
     "train": {
         "config_name": "direct_training_config",
@@ -29,6 +30,6 @@ direct_training_config = {
     "model": {
         "name": "inception",
         "pretrained": True,
-        "pooling": None,
+        "pooling": "avg",
     }
 }

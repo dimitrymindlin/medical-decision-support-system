@@ -8,21 +8,18 @@ def get_model_by_name(config, input_shape, weights, img_input=None):
                                                        input_tensor=img_input,
                                                        input_shape=input_shape,
                                                        weights=weights,
-
                                                        classes=len(config['data']['class_names']))
     elif config["model"]["name"] == "vgg":
         base_model = tf.keras.applications.VGG19(include_top=False,
                                                  input_shape=input_shape,
                                                  input_tensor=img_input,
                                                  weights=weights,
-
                                                  classes=len(config['data']['class_names']))
     elif config["model"]["name"] == "resnet":
         base_model = tf.keras.applications.ResNet50(include_top=False,
                                                     input_shape=input_shape,
                                                     input_tensor=img_input,
                                                     weights=weights,
-
                                                     classes=len(config['data']['class_names']))
 
     else:
@@ -31,7 +28,7 @@ def get_model_by_name(config, input_shape, weights, img_input=None):
                                                        input_shape=input_shape,
                                                        input_tensor=img_input,
                                                        weights=weights,
-
+                                                       pooling=config['model']['pooling'],
                                                        classes=len(config['data']['class_names']))
     return base_model
 

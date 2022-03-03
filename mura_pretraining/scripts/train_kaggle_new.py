@@ -14,7 +14,7 @@ TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
 checkpoint_filepath = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
 
 
-mura_data = MuraGeneratorDataset()
+mura_data = MuraGeneratorDataset(config)
 
 y_integers = np.argmax(mura_data.y_data, axis=1)
 
@@ -41,13 +41,13 @@ my_callbacks = [
                                       min_delta=0.001,
                                       verbose=1,
                                       min_lr=0.000000001),
-    keras.callbacks.TensorBoard(log_dir="logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S"),
+    keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR,
                                 histogram_freq=1,
                                 write_graph=True,
                                 write_images=False,
                                 update_freq='epoch',
                                 profile_batch=30,
-                                embeddings_freq=1,
+                                embeddings_freq=0,
                                 embeddings_metadata=None
                                 ),
     keras.callbacks.EarlyStopping(monitor="val_accuracy",
@@ -60,6 +60,7 @@ my_callbacks = [
 
 model = WristPredictNet(config).model()
 #model = get_working_mura_model()
+#print(model.summary())
 
 
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
@@ -92,7 +93,7 @@ m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
 y_pred = model.predict(mura_data.valid_loader)
 
 yp2 = np.argmax(y_pred, axis=1)
-ya2 = np.argmax(mura_data.y_data, axis=1)
+ya2 = np.argmax(mura_data.y_data_valid, axis=1)
 print(y_pred.shape, mura_data.y_data_valid.shape)
 m.update_state(ya2, yp2)
 print('Final result: ', m.result().numpy())

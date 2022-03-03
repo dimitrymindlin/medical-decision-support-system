@@ -28,15 +28,20 @@ AUGMENTATIONS_TEST = Compose([
 
 
 class MuraGeneratorDataset():
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
         self.preprocess_img = preprocess_img
         self.augment_train = AUGMENTATIONS_TRAIN
         self.augment_valid = AUGMENTATIONS_TEST
-        self.train_loader, self.valid_loader, self.raw_valid_loader, self.y_data, self.y_data_valid = get_mura_loaders()
+        self.train_loader, self.valid_loader, self.raw_valid_loader, self.y_data, self.y_data_valid = get_mura_loaders(
+            config,
+            batch_size=self.config["train"]["batch_size"])
+
 
 class MuraGenerator(Sequence):
 
-    def __init__(self, image_filenames, labels, batch_size, transform, preprocess=True):
+    def __init__(self, config, image_filenames, labels, batch_size, transform, preprocess=True):
+        self.config = config
         self.image_filenames = image_filenames
         self.labels = labels
         self.batch_size = batch_size
@@ -58,7 +63,7 @@ class MuraGenerator(Sequence):
                 img = tf.expand_dims(img, axis=-1)
             if img.shape[-1] != 3:
                 img = tf.image.grayscale_to_rgb(img)
-            img = tf.image.resize_with_pad(img, 224, 224)
+            img = tf.image.resize_with_pad(img, self.config["data"]["image_height"], self.config["data"]["image_width"])
             if self.preprocess:
                 img = preprocess_img(img)
             x.append(img)
@@ -67,7 +72,7 @@ class MuraGenerator(Sequence):
         return x, y
 
 
-def get_mura_loaders(preprocess=True):
+def get_mura_loaders(config, batch_size=32, preprocess=True):
     # To get the filenames for a task
     def filenames(part, train=True):
         root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
@@ -106,11 +111,10 @@ def get_mura_loaders(preprocess=True):
     y_data_valid = [0 if x == 'negative' else 1 for x in vlabels]
     y_data_valid = keras.utils.to_categorical(y_data_valid)
 
-    batch_size = 32
     imgs, y_data = shuffle(imgs, y_data)
-    train_gen = MuraGenerator(imgs, y_data, batch_size, AUGMENTATIONS_TRAIN, preprocess)
-    valid_gen = MuraGenerator(vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST, preprocess)
-    valid_gen_raw = MuraGenerator(vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST, preprocess=False)
+    train_gen = MuraGenerator(config, imgs, y_data, batch_size, AUGMENTATIONS_TRAIN, preprocess)
+    valid_gen = MuraGenerator(config, vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST, preprocess)
+    valid_gen_raw = MuraGenerator(config, vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST, preprocess=False)
 
     return train_gen, valid_gen, valid_gen_raw, y_data, y_data_valid
 
