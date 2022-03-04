@@ -96,7 +96,7 @@ yp2 = np.argmax(y_pred, axis=1)
 ya2 = np.argmax(mura_data.y_data_valid, axis=1)
 print(y_pred.shape, mura_data.y_data_valid.shape)
 m.update_state(ya2, yp2)
-print('Final result: ', m.result().numpy())
+print('Kappa score result: ', m.result().numpy())
 
 vy_data2 = np.argmax(mura_data.y_data_valid, axis=1)
 

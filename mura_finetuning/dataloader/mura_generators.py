@@ -8,7 +8,7 @@ from keras.utils.all_utils import Sequence
 from albumentations import (
     Compose, HorizontalFlip,
     RandomBrightness, RandomContrast, RandomGamma,
-    ToFloat, ShiftScaleRotate
+    ShiftScaleRotate
 )
 
 AUGMENTATIONS_TRAIN = Compose([
@@ -19,20 +19,13 @@ AUGMENTATIONS_TRAIN = Compose([
     ShiftScaleRotate(
         shift_limit=0.0625, scale_limit=0.1,
         rotate_limit=15, border_mode=cv2.BORDER_REFLECT_101, p=0.8),
-    ToFloat(max_value=255)
 ])
-AUGMENTATIONS_TEST = Compose([
-    # CLAHE(p=1.0, clip_limit=2.0),
-    ToFloat(max_value=255)
-])
-
 
 class MuraGeneratorDataset():
     def __init__(self, config):
         self.config = config
         self.preprocess_img = preprocess_img
         self.augment_train = AUGMENTATIONS_TRAIN
-        self.augment_valid = AUGMENTATIONS_TEST
         self.train_loader, self.valid_loader, self.raw_valid_loader, self.y_data, self.y_data_valid = get_mura_loaders(
             config,
             batch_size=self.config["train"]["batch_size"])
@@ -57,7 +50,7 @@ class MuraGenerator(Sequence):
         x = []
         for file in batch_x:
             img = imread(file)
-            if self.preprocess:
+            if self.t:
                 img = self.t(image=img)["image"]
             if len(img.shape) < 3:
                 img = tf.expand_dims(img, axis=-1)
@@ -113,8 +106,8 @@ def get_mura_loaders(config, batch_size=32, preprocess=True):
 
     imgs, y_data = shuffle(imgs, y_data)
     train_gen = MuraGenerator(config, imgs, y_data, batch_size, AUGMENTATIONS_TRAIN, preprocess)
-    valid_gen = MuraGenerator(config, vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST, preprocess)
-    valid_gen_raw = MuraGenerator(config, vimgs, y_data_valid, batch_size, AUGMENTATIONS_TEST, preprocess=False)
+    valid_gen = MuraGenerator(config, vimgs, y_data_valid, batch_size, None, preprocess)
+    valid_gen_raw = MuraGenerator(config, vimgs, y_data_valid, batch_size, None, preprocess=False)
 
     return train_gen, valid_gen, valid_gen_raw, y_data, y_data_valid
 
