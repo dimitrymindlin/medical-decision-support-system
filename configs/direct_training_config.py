@@ -11,6 +11,7 @@ direct_training_config = {
         "input_shape": (521, 521, 3)
     },
     "train": {
+        "body_parts": ["XR_WRIST"],
         "config_name": "direct_training_config",
         "train_base": True,
         "augmentation": True,
