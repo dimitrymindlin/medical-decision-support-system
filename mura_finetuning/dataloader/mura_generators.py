@@ -1,3 +1,5 @@
+from typing import List
+
 from tensorflow import keras
 import tensorflow as tf
 import cv2
@@ -64,10 +66,46 @@ class MuraGenerator(Sequence):
         y = np.array(batch_y)
         return x, y
 
+class MuraValidDataGenerator(Sequence):
+
+    def __init__(self, config, image_filenames, labels, batch_size=1):
+        self.config = config
+        self.image_filenames = image_filenames
+        self.labels = labels
+        self.batch_size = batch_size
+        self.pos_image_paths = [filename for filename in image_filenames if
+                                "positive" in filename]
+        self.neg_image_paths = [filename for filename in image_filenames if
+                                "negative" in filename]
+
+    def __len__(self):
+        return (np.ceil(len(self.image_filenames) / float(self.batch_size))).astype(np.int)
+
+    def __getitem__(self, idx):
+        if idx % 2 == 0:
+            batches = self.neg_image_paths[idx * self.batch_size: (idx + 1) * self.batch_size]
+            y = np.array([1,0])
+        else:
+            batches = self.pos_image_paths[idx * self.batch_size: (idx + 1) * self.batch_size]
+            y = np.array([0,1])
+        xs = []
+        ys = []
+        for file in batches:
+            img = imread(file)
+            if len(img.shape) < 3:
+                img = tf.expand_dims(img, axis=-1)
+            if img.shape[-1] != 3:
+                img = tf.image.grayscale_to_rgb(img)
+            img = tf.image.resize_with_pad(img, self.config["data"]["image_height"], self.config["data"]["image_width"])
+            xs.append(img)
+            ys.append(y)
+        xs = tf.stack(xs)
+        ys = np.reshape(ys, (-1, 2))
+        return xs, ys
 
 def get_mura_loaders(config, batch_size=32, preprocess=True):
     # To get the filenames for a task
-    def filenames(part, train=True):
+    def filenames(parts: List[str], train=True):
         root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
         #root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
         if train:
@@ -79,19 +117,16 @@ def get_mura_loaders(config, batch_size=32, preprocess=True):
 
         with open(csv_path, 'rb') as F:
             d = F.readlines()
-            if part == 'all':
-                imgs = [root + str(x, encoding='utf-8').strip() for x in d]
-            else:
-                imgs = [root + str(x, encoding='utf-8').strip() for x in d if
-                        str(x, encoding='utf-8').strip().split('/')[2] == part]
+            imgs = [root + str(x, encoding='utf-8').strip() for x in d if
+                    str(x, encoding='utf-8').strip().split('/')[2] in parts]
 
         # imgs= [x.replace("/", "\\") for x in imgs]
         labels = [x.split('_')[-1].split('/')[0] for x in imgs]
         return imgs, labels
 
-    part = 'XR_WRIST'  # part to work with
-    imgs, labels = filenames(part=part)  # train data
-    vimgs, vlabels = filenames(part=part, train=False)  # validation data
+    parts = config["train"]["body_parts"]  # part to work with
+    imgs, labels = filenames(parts=parts)  # train data
+    vimgs, vlabels = filenames(parts=parts, train=False)  # validation data
 
     train_amount = labels.count('positive') + labels.count('negative')
     valid_amount = vlabels.count('positive') + vlabels.count('negative')
@@ -107,7 +142,9 @@ def get_mura_loaders(config, batch_size=32, preprocess=True):
     imgs, y_data = shuffle(imgs, y_data)
     train_gen = MuraGenerator(config, imgs, y_data, batch_size, AUGMENTATIONS_TRAIN, preprocess)
     valid_gen = MuraGenerator(config, vimgs, y_data_valid, batch_size, None, preprocess)
-    valid_gen_raw = MuraGenerator(config, vimgs, y_data_valid, batch_size, None, preprocess=False)
+    valid_gen_raw = MuraValidDataGenerator(config, vimgs, y_data_valid)
+    #valid_gen_raw = MuraGenerator(config, vimgs, y_data_valid, batch_size, None, preprocess=False)
+
 
     return train_gen, valid_gen, valid_gen_raw, y_data, y_data_valid
 
