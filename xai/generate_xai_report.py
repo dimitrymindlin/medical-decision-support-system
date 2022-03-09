@@ -3,7 +3,7 @@ import numpy as np
 from tensorflow_addons.layers import InstanceNormalization
 import matplotlib.pyplot as plt
 from configs.direct_training_config import direct_training_config
-from cyclegan.cyclegan import predict_single
+from cyclegan.generate_counterfactual import predict_single
 from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
 import tensorflow as tf
 import tensorflow_addons as tfa
