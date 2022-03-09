@@ -3,12 +3,29 @@ import matplotlib.cm as cm
 import numpy as np
 import cv2
 
-from xai.utils import image_stack
+from utils.xai_utils import image_stack
+
+def find_target_layer(model):
+    # attempt to find the final convolutional layer in the network
+    # by looping over the layers of the network in reverse order
+    for layer in reversed(model.layers):
+        # check to see if the layer has a 4D output
+        try:
+            if len(layer.output_shape) == 4:
+                return layer.name
+        except AttributeError:
+            print("Output ...")
+    # otherwise, we could not find a 4D layer so the GradCAM
+    # algorithm cannot be applied
+    raise ValueError("Could not find 4D layer. Cannot apply GradCAM.")
 
 
-def make_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
+def make_heatmap(img_array, model, last_conv_layer_name=None, pred_index=None):
     # First, we create a model that maps the input image to the activations
     # of the last conv layer as well as the output predictions
+    if not last_conv_layer_name:
+        last_conv_layer_name = find_target_layer(model)
+
     grad_model = tf.keras.models.Model(
         [model.inputs], [model.get_layer(last_conv_layer_name).output, model.output]
     )
@@ -40,7 +57,7 @@ def make_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
     heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
     return heatmap.numpy()
 
-def save_heatmap(img, heatmap, cam_path="cam.jpg", alpha=0.4, img_raw=None):
+def save_heatmap(img, heatmap, cam_path="cam.jpg", alpha=0.4, img_raw=None, save=False):
     # Rescale heatmap to a range 0-255
     heatmap = np.uint8(255 * heatmap)
 
@@ -61,11 +78,14 @@ def save_heatmap(img, heatmap, cam_path="cam.jpg", alpha=0.4, img_raw=None):
     superimposed_img = tf.keras.utils.array_to_img(superimposed_img)
 
     # Save the superimposed image
-    if np.any(img_raw):
-        superimposed_img = image_stack(img_raw, superimposed_img)
-        cv2.imwrite(cam_path, cv2.cvtColor(superimposed_img, cv2.COLOR_RGB2BGR))
-    else:
-        superimposed_img.save(cam_path)
+    #superimposed_img = image_stack(img_raw, superimposed_img)
+    #superimposed_img = cv2.cvtColor(superimposed_img, cv2.COLOR_RGB2BGR)
+    if save:
+        cv2.imwrite(cam_path, superimposed_img)
+    return superimposed_img
 
-    # Display Grad CAM
-    #display(Image(cam_path))
+def get_keras_gradcam(model, image_batch, image_raw, sub_dir, file_name, save=False):
+    output_heatmap = make_heatmap(image_batch, model)
+    heatmap_png = save_heatmap(image_batch[0], output_heatmap, cam_path=f"xai_results/heatmap/{sub_dir}/{file_name}", alpha=0.005,
+                     img_raw=image_raw, save=save)
+    return heatmap_png
