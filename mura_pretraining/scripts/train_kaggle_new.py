@@ -68,11 +68,11 @@ metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(
 
 metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
                                 threshold=config["test"]["F1_threshold"], average='macro')
-kappa = tfa.metrics.CohenKappa(num_classes=2)
+
 
 model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001),
               loss='categorical_crossentropy',
-              metrics=["accuracy", metric_auc, metric_f1, kappa])
+              metrics=["accuracy", metric_auc, metric_f1])
 # Model Training
 # model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
 history = model.fit(mura_data.train_loader,
