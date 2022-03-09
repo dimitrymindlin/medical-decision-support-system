@@ -10,11 +10,10 @@ from utils.model_utils import get_input_shape_from_config, get_model_by_name
 class WristPredictNet(tf.keras.Model):
     "MuraNet Model Class with various base models"
 
-    def __init__(self, config, weights='imagenet', include_top=True):
+    def __init__(self, config, weights='imagenet'):
         super(WristPredictNet, self).__init__(name='WristPredictNet')
 
         self.config = config
-        self.include_top = include_top
         self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)
         self.base_model = get_model_by_name(self.config, self._input_shape, weights, self.img_input)
