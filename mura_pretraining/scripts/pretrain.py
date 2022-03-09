@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
 from configs.pretraining_config import pretraining_config as config
-from models.mura_model import WristPredictNet, get_working_mura_model
+from models.mura_model import WristPredictNet
 from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
 
 model_name = config["model"]["name"]
