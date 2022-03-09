@@ -16,7 +16,7 @@ pretraining_config = {
         "train_base": True,
         "augmentation": True,
         "use_class_weights": True,
-        "batch_size": 16,
+        "batch_size": 32,
         "epochs": 60,
         "learning_rate": 0.0001,
         "patience_learning_rate": 1,
@@ -25,12 +25,12 @@ pretraining_config = {
         "early_stopping_patience": 5
     },
     "test": {
-        "batch_size": 16,
+        "batch_size": 32,
         "F1_threshold": 0.5,
     },
     "model": {
         "name": "densenet",
         "pretrained": True,
-        "pooling": "max",
+        "pooling": "avg",
     }
 }
