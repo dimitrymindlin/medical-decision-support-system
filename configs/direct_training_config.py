@@ -22,7 +22,8 @@ direct_training_config = {
         "patience_learning_rate": 3,
         "factor_learning_rate": 0.1,
         "min_learning_rate": 1e-8,
-        "early_stopping_patience": 5
+        "early_stopping_patience": 5,
+        "additional_last_layers": True,
     },
     "test": {
         "batch_size": 32,
