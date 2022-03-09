@@ -30,7 +30,7 @@ pretraining_config = {
         "F1_threshold": 0.5,
     },
     "model": {
-        "name": "densenet",
+        "name": "inception",
         "pretrained": True,
         "pooling": "avg",
     }
