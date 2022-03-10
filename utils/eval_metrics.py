@@ -90,9 +90,9 @@ def log_and_pring_evaluation(model, history, data, config, timestamp, file_write
     print(history)
     print(f"Kaggel Test Evaluation for {timestamp}")
     result = model.evaluate(data.valid_loader)
-
+    result_dict = dict(zip(model.metrics_names, result))
     with file_writer.as_default():
-        tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result), step=0)
+        tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_dict), step=0)
 
     for metric, value in zip(model.metrics_names, result):
         print(metric, ": ", value)
