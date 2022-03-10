@@ -83,3 +83,44 @@ class PRTensorBoard(TensorBoard):
             result = self.sess.run([self.pr_summary], feed_dict=feed_dict)
             self.writer.add_summary(result[0], epoch)
         self.writer.flush()
+
+
+def log_and_pring_evaluation(model, history, data, config, timestamp, file_writer):
+    print("Train History")
+    print(history)
+    print(f"Kaggel Test Evaluation for {timestamp}")
+    result = model.evaluate(data.valid_loader)
+
+    with file_writer.as_default():
+        tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result), step=0)
+
+    for metric, value in zip(model.metrics_names, result):
+        print(metric, ": ", value)
+
+    m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
+    y_pred = model.predict(data.valid_loader)
+
+    yp2 = np.argmax(y_pred, axis=1)
+    ya2 = np.argmax(data.y_data_valid, axis=1)
+    print(y_pred.shape, data.y_data_valid.shape)
+    m.update_state(ya2, yp2)
+    print('Kappa score result: ', m.result().numpy())
+
+    vy_data2 = np.argmax(data.y_data_valid, axis=1)
+
+    from sklearn.metrics import confusion_matrix, classification_report
+
+    cm = confusion_matrix(vy_data2, yp2)
+    print(cm)
+
+    print(classification_report(vy_data2, yp2))
+
+    y_pred = model.predict(data.train_loader)
+
+    yp3 = np.argmax(y_pred, axis=1)
+    y_true3 = np.argmax(data.y_data, axis=1)
+
+    cm2 = confusion_matrix(y_true3, yp3)
+    print(cm2)
+
+    print(classification_report(y_true3, yp3))

@@ -9,6 +9,7 @@ from sklearn.utils.class_weight import compute_class_weight
 from configs.pretraining_config import pretraining_config as config
 from models.mura_model import WristPredictNet
 from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
+from utils.eval_metrics import log_and_pring_evaluation
 from utils.path_constants import PathConstants
 from utils.training_utils import get_model_name_from_cli_to_config
 
@@ -18,6 +19,7 @@ timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
 TF_LOG_DIR = f'{PathConstants.PRETRAIN}/{model_prefix}{model_name}/' + timestamp + "/"
 checkpoint_path_name = f'checkpoints/{model_prefix}{model_name}/' + timestamp + '/cp.ckpt'
 checkpoint_path = f'checkpoints/{model_prefix}{model_name}/' + timestamp + '/'
+file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 
 
 mura_data = MuraGeneratorDataset(config)
@@ -84,40 +86,7 @@ history = model.fit(mura_data.train_loader,
                               validation_data=mura_data.valid_loader,
                               callbacks=my_callbacks)
 
-print("Train History")
-print(history)
-print(f"Kaggel Test Evaluation for {timestamp}")
-result = model.evaluate(mura_data.valid_loader)
-for metric, value in zip(model.metrics_names, result):
-    print(metric, ": ", value)
-
-m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-y_pred = model.predict(mura_data.valid_loader)
-
-yp2 = np.argmax(y_pred, axis=1)
-ya2 = np.argmax(mura_data.y_data_valid, axis=1)
-print(y_pred.shape, mura_data.y_data_valid.shape)
-m.update_state(ya2, yp2)
-print('Kappa score result: ', m.result().numpy())
-
-vy_data2 = np.argmax(mura_data.y_data_valid, axis=1)
-
-from sklearn.metrics import confusion_matrix, classification_report
-
-cm = confusion_matrix(vy_data2, yp2)
-print(cm)
-
-print(classification_report(vy_data2, yp2))
-
-y_pred = model.predict(mura_data.train_loader)
-
-yp3 = np.argmax(y_pred, axis=1)
-y_true3 = np.argmax(mura_data.y_data, axis=1)
-
-cm2 = confusion_matrix(y_true3, yp3)
-print(cm2)
-
-print(classification_report(y_true3, yp3))
+log_and_pring_evaluation(model, history, mura_data, config, timestamp, file_writer)
 
 #Save whole model
 model.save(checkpoint_path + 'model')

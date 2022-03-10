@@ -118,6 +118,3 @@ print("Evaluation Result: ", result)
 result_matrix = [[k, str(w)] for k, w in result.items()]
 with file_writer.as_default():
     tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
-    log_confusion_matrix(dataset, model)
-    log_kappa(dataset, model)
-    log_sklearn_consufions_matrix(dataset, model)
