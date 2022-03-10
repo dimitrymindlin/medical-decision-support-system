@@ -22,7 +22,7 @@ def train_model(config):
     model_name = config["model"]["name"]
     timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
     TF_LOG_DIR = f'tensorboard_logs/logs_{training_prefix}/{training_prefix}_{model_name}/' + timestamp + "/"
-    PRETRAINED_CKP_PATH = f"checkpoints/pre_{model_name}{config['train']['pretrained_checkpoint']}/cp.ckpt"
+    PRETRAINED_CKP_PATH = f"checkpoints/pre_{model_name}/{config['train']['pretrained_checkpoint']}/cp.ckpt"
     checkpoint_path_name = f'checkpoints/{training_prefix}_{model_name}/' + timestamp + '/cp.ckpt'
     checkpoint_path = f'checkpoints/{training_prefix}_{model_name}/' + timestamp + '/'
     file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
