@@ -25,8 +25,10 @@ class WristPredictNet(tf.keras.Model):
         x = self.base_model(x)
         if self.config["train"]["additional_last_layers"]:
             x = tf.keras.layers.Dense(256, activation='relu')(x)
-            x = tf.keras.layers.Dropout(0.2)(x)
+            x = tf.keras.layers.Dropout(0.3)(x)
             x = tf.keras.layers.Dense(256, activation='relu')(x)
+            x = tf.keras.layers.Dropout(0.3)(x)
+            x = tf.keras.layers.Dense(128, activation='relu')(x)
             x = tf.keras.layers.Dropout(0.2)(x)
         x = self.classifier(x)
         return x
@@ -36,8 +38,10 @@ class WristPredictNet(tf.keras.Model):
         x = self.base_model.output
         if self.config["train"]["additional_last_layers"]:
             x = tf.keras.layers.Dense(256, activation='relu')(x)
-            x = tf.keras.layers.Dropout(0.2)(x)
+            x = tf.keras.layers.Dropout(0.3)(x)
             x = tf.keras.layers.Dense(256, activation='relu')(x)
+            x = tf.keras.layers.Dropout(0.3)(x)
+            x = tf.keras.layers.Dense(128, activation='relu')(x)
             x = tf.keras.layers.Dropout(0.2)(x)
         predictions = self.classifier(x)
         return tf.keras.Model(inputs=self.img_input, outputs=predictions)
