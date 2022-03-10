@@ -1,3 +1,5 @@
+import sys
+
 from tensorflow import keras
 import tensorflow as tf
 import tensorflow_addons as tfa
@@ -5,12 +7,15 @@ from datetime import datetime
 import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
 from configs.direct_training_config import direct_training_config as config
-from models.mura_model import WristPredictNet, get_working_mura_model
+from models.mura_model import WristPredictNet
 from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
+from utils.path_constants import PathConstants
+from utils.training_utils import get_model_name_from_cli_to_config
 
-model_name = config["model"]["name"]
+model_prefix = "direct_"
+model_name = get_model_name_from_cli_to_config(sys.argv, config)
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
-TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
+TF_LOG_DIR = f'{PathConstants.DIRECT}/{model_prefix}{model_name}/' + timestamp + "/"
 checkpoint_dir = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
 
 
@@ -59,8 +64,6 @@ my_callbacks = [
 ]
 
 model = WristPredictNet(config).model()
-#model = get_working_mura_model()
-#print(model.summary())
 
 
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
@@ -73,8 +76,8 @@ metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
 model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001),
               loss='categorical_crossentropy',
               metrics=["accuracy", metric_auc, metric_f1])
+
 # Model Training
-# model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
 history = model.fit(mura_data.train_loader,
                               epochs=40,
                               verbose=1,
@@ -84,7 +87,7 @@ history = model.fit(mura_data.train_loader,
 
 print("Train History")
 print(history)
-print("Kaggel Test Evaluation")
+print(f"Kaggel Test Evaluation for {timestamp}")
 result = model.evaluate(mura_data.valid_loader)
 for metric, value in zip(model.metrics_names, result):
     print(metric, ": ", value)

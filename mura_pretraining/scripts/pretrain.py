@@ -1,3 +1,5 @@
+import sys
+
 from tensorflow import keras
 import tensorflow as tf
 import tensorflow_addons as tfa
@@ -7,12 +9,15 @@ from sklearn.utils.class_weight import compute_class_weight
 from configs.pretraining_config import pretraining_config as config
 from models.mura_model import WristPredictNet
 from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
+from utils.path_constants import PathConstants
+from utils.training_utils import get_model_name_from_cli_to_config
 
-model_name = config["model"]["name"]
+model_prefix = "pre_"
+model_name = get_model_name_from_cli_to_config(sys.argv, config)
 timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
-TF_LOG_DIR = f'kaggle/kaggle_new_{model_name}/' + timestamp + "/"
-checkpoint_path_name = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/cp.ckpt'
-checkpoint_path = f'checkpoints/kaggle_new_{model_name}/' + timestamp + '/'
+TF_LOG_DIR = f'{PathConstants.PRETRAIN}/{model_prefix}{model_name}/' + timestamp + "/"
+checkpoint_path_name = f'checkpoints/{model_prefix}{model_name}/' + timestamp + '/cp.ckpt'
+checkpoint_path = f'checkpoints/{model_prefix}{model_name}/' + timestamp + '/'
 
 
 mura_data = MuraGeneratorDataset(config)
@@ -60,33 +65,28 @@ my_callbacks = [
 ]
 
 model = WristPredictNet(config).model()
-#model = get_working_mura_model()
-#print(model.summary())
-
 
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 
 metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
                                 threshold=config["test"]["F1_threshold"], average='macro')
-#kappa = tfa.metrics.CohenKappa(num_classes=2)
 
 model.compile(optimizer=keras.optimizers.Adam(learning_rate=config["train"]["learning_rate"]),
               loss='categorical_crossentropy',
               metrics=["accuracy", metric_auc, metric_f1])
 
 # Model Training
-# model.load_weights("checkpoints/kaggle_inception/2022-02-21--15.47/cp.ckpt")
 history = model.fit(mura_data.train_loader,
                               epochs=config["train"]["epochs"],
                               verbose=1,
-                              class_weight=d_class_weights,  # d_class_weights
+                              class_weight=d_class_weights,
                               validation_data=mura_data.valid_loader,
                               callbacks=my_callbacks)
 
 print("Train History")
 print(history)
-print("Kaggel Test Evaluation")
+print(f"Kaggel Test Evaluation for {timestamp}")
 result = model.evaluate(mura_data.valid_loader)
 for metric, value in zip(model.metrics_names, result):
     print(metric, ": ", value)
