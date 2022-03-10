@@ -12,6 +12,7 @@ pretraining_config = {
     },
     "train": {
         "body_parts": ["XR_HAND", "XR_FINGER", "XR_FOREARM"],
+        "prefix": "pretrain",
         "config_name": "pretraining_config",
         "train_base": True,
         "augmentation": True,
