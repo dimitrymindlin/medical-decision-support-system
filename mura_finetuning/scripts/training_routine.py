@@ -19,9 +19,10 @@ from utils.training_utils import get_model_name_from_cli_to_config
 def train_model(config):
     # Get Settings and set names and paths
     training_prefix = config["train"]["prefix"]
-    model_name = get_model_name_from_cli_to_config(sys.argv, config)
+    model_name = config["model"]["name"]
     timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
     TF_LOG_DIR = f'tensorboard_logs/logs_{training_prefix}/{training_prefix}_{model_name}/' + timestamp + "/"
+    PRETRAINED_CKP_PATH = f"checkpoints/pre_{model_name}{config['train']['pretrained_checkpoint']}/cp.ckpt"
     checkpoint_path_name = f'checkpoints/{training_prefix}_{model_name}/' + timestamp + '/cp.ckpt'
     checkpoint_path = f'checkpoints/{training_prefix}_{model_name}/' + timestamp + '/'
     file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
@@ -73,13 +74,12 @@ def train_model(config):
                                       )
     ]
 
-    model = None
     # Load model and set train params and metrics
     if config["train"]["prefix"] == "pretrain":
         model = WristPredictNet(config).model()
     else:
         pre_model = WristPredictNet(config).model()
-        pre_model.load_weights(f"../checkpoints/{config['train']['pretrained_checkpoint']}/cp.ckpt")
+        pre_model.load_weights(PRETRAINED_CKP_PATH)
         # Remove top layer and put new layers on top
         model = get_finetuning_model_from_pretrained_model(pre_model, config["train"]["train_base"])
 
