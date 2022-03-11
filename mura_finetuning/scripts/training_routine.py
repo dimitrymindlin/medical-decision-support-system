@@ -18,14 +18,15 @@ from utils.training_utils import get_model_name_from_cli_to_config
 
 def train_model(config):
     # Get Settings and set names and paths
-    training_prefix = config["train"]["prefix"]
-    model_name = config["model"]["name"]
-    timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
-    TF_LOG_DIR = f'tensorboard_logs/logs_{training_prefix}/{training_prefix}_{model_name}/' + timestamp + "/"
-    PRETRAINED_CKP_PATH = f"checkpoints/pre_{model_name}/{config['train']['pretrained_checkpoint']}/cp.ckpt"
-    checkpoint_path_name = f'checkpoints/{training_prefix}_{model_name}/' + timestamp + '/cp.ckpt'
-    checkpoint_path = f'checkpoints/{training_prefix}_{model_name}/' + timestamp + '/'
+    TRAIN_MODE = config["train"]["prefix"]  # one of: [pretrain, finetune, frozen]
+    MODEL_NAME = config["model"]["name"]
+    TIMESTAMP = datetime.now().strftime("%Y-%m-%d--%H.%M")
+    TF_LOG_DIR = f'tensorboard_logs/logs_{TRAIN_MODE}/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + "/"
+    checkpoint_path_name = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/cp.ckpt'
+    checkpoint_path = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/'
     file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
+    if TRAIN_MODE != "pretrain":
+        PRETRAINED_CKP_PATH = f"checkpoints/pre_{MODEL_NAME}/{config['train']['pretrained_checkpoint']}/cp.ckpt"
 
     # Load data and class weights
     mura_data = MuraGeneratorDataset(config)
@@ -102,7 +103,7 @@ def train_model(config):
                         callbacks=my_callbacks)
 
     # Evaluation
-    log_and_pring_evaluation(model, history, mura_data, config, timestamp, file_writer)
+    log_and_pring_evaluation(model, history, mura_data, config, TIMESTAMP, file_writer)
 
     # Save whole model
     model.save(checkpoint_path + 'model')
