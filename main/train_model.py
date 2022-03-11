@@ -9,18 +9,12 @@ config = None
 for arg in sys.argv:
     if arg == "--pretrain":
         config = pretraining_config
-        print("Using pretrain config")
         break
     elif arg == "--frozen":  # Freeze base and train last layers
         config = frozen_config
-        config["train"]["train_base"] = False
-        config["train"]["learning_rate"]: 0.001
         break
     elif arg == "--finetune":  # Finetune whole model with low lr
         config = finetuning_config
-        config["train"]["prefix"] = "finetune"
-        config["train"]["train_base"] = True
-        config["train"]["learning_rate"]: 0.0001
         break
 
 for arg in sys.argv:
