@@ -1,4 +1,4 @@
-finetuning_config = {
+frozen_config = {
     "dataset": {
         "download": True,
     },
@@ -10,10 +10,10 @@ finetuning_config = {
         "image_channel": 3,
     },
     "train": {
-        "prefix": "finetuning",
-        "config_name": "finetuning_config",
+        "prefix": "frozen",
+        "config_name": "frozen_config",
         "body_parts": ["XR_WRIST"],
-        "frozen_checkpoint": "2022-03-11--08.25",
+        "pretrained_checkpoint": "2022-03-10--09.24",
         "train_base": False,
         "augmentation": True,
         "use_class_weights": True,
