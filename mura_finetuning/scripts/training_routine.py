@@ -27,7 +27,7 @@ def train_model(config):
     file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
     if TRAIN_MODE != "pretrain":
         ckp_stage = config["train"]["checkpoint_stage"]
-        ckp_name = config['train']['checkpoint_timestamp']
+        ckp_name = config['train']['checkpoint_name']
         PRETRAINED_CKP_PATH = f"checkpoints/{ckp_stage}_{MODEL_NAME}/{ckp_name}/cp.ckpt"
 
     # Tensorboard config matrix
