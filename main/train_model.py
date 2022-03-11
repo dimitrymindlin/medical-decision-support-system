@@ -1,6 +1,7 @@
 import sys
 
 from configs.finetuning_config import finetuning_config
+from configs.frozen_config import frozen_config
 from configs.pretraining_config import pretraining_config
 from mura_finetuning.scripts.training_routine import train_model
 
@@ -11,8 +12,7 @@ for arg in sys.argv:
         print("Using pretrain config")
         break
     elif arg == "--frozen":  # Freeze base and train last layers
-        config = finetuning_config
-        config["train"]["prefix"] = "frozen"
+        config = frozen_config
         config["train"]["train_base"] = False
         config["train"]["learning_rate"]: 0.001
         break

@@ -26,13 +26,18 @@ def train_model(config):
     checkpoint_path = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/'
     file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
     if TRAIN_MODE != "pretrain":
-        PRETRAINED_CKP_PATH = f"checkpoints/pre_{MODEL_NAME}/{config['train']['pretrained_checkpoint']}/cp.ckpt"
+        ckp_stage = config["train"]["checkpoint_stage"]
+        ckp_name = config['train']['checkpoint_timestamp']
+        PRETRAINED_CKP_PATH = f"checkpoints/{ckp_stage}_{MODEL_NAME}/{ckp_name}/cp.ckpt"
+
+    # Tensorboard config matrix
+    config_matrix = [[k, str(w)] for k, w in config["train"].items()]
+    with file_writer.as_default():
+        tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
 
     # Load data and class weights
     mura_data = MuraGeneratorDataset(config)
-
     y_integers = np.argmax(mura_data.y_data, axis=1)
-
     if config["train"]["use_class_weights"]:
         class_weights = compute_class_weight(class_weight="balanced",
                                              classes=np.unique(y_integers),
@@ -53,11 +58,11 @@ def train_model(config):
                                         save_freq='epoch'),
         keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
                                           # Reduce learning rate when a metric has stopped improving.
-                                          factor=0.1,
-                                          patience=3,
+                                          factor=config["train"]["factor_learning_rate"],
+                                          patience=config["train"]["patience_learning_rate"],
                                           min_delta=0.001,
                                           verbose=1,
-                                          min_lr=0.000000001),
+                                          min_lr=config["train"]["min_learning_rate"]),
         keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR,
                                     histogram_freq=1,
                                     write_graph=True,
@@ -68,7 +73,7 @@ def train_model(config):
                                     embeddings_metadata=None
                                     ),
         keras.callbacks.EarlyStopping(monitor="val_accuracy",
-                                      patience=5,
+                                      patience=config["train"]["early_stopping_patience"],
                                       mode="max",
                                       baseline=None,
                                       restore_best_weights=True,
