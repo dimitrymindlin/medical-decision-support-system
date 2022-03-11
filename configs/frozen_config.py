@@ -20,7 +20,7 @@ frozen_config = {
         "use_class_weights": True,
         "batch_size": 32,
         "epochs": 60,
-        "learning_rate": 0.0001,
+        "learning_rate": 0.001,
         "patience_learning_rate": 3,
         "factor_learning_rate": 0.1,
         "min_learning_rate": 1e-8,

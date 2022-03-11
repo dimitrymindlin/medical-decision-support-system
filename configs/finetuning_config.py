@@ -15,7 +15,7 @@ finetuning_config = {
         "body_parts": ["XR_WRIST"],
         "checkpoint_stage": "frozen",
         "checkpoint_name": "2022-03-11--08.25",
-        "train_base": False,
+        "train_base": True,
         "augmentation": True,
         "use_class_weights": True,
         "batch_size": 32,
