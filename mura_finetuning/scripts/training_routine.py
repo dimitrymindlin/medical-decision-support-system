@@ -24,7 +24,7 @@ def train_model(config):
     checkpoint_path_name = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/cp.ckpt'
     checkpoint_path = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/'
     file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
-    if TRAIN_MODE in ["finetune", "frozen"]:
+    if TRAIN_MODE in ["finetuning", "frozen"]:
         ckp_stage = config["train"]["checkpoint_stage"]
         ckp_name = config['train']['checkpoint_name']
         PRETRAINED_CKP_PATH = f"checkpoints/{ckp_stage}_{MODEL_NAME}/{ckp_name}/cp.ckpt"

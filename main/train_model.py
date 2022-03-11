@@ -14,7 +14,7 @@ for arg in sys.argv:
     elif arg == "--frozen":  # Freeze base and train last layers
         config = frozen_config
         break
-    elif arg == "--finetune":  # Finetune whole model with low lr
+    elif arg == "--finetuning":  # Finetune whole model with low lr
         config = finetuning_config
         break
     elif arg == "--direct":
