@@ -1,5 +1,6 @@
 import sys
 
+from configs.direct_training_config import direct_training_config
 from configs.finetuning_config import finetuning_config
 from configs.frozen_config import frozen_config
 from configs.pretraining_config import pretraining_config
@@ -15,6 +16,9 @@ for arg in sys.argv:
         break
     elif arg == "--finetune":  # Finetune whole model with low lr
         config = finetuning_config
+        break
+    elif arg == "--direct":
+        config = direct_training_config
         break
 
 for arg in sys.argv:

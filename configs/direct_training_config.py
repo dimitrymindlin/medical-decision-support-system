@@ -12,7 +12,7 @@ direct_training_config = {
     },
     "train": {
         "body_parts": ["XR_WRIST"],
-        "config_name": "direct_training_config",
+        "prefix": "direct",
         "train_base": True,
         "augmentation": True,
         "use_class_weights": True,

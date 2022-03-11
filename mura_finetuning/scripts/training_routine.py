@@ -13,7 +13,6 @@ from models.finetuning_model import get_finetuning_model_from_pretrained_model
 from models.mura_model import WristPredictNet
 from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
 from utils.eval_metrics import log_and_pring_evaluation
-from utils.training_utils import get_model_name_from_cli_to_config
 
 
 def train_model(config):
@@ -25,7 +24,7 @@ def train_model(config):
     checkpoint_path_name = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/cp.ckpt'
     checkpoint_path = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/'
     file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
-    if TRAIN_MODE != "pretrain":
+    if TRAIN_MODE in ["finetune", "frozen"]:
         ckp_stage = config["train"]["checkpoint_stage"]
         ckp_name = config['train']['checkpoint_name']
         PRETRAINED_CKP_PATH = f"checkpoints/{ckp_stage}_{MODEL_NAME}/{ckp_name}/cp.ckpt"
@@ -81,7 +80,7 @@ def train_model(config):
     ]
 
     # Load model and set train params and metrics
-    if config["train"]["prefix"] == "pretrain":
+    if config["train"]["prefix"] in ["pretrain", "direct"]:
         model = WristPredictNet(config).model()
     else:
         pre_model = WristPredictNet(config).model()
