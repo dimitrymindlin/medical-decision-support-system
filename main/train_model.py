@@ -6,7 +6,7 @@ from configs.frozen_config import frozen_config
 from configs.pretraining_config import pretraining_config
 from mura_finetuning.scripts.training_routine import train_model
 
-config = None
+config = finetuning_config
 for arg in sys.argv:
     if arg == "--pretrain":
         config = pretraining_config
