@@ -3,6 +3,7 @@
 
 # external
 import tensorflow as tf
+from keras import regularizers
 
 from utils.model_utils import get_input_shape_from_config, get_model_by_name
 
@@ -14,6 +15,7 @@ class WristPredictNet(tf.keras.Model):
         super(WristPredictNet, self).__init__(name='WristPredictNet')
 
         self.config = config
+        self.weight_regularisation = config["train"]["weight_regularisation"]
         self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)
         self.base_model = get_model_by_name(self.config, self._input_shape, weights, self.img_input)
@@ -24,15 +26,20 @@ class WristPredictNet(tf.keras.Model):
     def call(self, x):
         x = self.base_model(x)
         if self.config["train"]["additional_last_layers"]:
-            x = tf.keras.layers.Dense(256, activation='relu')(x)
+            x = tf.keras.layers.Dense(256,
+                                      activation='relu',
+                                      kernel_regularizer=regularizers.l2(self.weight_regularisation))(x)
             x = tf.keras.layers.Dropout(0.3)(x)
-            x = tf.keras.layers.Dense(256, activation='relu')(x)
+            x = tf.keras.layers.Dense(256,
+                                      activation='relu',
+                                      kernel_regularizer=regularizers.l2(self.weight_regularisation))(x)
             x = tf.keras.layers.Dropout(0.3)(x)
-            x = tf.keras.layers.Dense(128, activation='relu')(x)
+            x = tf.keras.layers.Dense(128,
+                                      activation='relu',
+                                      kernel_regularizer=regularizers.l2(self.weight_regularisation))(x)
             x = tf.keras.layers.Dropout(0.2)(x)
         x = self.classifier(x)
         return x
-
 
     def model(self):
         x = self.base_model.output
@@ -45,7 +52,6 @@ class WristPredictNet(tf.keras.Model):
             x = tf.keras.layers.Dropout(0.2)(x)
         predictions = self.classifier(x)
         return tf.keras.Model(inputs=self.img_input, outputs=predictions)
-
 
 
 def get_working_mura_model():
