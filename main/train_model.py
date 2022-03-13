@@ -35,9 +35,13 @@ for arg in sys.argv:
         config["model"]["name"] = "inception"
         break
 
-print(f'Using {config["train"]["prefix"]} config')
+
 """config = finetuning_config
 config["train"]["prefix"] = "frozen"
 config["train"]["train_base"] = False
 config["train"]["learning_rate"]: 0.001"""
+"""config = direct_training_config
+config["train"]["epochs"] = 1
+
+print(f'Using {config["train"]["prefix"]} config')"""
 train_model(config)

@@ -106,13 +106,13 @@ def get_mura_loaders(config, batch_size=32):
     # To get the filenames for a task
     def filenames(parts: List[str], train=True):
         root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
-        # root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
+        #root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
         if train:
             csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
-            # csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
         else:
             csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
-            # csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
 
         with open(csv_path, 'rb') as F:
             d = F.readlines()
@@ -139,13 +139,9 @@ def get_mura_loaders(config, batch_size=32):
     test_gen = MuraGenerator(config, test_x, test_y, batch_size, None)
     test_raw_gen = MuraValidDataGenerator(config, test_x, test_y)
 
-    train_amount = train_y.count('positive') + train_y.count('negative')
-    valid_amount = valid_y.count('positive') + valid_y.count('negative')
-    test_amount = test_y.count('positive') + test_y.count('negative')
-
-    print(f"Train data amount: {train_amount}")
-    print(f"Valid data amount: {valid_amount}")
-    print(f"Test data amount: {test_amount}")
+    print(f"Train data amount: {len(train_y)}")
+    print(f"Valid data amount: {len(valid_y)}")
+    print(f"Test data amount: {len(test_y)}")
 
     return train_gen, valid_gen, test_gen, test_raw_gen, train_y, test_y
 
