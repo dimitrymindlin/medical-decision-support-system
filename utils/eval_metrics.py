@@ -119,7 +119,7 @@ def log_and_pring_evaluation(model, history, data, config, timestamp, file_write
     y_pred = model.predict(data.train_loader)
 
     yp3 = np.argmax(y_pred, axis=1)
-    y_true3 = np.argmax(data.y_data, axis=1)
+    y_true3 = np.argmax(data.train_y, axis=1)
 
     cm2 = confusion_matrix(y_true3, yp3)
     print(cm2)

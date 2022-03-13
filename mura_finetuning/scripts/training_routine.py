@@ -36,7 +36,7 @@ def train_model(config):
 
     # Load data and class weights
     mura_data = MuraGeneratorDataset(config)
-    y_integers = np.argmax(mura_data.y_data, axis=1)
+    y_integers = np.argmax(mura_data.train_y, axis=1)
     if config["train"]["use_class_weights"]:
         class_weights = compute_class_weight(class_weight="balanced",
                                              classes=np.unique(y_integers),

@@ -24,7 +24,7 @@ file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 
 mura_data = MuraGeneratorDataset(config)
 
-y_integers = np.argmax(mura_data.y_data, axis=1)
+y_integers = np.argmax(mura_data.train_y, axis=1)
 
 class_weights = compute_class_weight(class_weight="balanced",
                                      classes=np.unique(y_integers),

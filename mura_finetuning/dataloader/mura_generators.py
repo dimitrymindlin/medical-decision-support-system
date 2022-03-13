@@ -1,5 +1,6 @@
 from typing import List
 
+from sklearn.model_selection import train_test_split
 from tensorflow import keras
 import tensorflow as tf
 import cv2
@@ -9,18 +10,13 @@ import numpy as np
 from keras.utils.all_utils import Sequence
 from albumentations import (
     Compose, HorizontalFlip,
-    RandomBrightness, RandomContrast, RandomGamma,
-    ShiftScaleRotate
-)
+    RandomBrightness, RandomContrast, RandomGamma)
 
 AUGMENTATIONS_TRAIN = Compose([
     HorizontalFlip(p=0.5),
     RandomContrast(limit=0.2, p=0.5),
     RandomGamma(gamma_limit=(80, 120), p=0.5),
     RandomBrightness(limit=0.2, p=0.5),
-    ShiftScaleRotate(
-        shift_limit=0.0625, scale_limit=0.1,
-        rotate_limit=15, border_mode=cv2.BORDER_REFLECT_101, p=0.8),
 ])
 
 
@@ -29,7 +25,7 @@ class MuraGeneratorDataset():
         self.config = config
         self.augment_train = AUGMENTATIONS_TRAIN
         self.preprocess_img = preprocess_img
-        self.train_loader, self.valid_loader, self.raw_valid_loader, self.y_data, self.y_data_valid = get_mura_loaders(
+        self.train_loader, self.valid_loader, self.test_loader, self.raw_valid_loader, self.train_y = get_mura_loaders(
             config,
             batch_size=self.config["train"]["batch_size"])
 
@@ -110,13 +106,13 @@ def get_mura_loaders(config, batch_size=32):
     # To get the filenames for a task
     def filenames(parts: List[str], train=True):
         root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
-        #root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
+        # root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
         if train:
             csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
-            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+            # csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
         else:
             csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
-            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+            # csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
 
         with open(csv_path, 'rb') as F:
             d = F.readlines()
@@ -128,31 +124,41 @@ def get_mura_loaders(config, batch_size=32):
         return imgs, labels
 
     parts = config["train"]["body_parts"]  # part to work with
-    imgs, labels = filenames(parts=parts)  # train data
-    vimgs, vlabels = filenames(parts=parts, train=False)  # validation data
 
-    train_amount = labels.count('positive') + labels.count('negative')
-    valid_amount = vlabels.count('positive') + vlabels.count('negative')
+    train_x, train_y = filenames(parts=parts)  # train data
+    test_x, test_y = filenames(parts=parts, train=False)  # test data
+    train_x, valid_x, train_y, valid_y = train_test_split(train_x, train_y, test_size=0.2,
+                                                          random_state=42)  # split train and valid data
+
+    train_x, train_y = to_categorical(train_x, train_y)
+    valid_x, valid_y = to_categorical(valid_x, valid_y)
+    test_x, test_y = to_categorical(test_x, test_y)
+
+    train_gen = MuraGenerator(config, train_x, train_y, batch_size, AUGMENTATIONS_TRAIN)
+    valid_gen = MuraGenerator(config, valid_x, valid_y, batch_size, None)
+    test_gen = MuraGenerator(config, test_x, test_y, batch_size, None)
+    test_raw_gen = MuraValidDataGenerator(config, test_x, test_y)
+
+    train_amount = train_y.count('positive') + train_y.count('negative')
+    valid_amount = valid_y.count('positive') + valid_y.count('negative')
+    test_amount = test_y.count('positive') + test_y.count('negative')
 
     print(f"Train data amount: {train_amount}")
     print(f"Valid data amount: {valid_amount}")
+    print(f"Test data amount: {test_amount}")
 
-    y_data = [0 if x == 'negative' else 1 for x in labels]
-    y_data = keras.utils.to_categorical(y_data)
-    y_data_valid = [0 if x == 'negative' else 1 for x in vlabels]
-    y_data_valid = keras.utils.to_categorical(y_data_valid)
-
-    imgs, y_data = shuffle(imgs, y_data)
-    train_gen = MuraGenerator(config, imgs, y_data, batch_size, AUGMENTATIONS_TRAIN)
-    valid_gen = MuraGenerator(config, vimgs, y_data_valid, batch_size, None)
-    valid_gen_raw = MuraValidDataGenerator(config, vimgs, y_data_valid)
-    # valid_gen_raw = MuraGenerator(config, vimgs, y_data_valid, batch_size, None, preprocess=False)
-
-    return train_gen, valid_gen, valid_gen_raw, y_data, y_data_valid
+    return train_gen, valid_gen, test_gen, test_raw_gen, train_y
 
 
 def preprocess_img(img, model_name="inception"):
     if model_name == 'densenet':
         return tf.cast(img, tf.float32) / 255.  # between 0 and 1
-    else: # Imagenet
+    else:  # Imagenet
         return tf.cast(img, tf.float32) / 127.5 - 1.  # between -1 and 1
+
+
+def to_categorical(x, y):
+    y = [0 if x == 'negative' else 1 for x in y]
+    y = keras.utils.to_categorical(y)
+    x, y = shuffle(x, y)
+    return x, y
