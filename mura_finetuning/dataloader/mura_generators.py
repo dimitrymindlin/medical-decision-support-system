@@ -25,7 +25,7 @@ class MuraGeneratorDataset():
         self.config = config
         self.augment_train = AUGMENTATIONS_TRAIN
         self.preprocess_img = preprocess_img
-        self.train_loader, self.valid_loader, self.test_loader, self.raw_valid_loader, self.train_y = get_mura_loaders(
+        self.train_loader, self.valid_loader, self.test_loader, self.raw_valid_loader, self.train_y, self.test_y = get_mura_loaders(
             config,
             batch_size=self.config["train"]["batch_size"])
 
@@ -147,7 +147,7 @@ def get_mura_loaders(config, batch_size=32):
     print(f"Valid data amount: {valid_amount}")
     print(f"Test data amount: {test_amount}")
 
-    return train_gen, valid_gen, test_gen, test_raw_gen, train_y
+    return train_gen, valid_gen, test_gen, test_raw_gen, train_y, test_y
 
 
 def preprocess_img(img, model_name="inception"):
