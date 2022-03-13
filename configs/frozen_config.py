@@ -13,7 +13,7 @@ frozen_config = {
         "prefix": "frozen",
         "config_name": "frozen_config",
         "body_parts": ["XR_WRIST"],
-        "checkpoint_stage": "pretrain",
+        "checkpoint_name": "pretrain",
         "checkpoint_timestamp": "2022-03-13--12.36",
         "train_base": False,
         "augmentation": True,
