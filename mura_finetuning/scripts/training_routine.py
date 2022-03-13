@@ -46,19 +46,13 @@ def train_model(config):
         d_class_weights = None
 
     # Callbacks
-    """
-    keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
-                                          # Reduce learning rate when a metric has stopped improving.
-                                          factor=config["train"]["factor_learning_rate"],
-                                          patience=config["train"]["patience_learning_rate"],
-                                          min_delta=0.001,
-                                          verbose=1,
-                                          min_lr=config["train"]["min_learning_rate"]),"""
-    def lr_scheduler(epoch, lr):
+    """def lr_scheduler(epoch, lr):
         if epoch < 10:
             return lr
         else:
             return lr * tf.math.exp(-0.1)
+            
+            tf.keras.callbacks.LearningRateScheduler(lr_scheduler),"""
 
     my_callbacks = [
         keras.callbacks.ModelCheckpoint(filepath=checkpoint_path_name,
@@ -69,7 +63,13 @@ def train_model(config):
                                         save_weights_only=True,
                                         mode='auto',
                                         save_freq='epoch'),
-        tf.keras.callbacks.LearningRateScheduler(lr_scheduler),
+        keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
+                                          # Reduce learning rate when a metric has stopped improving.
+                                          factor=config["train"]["factor_learning_rate"],
+                                          patience=config["train"]["patience_learning_rate"],
+                                          min_delta=0.001,
+                                          verbose=1,
+                                          min_lr=config["train"]["min_learning_rate"]),
         keras.callbacks.TensorBoard(log_dir=TF_LOG_DIR,
                                     histogram_freq=1,
                                     write_graph=True,
