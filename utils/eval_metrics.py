@@ -89,7 +89,7 @@ def log_and_pring_evaluation(model, history, data, config, timestamp, file_write
     print("Train History")
     print(history)
     print(f"Kaggel Test Evaluation for {timestamp}")
-    result = model.evaluate(data.valid_loader)
+    result = model.evaluate(data.test_loader)
     result = dict(zip(model.metrics_names, result))
     result_matrix = [[k, str(w)] for k, w in result.items()]
     with file_writer.as_default():
@@ -99,15 +99,15 @@ def log_and_pring_evaluation(model, history, data, config, timestamp, file_write
         print(metric, ": ", value)
 
     m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-    y_pred = model.predict(data.valid_loader)
+    y_pred = model.predict(data.test_loader)
 
     yp2 = np.argmax(y_pred, axis=1)
-    ya2 = np.argmax(data.y_data_valid, axis=1)
-    print(y_pred.shape, data.y_data_valid.shape)
+    ya2 = np.argmax(data.test_y, axis=1)
+    print(y_pred.shape, data.test_y.shape)
     m.update_state(ya2, yp2)
     print('Kappa score result: ', m.result().numpy())
 
-    vy_data2 = np.argmax(data.y_data_valid, axis=1)
+    vy_data2 = np.argmax(data.test_y, axis=1)
 
     from sklearn.metrics import confusion_matrix, classification_report
 
