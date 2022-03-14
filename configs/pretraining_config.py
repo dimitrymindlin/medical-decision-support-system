@@ -4,10 +4,10 @@ pretraining_config = {
     },
     "data": {
         "class_names": ["negative", "positive"],
-        "input_size": (520, 520),
-        "input_shape": (520, 520, 3),
-        "image_height": 520,
-        "image_width": 520,
+        "input_size": (512, 512),
+        "input_shape": (512, 512, 3),
+        "image_height": 512,
+        "image_width": 512,
         "image_channel": 3,
     },
     "train": {

@@ -4,9 +4,9 @@ frozen_hp_config = {
     },
     "data": {
         "class_names": ["positive"],
-        "input_size": (520, 520),
-        "image_height": 520,
-        "image_width": 520,
+        "input_size": (512, 512),
+        "image_height": 512,
+        "image_width": 512,
         "image_channel": 3,
     },
     "train": {
