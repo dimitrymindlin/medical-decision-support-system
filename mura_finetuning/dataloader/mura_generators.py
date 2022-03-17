@@ -158,3 +158,38 @@ def to_categorical(x, y):
     y = keras.utils.to_categorical(y)
     x, y = shuffle(x, y)
     return x, y
+
+
+"""def show_augmentations():
+    albumentation_list = [
+        HorizontalFlip(p=1),
+        RandomContrast(limit=0.2, p=1),
+        RandomGamma(gamma_limit=(80, 120), p=1),
+        RandomBrightness(limit=0.2, p=1),
+    ]
+    root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
+    chosen_image = imread(root + 'MURA-v1.1/train/XR_WRIST/patient00136/study1_positive/image3.png')
+    img_matrix_list = []
+    for aug_type in albumentation_list:
+        img = aug_type(image=chosen_image)['image']
+        img_matrix_list.append(img)
+    img_3d =tf.expand_dims(chosen_image, axis=-1)
+    img = tf.image.resize_with_pad(img_3d, 512, 512)
+    img_matrix_list.append(img)
+
+    img_matrix_list.insert(0, chosen_image)
+
+    titles_list = ["Original", "Horizontal Flip", "Random Contrast", "Random Gamma", "RandomBrightness", "Resizing"]
+
+    ncols = 3
+    fig, myaxes = plt.subplots(figsize=(20, 15), nrows=2, ncols=ncols, squeeze=True)
+    fig.suptitle("Augmentation", fontsize=30)
+    # fig.subplots_adjust(wspace=0.3)
+    # fig.subplots_adjust(hspace=0.3)
+    for i, (img, title) in enumerate(zip(img_matrix_list, titles_list)):
+        myaxes[i // ncols][i % ncols].imshow(img, cmap='gray')
+        myaxes[i // ncols][i % ncols].set_title(title, fontsize=15)
+    plt.show()
+
+
+show_augmentations()"""
