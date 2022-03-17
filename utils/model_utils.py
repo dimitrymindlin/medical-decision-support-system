@@ -4,7 +4,7 @@ import tensorflow as tf
 def get_model_by_name(config, input_shape, weights, img_input=None):
     print(f"Loading Model: {config['model']['name']}")
     if config["model"]["name"] == "densenet":
-        base_model = tf.keras.applications.DenseNet121(include_top=False,
+        base_model = tf.keras.applications.DenseNet169(include_top=False,
                                                        input_tensor=img_input,
                                                        input_shape=input_shape,
                                                        weights=weights,
