@@ -1,18 +1,22 @@
 import tensorflow as tf
+from keras import regularizers
 from keras.models import Model
 
 
-def get_finetuning_model_from_pretrained_model(pre_model, train_base=False):
-    if not train_base:
+def get_finetuning_model_from_pretrained_model(pre_model, config):
+    if not config["train"]["train_base"]:
         # Freeze all the layers
         for layer in pre_model.layers[:]:
             layer.trainable = False
-    x = tf.keras.layers.Dense(256, activation='relu')(pre_model.layers[-2].output)
-    x = tf.keras.layers.Dropout(0.3)(x)
-    x = tf.keras.layers.Dense(256, activation='relu')(x)
-    x = tf.keras.layers.Dropout(0.3)(x)
-    x = tf.keras.layers.Dense(128, activation='relu')(x)
-    x = tf.keras.layers.Dropout(0.2)(x)
+
+    weight_regularisation = regularizers.l2(config["train"]["weight_regularisation"]) if config["train"][
+        "weight_regularisation"] else None
+
+    x = pre_model.layers[-2].output
+    if config["train"]["additional_last_layers"]:
+        for layer_count in config["train"]["additional_last_layers"]:
+            x = tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=weight_regularisation)(x)
+            x = tf.keras.layers.Dropout(0.4)(x)
     output = tf.keras.layers.Dense(2, activation="softmax", name="predictions")(x)
     model = Model(pre_model.layers[0].input, output)
     return model
