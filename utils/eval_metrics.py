@@ -92,8 +92,7 @@ def log_and_pring_evaluation(model, history, data, config, timestamp, file_write
     result = model.evaluate(data.test_loader)
     result = dict(zip(model.metrics_names, result))
     result_matrix = [[k, str(w)] for k, w in result.items()]
-    with file_writer.as_default():
-        tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
+
 
     for metric, value in zip(model.metrics_names, result):
         print(metric, ": ", value)
@@ -107,11 +106,21 @@ def log_and_pring_evaluation(model, history, data, config, timestamp, file_write
     m.update_state(ya2, yp2)
     print('Kappa score result: ', m.result().numpy())
 
+
+
     vy_data2 = np.argmax(data.test_y, axis=1)
 
     from sklearn.metrics import confusion_matrix, classification_report
 
     cm = confusion_matrix(vy_data2, yp2)
+    tn, fp, fn, tp = confusion_matrix(vy_data2, yp2).ravel()
+    result_matrix.append(["Kappa score", str(m.result().numpy())])
+    result_matrix.append(["TN", str(tn)])
+    result_matrix.append(["FP", str(fp)])
+    result_matrix.append(["FN", str(fn)])
+    result_matrix.append(["TP", str(tp)])
+    with file_writer.as_default():
+        tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
     print(cm)
 
     print(classification_report(vy_data2, yp2))
