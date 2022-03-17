@@ -16,7 +16,7 @@ direct_training_config = {
         "train_base": True,
         "augmentation": False,
         "use_class_weights": False,
-        "batch_size": 16,
+        "batch_size": 8,
         "epochs": 60,
         "learning_rate": 0.0001,
         "patience_learning_rate": 3,
@@ -27,7 +27,7 @@ direct_training_config = {
         "weight_regularisation": None,
     },
     "test": {
-        "batch_size": 16,
+        "batch_size": 8,
         "F1_threshold": 0.5,
     },
     "model": {
