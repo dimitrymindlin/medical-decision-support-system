@@ -4,7 +4,7 @@ from configs.direct_training_config import direct_training_config
 from configs.finetuning_config import finetuning_config
 from configs.frozen_config import frozen_config
 from configs.pretraining_config import pretraining_config
-from mura_finetuning.scripts.training_routine import train_model
+from main.training_routine import train_model
 
 config = finetuning_config
 for arg in sys.argv:
