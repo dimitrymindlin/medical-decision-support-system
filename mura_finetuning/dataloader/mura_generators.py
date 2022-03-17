@@ -134,6 +134,8 @@ def get_mura_loaders(config, batch_size=32):
     valid_x, valid_y = to_categorical(valid_x, valid_y)
     test_x, test_y = to_categorical(test_x, test_y)
 
+    if not config["train"]["augmentation"]:
+        AUGMENTATIONS_TRAIN = None
     train_gen = MuraGenerator(config, train_x, train_y, batch_size, AUGMENTATIONS_TRAIN)
     valid_gen = MuraGenerator(config, valid_x, valid_y, batch_size, None)
     test_gen = MuraGenerator(config, test_x, test_y, batch_size, None)
@@ -148,9 +150,9 @@ def get_mura_loaders(config, batch_size=32):
 
 def preprocess_img(img, model_name="inception"):
     if model_name == 'densenet':
-        return tf.cast(img, tf.float32) / 255.  # between 0 and 1
-    else:  # Imagenet
-        return tf.cast(img, tf.float32) / 127.5 - 1.  # between -1 and 1
+        return tf.keras.applications.densenet.preprocess_input(img)  # between 0 and 1
+    else:  # Inception
+        return tf.keras.applications.inception_v3.preprocess_input  # between -1 and 1
 
 
 def to_categorical(x, y):
