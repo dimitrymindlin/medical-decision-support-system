@@ -21,6 +21,10 @@ AUGMENTATIONS_TRAIN = Compose([
     RandomBrightness(limit=0.2, p=0.5),
 ])
 
+AUGMENTATIONS_TEST = Compose([
+    CLAHE(always_apply=True)
+])
+
 
 class MuraGeneratorDataset():
     def __init__(self, config):
@@ -139,8 +143,8 @@ def get_mura_loaders(config, batch_size=32):
     if not config["train"]["augmentation"]:
         AUGMENTATIONS_TRAIN = None
     train_gen = MuraGenerator(config, train_x, train_y, batch_size, AUGMENTATIONS_TRAIN)
-    valid_gen = MuraGenerator(config, valid_x, valid_y, batch_size, None)
-    test_gen = MuraGenerator(config, test_x, test_y, batch_size, None)
+    valid_gen = MuraGenerator(config, valid_x, valid_y, batch_size, AUGMENTATIONS_TEST)
+    test_gen = MuraGenerator(config, test_x, test_y, batch_size, AUGMENTATIONS_TEST)
     test_raw_gen = MuraValidDataGenerator(config, test_x, test_y)
 
     print(f"Train data amount: {len(train_y)}")
@@ -164,7 +168,7 @@ def to_categorical(x, y):
     return x, y
 
 
-def show_augmentations():
+"""def show_augmentations():
     albumentation_list = [
         Equalize(always_apply=True),
         CLAHE(always_apply=True),
@@ -201,4 +205,4 @@ def show_augmentations():
 
 show_augmentations()
 show_augmentations()
-show_augmentations()
+show_augmentations()"""
