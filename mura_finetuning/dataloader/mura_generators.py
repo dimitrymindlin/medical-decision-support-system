@@ -1,5 +1,6 @@
 from typing import List
 
+from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 import tensorflow as tf
@@ -9,10 +10,11 @@ from sklearn.utils import shuffle
 import numpy as np
 from keras.utils.all_utils import Sequence
 from albumentations import (
-    Compose, HorizontalFlip,
+    Compose, HorizontalFlip, CLAHE, Equalize,
     RandomBrightness, RandomContrast, RandomGamma)
 
 AUGMENTATIONS_TRAIN = Compose([
+    CLAHE(always_apply=True),
     HorizontalFlip(p=0.5),
     RandomContrast(limit=0.2, p=0.5),
     RandomGamma(gamma_limit=(80, 120), p=0.5),
@@ -106,13 +108,13 @@ def get_mura_loaders(config, batch_size=32):
     # To get the filenames for a task
     def filenames(parts: List[str], train=True):
         root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
-        #root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
+        # root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
         if train:
             csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
-            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+            # csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
         else:
             csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
-            #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+            # csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
 
         with open(csv_path, 'rb') as F:
             d = F.readlines()
@@ -162,12 +164,14 @@ def to_categorical(x, y):
     return x, y
 
 
-"""def show_augmentations():
+def show_augmentations():
     albumentation_list = [
+        Equalize(always_apply=True),
+        CLAHE(always_apply=True),
         HorizontalFlip(p=1),
-        RandomContrast(limit=0.2, p=1),
-        RandomGamma(gamma_limit=(80, 120), p=1),
-        RandomBrightness(limit=0.2, p=1),
+        RandomContrast(limit=0.6, p=1),
+        RandomGamma(gamma_limit=(60, 180), p=1),
+        RandomBrightness(limit=0.5, p=1),
     ]
     root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
     chosen_image = imread(root + 'MURA-v1.1/train/XR_WRIST/patient00136/study1_positive/image3.png')
@@ -175,16 +179,17 @@ def to_categorical(x, y):
     for aug_type in albumentation_list:
         img = aug_type(image=chosen_image)['image']
         img_matrix_list.append(img)
-    img_3d =tf.expand_dims(chosen_image, axis=-1)
+    img_3d = tf.expand_dims(chosen_image, axis=-1)
     img = tf.image.resize_with_pad(img_3d, 512, 512)
     img_matrix_list.append(img)
 
     img_matrix_list.insert(0, chosen_image)
 
-    titles_list = ["Original", "Horizontal Flip", "Random Contrast", "Random Gamma", "RandomBrightness", "Resizing"]
+    titles_list = ["Original", "Equalize", "CLAHE", "Horizontal Flip", "Random Contrast", "Random Gamma",
+                   "RandomBrightness", "Resizing"]
 
     ncols = 3
-    fig, myaxes = plt.subplots(figsize=(20, 15), nrows=2, ncols=ncols, squeeze=True)
+    fig, myaxes = plt.subplots(figsize=(20, 15), nrows=3, ncols=ncols, squeeze=True)
     fig.suptitle("Augmentation", fontsize=30)
     # fig.subplots_adjust(wspace=0.3)
     # fig.subplots_adjust(hspace=0.3)
@@ -194,4 +199,6 @@ def to_categorical(x, y):
     plt.show()
 
 
-show_augmentations()"""
+show_augmentations()
+show_augmentations()
+show_augmentations()
