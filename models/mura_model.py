@@ -13,9 +13,9 @@ class WristPredictNet(tf.keras.Model):
 
     def __init__(self, config, weights='imagenet'):
         super(WristPredictNet, self).__init__(name='WristPredictNet')
-
         self.config = config
-        self.weight_regularisation = config["train"]["weight_regularisation"]
+        self.weight_regularisation = regularizers.l2(config["train"]["weight_regularisation"]) if config["train"][
+            "weight_regularisation"] else None
         self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)
         self.base_model = get_model_by_name(self.config, self._input_shape, weights, self.img_input)
@@ -28,28 +28,26 @@ class WristPredictNet(tf.keras.Model):
         if self.config["train"]["additional_last_layers"]:
             x = tf.keras.layers.Dense(256,
                                       activation='relu',
-                                      kernel_regularizer=regularizers.l2(self.weight_regularisation))(x)
-            x = tf.keras.layers.Dropout(0.3)(x)
-            x = tf.keras.layers.Dense(256,
-                                      activation='relu',
-                                      kernel_regularizer=regularizers.l2(self.weight_regularisation))(x)
-            x = tf.keras.layers.Dropout(0.3)(x)
+                                      kernel_regularizer=self.weight_regularisation)(x)
+            x = tf.keras.layers.Dropout(0.4)(x)
             x = tf.keras.layers.Dense(128,
                                       activation='relu',
-                                      kernel_regularizer=regularizers.l2(self.weight_regularisation))(x)
-            x = tf.keras.layers.Dropout(0.2)(x)
+                                      kernel_regularizer=self.weight_regularisation)(x)
+            x = tf.keras.layers.Dropout(0.3)(x)
         x = self.classifier(x)
         return x
 
     def model(self):
         x = self.base_model.output
         if self.config["train"]["additional_last_layers"]:
-            x = tf.keras.layers.Dense(256, activation='relu')(x)
+            x = tf.keras.layers.Dense(256,
+                                      activation='relu',
+                                      kernel_regularizer=self.weight_regularisation)(x)
+            x = tf.keras.layers.Dropout(0.4)(x)
+            x = tf.keras.layers.Dense(128,
+                                      activation='relu',
+                                      kernel_regularizer=self.weight_regularisation)(x)
             x = tf.keras.layers.Dropout(0.3)(x)
-            x = tf.keras.layers.Dense(256, activation='relu')(x)
-            x = tf.keras.layers.Dropout(0.3)(x)
-            x = tf.keras.layers.Dense(128, activation='relu')(x)
-            x = tf.keras.layers.Dropout(0.2)(x)
         predictions = self.classifier(x)
         return tf.keras.Model(inputs=self.img_input, outputs=predictions)
 
