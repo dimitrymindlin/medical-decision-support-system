@@ -11,13 +11,13 @@ pretraining_config = {
         "image_channel": 3,
     },
     "train": {
-        "body_parts": ["XR_HAND", "XR_FINGER", "XR_FOREARM"],
+        "body_parts": ["XR_HAND", "XR_FINGER", "XR_FOREARM", "XR_SHOULDER", "XR_ELBOW", "XR_HUMERUS"],
         "prefix": "pretrain",
         "config_name": "pretraining_config",
         "train_base": True,
         "augmentation": False,
         "use_class_weights": False,
-        "batch_size": 16,
+        "batch_size": 32,
         "epochs": 60,
         "learning_rate": 0.0001,
         "patience_learning_rate": 1,
@@ -28,7 +28,7 @@ pretraining_config = {
         "weight_regularisation": None
     },
     "test": {
-        "batch_size": 16,
+        "batch_size": 32,
         "F1_threshold": 0.5,
     },
     "model": {

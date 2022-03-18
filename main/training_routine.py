@@ -11,7 +11,7 @@ from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
 from utils.eval_metrics import log_and_pring_evaluation
 
 
-def train_model(config):
+def train_model(config, print_console=True):
     # Get Settings and set names and paths
     TRAIN_MODE = config["train"]["prefix"]  # one of: [pretrain, finetune, frozen]
     MODEL_NAME = config["model"]["name"]
@@ -115,3 +115,4 @@ def train_model(config):
 
     # Save whole model
     model.save(checkpoint_path + 'model')
+    return TIMESTAMP
