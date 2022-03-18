@@ -1,7 +1,3 @@
-import sys
-
-from keras import Sequential
-from keras.models import Model
 from tensorflow import keras
 import tensorflow as tf
 import tensorflow_addons as tfa
