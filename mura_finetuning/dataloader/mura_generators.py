@@ -158,7 +158,7 @@ def preprocess_img(img, model_name="inception"):
     if model_name == 'densenet':
         return tf.keras.applications.densenet.preprocess_input(img)  # between 0 and 1
     else:  # Inception
-        return tf.keras.applications.inception_v3.preprocess_input  # between -1 and 1
+        return tf.keras.applications.inception_v3.preprocess_input(img)  # between -1 and 1
 
 
 def to_categorical(x, y):
