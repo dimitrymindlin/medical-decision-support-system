@@ -18,7 +18,7 @@ frozen_config = {
         "train_base": False,
         "augmentation": True,
         "use_class_weights": True,
-        "batch_size": 32,
+        "batch_size": 16,
         "epochs": 60,
         "learning_rate": 0.001,
         "patience_learning_rate": 3,
@@ -29,7 +29,7 @@ frozen_config = {
         "weight_regularisation": None,
     },
     "test": {
-        "batch_size": 32,
+        "batch_size": 16,
         "F1_threshold": 0.5,
     },
     "model": {

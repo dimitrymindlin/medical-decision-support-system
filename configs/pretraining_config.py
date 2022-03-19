@@ -17,7 +17,7 @@ pretraining_config = {
         "train_base": True,
         "augmentation": False,
         "use_class_weights": False,
-        "batch_size": 32,
+        "batch_size": 16,
         "epochs": 60,
         "learning_rate": 0.0001,
         "patience_learning_rate": 1,
@@ -28,7 +28,7 @@ pretraining_config = {
         "weight_regularisation": None
     },
     "test": {
-        "batch_size": 32,
+        "batch_size": 16,
         "F1_threshold": 0.5,
     },
     "model": {

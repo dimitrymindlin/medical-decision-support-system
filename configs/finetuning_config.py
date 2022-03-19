@@ -18,7 +18,7 @@ finetuning_config = {
         "train_base": True,
         "augmentation": True,
         "use_class_weights": True,
-        "batch_size": 32,
+        "batch_size": 16,
         "epochs": 60,
         "learning_rate": 0.0001,
         "patience_learning_rate": 3,
@@ -29,7 +29,7 @@ finetuning_config = {
         "weight_regularisation": 0.001,
     },
     "test": {
-        "batch_size": 32,
+        "batch_size": 16,
         "F1_threshold": 0.5,
     },
     "model": {
