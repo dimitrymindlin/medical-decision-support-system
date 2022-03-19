@@ -13,27 +13,27 @@ from albumentations import (
     Compose, HorizontalFlip, CLAHE, Equalize,
     RandomBrightness, RandomContrast, RandomGamma)
 
-AUGMENTATIONS_TRAIN = Compose([
-    CLAHE(always_apply=True),
-    HorizontalFlip(p=0.5),
-    RandomContrast(limit=0.2, p=0.5),
-    RandomGamma(gamma_limit=(80, 120), p=0.5),
-    RandomBrightness(limit=0.2, p=0.5),
-])
-
-AUGMENTATIONS_TEST = Compose([
-    CLAHE(always_apply=True)
-])
-
 
 class MuraGeneratorDataset():
     def __init__(self, config):
         self.config = config
-        self.augment_train = AUGMENTATIONS_TRAIN
+        self.AUGMENTATIONS_TRAIN = Compose([
+            CLAHE(always_apply=True),
+            HorizontalFlip(p=0.5),
+            RandomContrast(limit=0.2, p=0.5),
+            RandomGamma(gamma_limit=(80, 120), p=0.5),
+            RandomBrightness(limit=0.2, p=0.5),
+        ])
+        self.AUGMENTATIONS_TEST = Compose([
+            CLAHE(always_apply=True)
+        ])
         self.preprocess_img = preprocess_img
         self.train_loader, self.valid_loader, self.test_loader, self.raw_valid_loader, self.train_y, self.test_y = get_mura_loaders(
             config,
-            batch_size=self.config["train"]["batch_size"])
+            batch_size=self.config["train"]["batch_size"],
+            aug_train=self.AUGMENTATIONS_TRAIN,
+            aug_test=self.AUGMENTATIONS_TEST
+        )
 
 
 class MuraGenerator(Sequence):
@@ -108,7 +108,7 @@ class MuraValidDataGenerator(Sequence):
         return xs, ys
 
 
-def get_mura_loaders(config, batch_size=32):
+def get_mura_loaders(config, batch_size=32, aug_train=None, aug_test=None):
     # To get the filenames for a task
     def filenames(parts: List[str], train=True):
         root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
@@ -141,10 +141,10 @@ def get_mura_loaders(config, batch_size=32):
     test_x, test_y = to_categorical(test_x, test_y)
 
     if not config["train"]["augmentation"]:
-        AUGMENTATIONS_TRAIN = None
-    train_gen = MuraGenerator(config, train_x, train_y, batch_size, AUGMENTATIONS_TRAIN)
-    valid_gen = MuraGenerator(config, valid_x, valid_y, batch_size, AUGMENTATIONS_TEST)
-    test_gen = MuraGenerator(config, test_x, test_y, batch_size, AUGMENTATIONS_TEST)
+        aug_train = aug_test  # Just make CLAHE
+    train_gen = MuraGenerator(config, train_x, train_y, batch_size, aug_train)
+    valid_gen = MuraGenerator(config, valid_x, valid_y, batch_size, aug_test)
+    test_gen = MuraGenerator(config, test_x, test_y, batch_size, aug_test)
     test_raw_gen = MuraValidDataGenerator(config, test_x, test_y)
 
     print(f"Train data amount: {len(train_y)}")
