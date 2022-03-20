@@ -6,6 +6,7 @@ from keras.models import Model
 def get_finetuning_model_from_pretrained_model(pre_model, config):
     if not config["train"]["train_base"]:
         # Freeze all the layers
+        print("Freezing all layers...")
         for layer in pre_model.layers[:]:
             layer.trainable = False
 
@@ -15,6 +16,7 @@ def get_finetuning_model_from_pretrained_model(pre_model, config):
     x = pre_model.layers[-2].output
     if config["train"]["additional_last_layers"]:
         for layer_count in config["train"]["additional_last_layers"]:
+            print("Adding additional layers...")
             x = tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=weight_regularisation)(x)
             x = tf.keras.layers.Dropout(0.4)(x)
     output = tf.keras.layers.Dense(2, activation="softmax", name="predictions")(x)
