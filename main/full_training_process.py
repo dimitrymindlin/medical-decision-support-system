@@ -26,6 +26,7 @@ last_saved_model_name = None
 
 if model_name == "inception":
     configs = configs[1:]
+    last_saved_model_timestamp = "2022-03-19--10.48"
 
 for conf in configs:
     conf["model"]["name"] = model_name
