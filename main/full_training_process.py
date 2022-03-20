@@ -24,6 +24,9 @@ configs = [pretraining_config, frozen_config, finetuning_config]
 last_stage = None
 last_saved_model_name = None
 
+if model_name == "inception":
+    configs = configs[1:]
+
 for conf in configs:
     conf["model"]["name"] = model_name
     if conf["train"]["prefix"] != "pretrain":
