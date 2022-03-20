@@ -90,6 +90,7 @@ def train_model(config, print_console=True):
         pre_model = WristPredictNet(config).model()
         pre_model.load_weights(PRETRAINED_CKP_PATH)
         # Remove top layer and put new layers on top
+        print(f"Loading pretrained for {config['train']['prefix']} from {config['train']['checkpoint_stage']}")
         model = get_finetuning_model_from_pretrained_model(pre_model, config)
 
     metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
