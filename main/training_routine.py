@@ -86,12 +86,16 @@ def train_model(config, print_console=True):
     # Load model and set train params and metrics
     if config["train"]["prefix"] in ["pretrain", "direct"]:
         model = WristPredictNet(config).model()
-    else:
+    elif config["train"]["prefix"] in ["frozen"]:
         pre_model = WristPredictNet(config).model()
         print(f"Loading pretrained from {config['train']['checkpoint_stage']} for {config['train']['prefix']}.")
         pre_model.load_weights(PRETRAINED_CKP_PATH)
-        # Remove top layer and put new layers on top
         model = get_finetuning_model_from_pretrained_model(pre_model, config)
+    else:
+        pre_model = WristPredictNet(config).model()
+        model = get_finetuning_model_from_pretrained_model(pre_model, config)
+        print(f"Loading pretrained from {config['train']['checkpoint_stage']} for {config['train']['prefix']}.")
+        model.load_weights(PRETRAINED_CKP_PATH)
 
     metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                       from_logits=False)
