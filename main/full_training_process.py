@@ -26,8 +26,8 @@ last_saved_model_name = None
 batch_size = 16
 
 if model_name == "inception":
-    configs = configs[1:]
-    last_saved_model_timestamp = "2022-03-20--23.59"
+    configs = configs[2:]
+    last_saved_model_timestamp = "2022-03-21--10.17"
 
 
 for conf in configs:
