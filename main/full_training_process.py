@@ -5,9 +5,11 @@ from main.training_routine import train_model
 import sys
 
 model_name = "inception"
+batch_size = None
 for arg in sys.argv:
     if arg == "--densenet":
         model_name = "densenet"
+        batch_size = 8
         break
     elif arg == "--vgg":
         model_name = "vgg"
@@ -23,7 +25,6 @@ configs = [pretraining_config, frozen_config, finetuning_config]
 
 last_stage = None
 last_saved_model_name = None
-batch_size = 16
 
 if model_name == "inception":
     configs = configs[2:]
@@ -32,6 +33,9 @@ if model_name == "inception":
 
 for conf in configs:
     conf["model"]["name"] = model_name
+    if batch_size:
+        conf["train"]["batch_size"] = batch_size
+        conf["test"]["batch_size"] = batch_size
     if conf["train"]["prefix"] != "pretrain":
         conf["train"]["checkpoint_name"] = last_saved_model_timestamp
     last_saved_model_timestamp = train_model(conf, print_console=False)
