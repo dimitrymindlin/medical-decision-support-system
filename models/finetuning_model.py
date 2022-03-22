@@ -18,7 +18,7 @@ def get_finetuning_model_from_pretrained_model(pre_model, config):
         for layer_count in range(config["train"]["additional_last_layers"]):
             print("Adding additional layers...")
             x = tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=weight_regularisation)(x)
-            x = tf.keras.layers.Dropout(0.4)(x)
+            x = tf.keras.layers.Dropout(config["train"]["dropout_value"])(x)
     output = tf.keras.layers.Dense(2, activation="softmax", name="predictions")(x)
     model = Model(pre_model.layers[0].input, output)
     return model
