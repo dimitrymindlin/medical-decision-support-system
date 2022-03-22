@@ -25,8 +25,9 @@ finetuning_config = {
         "factor_learning_rate": 0.1,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 5,
-        "additional_last_layers": 1,
-        "weight_regularisation": 0.001,
+        "additional_last_layers": 4,
+        "dropout_value": 0.5,
+        "weight_regularisation": 0.01,
     },
     "test": {
         "batch_size": 16,
