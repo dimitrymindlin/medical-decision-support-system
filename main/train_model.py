@@ -24,15 +24,13 @@ for arg in sys.argv:
 for arg in sys.argv:
     if arg == "--densenet":
         config["model"]["name"] = "densenet"
-        break
-    elif arg == "--vgg":
-        config["model"]["name"] = "vgg"
-        break
-    elif arg == "--resnet":
-        config["model"]["name"] = "resnet"
+        if config == finetuning_config:
+            config["train"]["checkpoint_name"] = "2022-03-23--01.50"
         break
     elif arg == "--inception":
         config["model"]["name"] = "inception"
+        if config == finetuning_config:
+            config["train"]["checkpoint_name"] = "2022-03-21--10.17"
         break
 
 
