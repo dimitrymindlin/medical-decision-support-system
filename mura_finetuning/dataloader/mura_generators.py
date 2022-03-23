@@ -72,11 +72,12 @@ class MuraGenerator(Sequence):
 
 class MuraValidDataGenerator(Sequence):
 
-    def __init__(self, config, image_filenames, labels, batch_size=1):
+    def __init__(self, config, image_filenames, labels, batch_size=1, transform=None):
         self.config = config
         self.image_filenames = image_filenames
         self.labels = labels
         self.batch_size = batch_size
+        self.t = transform
         self.pos_image_paths = [filename for filename in image_filenames if
                                 "positive" in filename]
         self.neg_image_paths = [filename for filename in image_filenames if
@@ -96,6 +97,8 @@ class MuraValidDataGenerator(Sequence):
         ys = []
         for file in batches:
             img = imread(file)
+            if self.t:
+                img = self.t(image=img)["image"]
             if len(img.shape) < 3:
                 img = tf.expand_dims(img, axis=-1)
             if img.shape[-1] != 3:
@@ -145,7 +148,7 @@ def get_mura_loaders(config, batch_size=32, aug_train=None, aug_test=None):
     train_gen = MuraGenerator(config, train_x, train_y, batch_size, aug_train)
     valid_gen = MuraGenerator(config, valid_x, valid_y, batch_size, aug_test)
     test_gen = MuraGenerator(config, test_x, test_y, batch_size, aug_test)
-    test_raw_gen = MuraValidDataGenerator(config, test_x, test_y)
+    test_raw_gen = MuraValidDataGenerator(config, test_x, test_y, transform=aug_test)
 
     print(f"Train data amount: {len(train_y)}")
     print(f"Valid data amount: {len(valid_y)}")
