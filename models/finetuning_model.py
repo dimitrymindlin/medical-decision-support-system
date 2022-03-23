@@ -24,11 +24,20 @@ def get_finetuning_model_from_pretrained_model(pre_model, config):
     return model
 
 
-def get_finetuning_model_from_pretrained_model_hp(model, hp):
-    x = model.layers[-1].output
-    dropout_rate = hp.Choice('dropout_rate', [0.2, 0.3])
-    if hp.Boolean("dropout"):
-        x = tf.keras.layers.Dropout(dropout_rate)(x)  # Regularize with dropout
-    x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-    model = tf.keras.Model(inputs=model.layers[0].input, outputs=x)
+def get_finetuning_model_from_pretrained_model_hp(pre_model, config, hp):
+    if not config["train"]["train_base"]:
+        # Freeze all the layers
+        print("Freezing all layers...")
+        for layer in pre_model.layers[:]:
+            layer.trainable = False
+
+    weight_regularisation = regularizers.l2(hp.Choice("weight_regularisation", [0.01, 0.0005]))
+
+    x = pre_model.layers[-2].output
+    for layer_count in range(hp.Choice("additional_layers", [1, 3])):
+        print("Adding additional layers...")
+        x = tf.keras.layers.Dense(hp.Choice("neurons", [128, 64]), activation='relu', kernel_regularizer=weight_regularisation)(x)
+        x = tf.keras.layers.Dropout(hp.Choice("dropout_value", [0.4, 0.6]))(x)
+    output = tf.keras.layers.Dense(2, activation="softmax", name="predictions")(x)
+    model = Model(pre_model.layers[0].input, output)
     return model
