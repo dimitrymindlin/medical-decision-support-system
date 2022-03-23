@@ -4,63 +4,61 @@ import tensorflow as tf
 # import tensorflow_addons as tfa
 from datetime import datetime
 
-from configs.frozen_hp_config import frozen_hp_config as config
+from sklearn.utils import compute_class_weight
+
+from configs.finetuning_hp_config import finetuning_hp_config
+
 from models.finetuning_model import get_finetuning_model_from_pretrained_model_hp
-from mura_pretraining.dataloader.mura_dataset import MuraDataset
-from models.mura_model import get_mura_model
-from utils.path_constants import PathConstants
+from models.mura_model import WristPredictNet
+
 import keras_tuner as kt
 import sys
+import numpy as np
 
+from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
 from utils.training_utils import get_model_name_from_cli_to_config, print_running_on_gpu
 
-for arg in sys.argv:  # Train whole network with low lr
-    if arg == "--finetune":
-        config["train"]["finetune"] = True
 
-timestamp = datetime.now().strftime("%Y-%m-%d--%H.%M")
+TIMESTAMP = datetime.now().strftime("%Y-%m-%d--%H.%M")
+MODEL_NAME = get_model_name_from_cli_to_config(sys.argv, finetuning_hp_config)
+TRAIN_MODE = finetuning_hp_config["train"]["prefix"]  # one of: [pretrain, finetune, frozen]
+ckp_stage = finetuning_hp_config["train"]["checkpoint_stage"]
+ckp_name = finetuning_hp_config['train']['checkpoint_name']
+PRETRAINED_CKP_PATH = f"checkpoints/{ckp_stage}_{MODEL_NAME}/{ckp_name}/cp.ckpt"
+TF_LOG_DIR = f'tensorboard_logs/logs_{TRAIN_MODE}/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + "/"
+checkpoint_path_name = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/cp.ckpt'
+checkpoint_path = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/'
+
 print_running_on_gpu(tf)
-model_name = get_model_name_from_cli_to_config(sys.argv, config)
-
-if config["train"]["finetune"]:
-    config["train"]["train_base"] = True
-    TF_LOG_DIR = f'{PathConstants.FINETUNE_HP}/' + timestamp
-    GPU_WEIGHT_PATH = f"checkpoints/frozen_{model_name}/best/cp.ckpt"
-else:
-    # Train only last layers
-    GPU_WEIGHT_PATH = f"checkpoints/pre_{model_name}/best/cp.ckpt"  # for cpu prepend "../../"
-    TF_LOG_DIR = f'{PathConstants.FROZEN_HP}/' + timestamp
 
 # Dataset
-dataset = MuraDataset(config, only_wrist_data=True)
+mura_data = MuraGeneratorDataset(finetuning_hp_config)
+y_integers = np.argmax(mura_data.train_y, axis=1)
+class_weights = compute_class_weight(class_weight="balanced",
+                                     classes=np.unique(y_integers),
+                                     y=y_integers)
+d_class_weights = dict(zip(np.unique(y_integers), class_weights))
+
 
 
 # Model Definition
 def build_model(hp):
     # Model Definition
-    config["train"]["use_class_weights"] = hp.Boolean("use_class_weights")
-    config["train"]["batch_size"] = hp.Choice("batch_size", [8, 64])
-    model = get_mura_model(config, include_top=False)
-    model.load_weights(GPU_WEIGHT_PATH).expect_partial()
-    model = get_finetuning_model_from_pretrained_model_hp(model, hp)
+    pre_model = WristPredictNet(finetuning_hp_config).model()
+    model = get_finetuning_model_from_pretrained_model_hp(pre_model, finetuning_hp_config, hp)
+    print(f"Loading pretrained from {finetuning_hp_config['train']['checkpoint_stage']} for {finetuning_hp_config['train']['prefix']}.")
+    model.load_weights(PRETRAINED_CKP_PATH)
 
     # Training params
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-    auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
+    auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(finetuning_hp_config["data"]["class_names"]),
                                from_logits=False, name="auc")
     bin_accuracy = tf.keras.metrics.BinaryAccuracy(name="bin_accuracy")
 
-    """metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
-                                    threshold=config["test"]["F1_threshold"], average='macro')"""
+    learning_rate = hp.Choice('learning_rate', [0.0001, 0.00001])
 
-    # Optimizer and LR
-    # optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
-    if config["train"]["finetune"]:
-        learning_rate = hp.Choice('learning_rate', [0.001, 0.0001, 0.00001])
-    else:
-        learning_rate = hp.Choice('learning_rate', [0.01, 0.001])
     # if optimizer == "adam":
-    optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
+    optimizer = tf.optimizers.Adam(learning_rate)
     """elif optimizer == "sgd":
         optimizer = tf.optimizers.SGD(learning_rate=learning_rate)"""
 
@@ -78,16 +76,16 @@ tuner = kt.Hyperband(
     max_epochs=30,
     directory=TF_LOG_DIR)
 
-tuner.search(dataset.ds_train,
-             validation_data=dataset.ds_val,
-             epochs=config["train"]["epochs"],
-             callbacks=[tf.keras.callbacks.EarlyStopping(patience=config['train']['early_stopping_patience']),
-                        tf.keras.callbacks.ReduceLROnPlateau(
-                            monitor="val_loss",
-                            factor=0.1,
-                            patience=config['train']['patience_learning_rate'],
-                            mode="min",
-                            min_lr=config['train']['min_learning_rate'],
-                        ),
+tuner.search(mura_data.train_loader,
+             validation_data=mura_data.valid_loader,
+             epochs=finetuning_hp_config["train"]["epochs"],
+             class_weights=d_class_weights,
+             callbacks=[tf.keras.callbacks.EarlyStopping(patience=finetuning_hp_config['train']['early_stopping_patience']),
+                        tf.keras.callbacks.ReduceLROnPlateau(monitor='val_auc',
+                                                          factor=finetuning_hp_config["train"]["factor_learning_rate"],
+                                                          patience=finetuning_hp_config["train"]["patience_learning_rate"],
+                                                          min_delta=0.001,
+                                                          verbose=1,
+                                                          min_lr=finetuning_hp_config["train"]["min_learning_rate"]),
                         tf.keras.callbacks.TensorBoard(TF_LOG_DIR)],
              )
