@@ -11,12 +11,6 @@ for arg in sys.argv:
         model_name = "densenet"
         batch_size = 8
         break
-    elif arg == "--vgg":
-        model_name = "vgg"
-        break
-    elif arg == "--resnet":
-        model_name = "resnet"
-        break
     elif arg == "--inception":
         model_name = "inception"
         break
