@@ -6,4 +6,4 @@
 #SBATCH --mail-user=dmindlin@techfak.uni-bielefeld.de
 #SBATCH --mail-type=END
 
-srun inception_finetune_hp.job.sh
+srun inception_hp.job.sh

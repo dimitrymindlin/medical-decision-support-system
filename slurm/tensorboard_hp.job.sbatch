@@ -8,4 +8,4 @@
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-core=1
 
-srun tensorboard_finetune_hp.job.sh
+srun tensorboard_hp.job.sh

@@ -4,8 +4,8 @@ conda activate medical-decision-support-system
 
 cd /media/compute/homes/dmindlin/medical-decision-support-system
 
-tensorboard dev upload --logdir tensorboard_logs/logs_finetune_hp \
-    --name "MDS Finetuning Board" \
-    --description "Final Finetuning of all layers on XR-Wrist" \
+tensorboard dev upload --logdir tensorboard_logs/logs_hp \
+    --name "MDS Direct HP Board" \
+    --description "Direct HP Board" \
     --one_shot
 
