@@ -1,4 +1,4 @@
-finetuning_hp_config = {
+hp_config = {
     "dataset": {
         "download": True,
     },
@@ -10,11 +10,9 @@ finetuning_hp_config = {
         "image_channel": 3,
     },
     "train": {
-        "prefix": "finetuning_hp",
-        "config_name": "finetuning_hp_config",
+        "prefix": "hp",
+        "config_name": "hp",
         "body_parts": ["XR_WRIST"],
-        "checkpoint_stage": "frozen",
-        "checkpoint_name": "2022-03-21--10.17",
         "train_base": True,
         "augmentation": True,
         "use_class_weights": True,

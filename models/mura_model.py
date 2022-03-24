@@ -25,29 +25,57 @@ class WristPredictNet(tf.keras.Model):
 
     def call(self, x):
         x = self.base_model(x)
-        """if self.config["train"]["additional_last_layers"]:
-            x = tf.keras.layers.Dense(256,
-                                      activation='relu',
-                                      kernel_regularizer=self.weight_regularisation)(x)
-            x = tf.keras.layers.Dropout(0.4)(x)
-            x = tf.keras.layers.Dense(128,
-                                      activation='relu',
-                                      kernel_regularizer=self.weight_regularisation)(x)
-            x = tf.keras.layers.Dropout(0.3)(x)"""
+        if self.config["train"]["additional_last_layers"]:
+            for layer_count in range(self.config["train"]["additional_last_layers"]):
+                print("Adding additional layers...")
+                x = tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=self.weight_regularisation)(x)
+                x = tf.keras.layers.Dropout(self.config["train"]["dropout_value"])(x)
         x = self.classifier(x)
         return x
 
     def model(self):
         x = self.base_model.output
-        """if self.config["train"]["additional_last_layers"]:
-            x = tf.keras.layers.Dense(256,
-                                      activation='relu',
+        if self.config["train"]["additional_last_layers"]:
+            for layer_count in range(self.config["train"]["additional_last_layers"]):
+                print("Adding additional layers...")
+                x = tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=self.weight_regularisation)(x)
+                x = tf.keras.layers.Dropout(self.config["train"]["dropout_value"])(x)
+        predictions = self.classifier(x)
+        return tf.keras.Model(inputs=self.img_input, outputs=predictions)
+
+class WristPredictNetHP(tf.keras.Model):
+    "MuraNet Model Class with various base models"
+
+    def __init__(self, config, hp, weights='imagenet'):
+        super(WristPredictNetHP, self).__init__(name='WristPredictNetHP')
+        self.config = config
+        self.weight_regularisation = regularizers.l2(hp.Choice('weight_regularisation', [0.0004, 0.001]))
+        self.additional_layers = hp.Choice('additional_layers', [1, 4])
+        self.dense_neurons = hp.Choice('dense_neurons', [128, 64])
+        self.dropout_value = hp.Choice('dropout_value' [0.4, 0,6])
+        self._input_shape = get_input_shape_from_config(self.config)
+        self.img_input = tf.keras.Input(shape=self._input_shape)
+        self.base_model = get_model_by_name(self.config, self._input_shape, weights, self.img_input)
+        self.base_model.trainable = self.config['train']['train_base']
+        self.classifier = tf.keras.layers.Dense(len(self.config['data']['class_names']), activation="softmax",
+                                                name="predictions")
+
+    def call(self, x):
+        x = self.base_model(x)
+        for layer_count in range(self.additional_layers):
+            print("Adding additional layers...")
+            x = tf.keras.layers.Dense(self.dense_neurons, activation='relu', kernel_regularizer=self.weight_regularisation)(x)
+            x = tf.keras.layers.Dropout(self.dropout_value)(x)
+        x = self.classifier(x)
+        return x
+
+    def model(self):
+        x = self.base_model.output
+        for layer_count in range(self.additional_layers):
+            print("Adding additional layers...")
+            x = tf.keras.layers.Dense(self.dense_neurons, activation='relu',
                                       kernel_regularizer=self.weight_regularisation)(x)
-            x = tf.keras.layers.Dropout(0.4)(x)
-            x = tf.keras.layers.Dense(128,
-                                      activation='relu',
-                                      kernel_regularizer=self.weight_regularisation)(x)
-            x = tf.keras.layers.Dropout(0.3)(x)"""
+            x = tf.keras.layers.Dropout(self.dropout_value)(x)
         predictions = self.classifier(x)
         return tf.keras.Model(inputs=self.img_input, outputs=predictions)
 

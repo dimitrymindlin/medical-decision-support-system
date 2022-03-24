@@ -5,7 +5,7 @@ from datetime import datetime
 
 from sklearn.utils import compute_class_weight
 
-from configs.finetuning_hp_config import hp_config
+from configs.hp_config import hp_config
 
 from models.mura_model import WristPredictNetHP
 
