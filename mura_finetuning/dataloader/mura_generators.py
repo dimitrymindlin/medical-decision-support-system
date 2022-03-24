@@ -1,16 +1,14 @@
 from typing import List
 
-from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 import tensorflow as tf
-import cv2
 from skimage.io import imread
 from sklearn.utils import shuffle
 import numpy as np
 from keras.utils.all_utils import Sequence
 from albumentations import (
-    Compose, HorizontalFlip, CLAHE, Equalize,
+    Compose, HorizontalFlip, CLAHE,
     RandomBrightness, RandomContrast, RandomGamma)
 
 
@@ -55,10 +53,10 @@ class MuraGenerator(Sequence):
         x = []
         for file in batch_x:
             img = imread(file)
-            if self.t:
-                img = self.t(image=img)["image"]
             if len(img.shape) < 3:
                 img = tf.expand_dims(img, axis=-1)
+            if self.t:
+                img = self.t(image=img)["image"]
             if img.shape[-1] != 3:
                 img = tf.image.grayscale_to_rgb(img)
             img = tf.image.resize_with_pad(img, self.config["data"]["image_height"], self.config["data"]["image_width"])
@@ -97,10 +95,10 @@ class MuraValidDataGenerator(Sequence):
         ys = []
         for file in batches:
             img = imread(file)
-            if self.t:
-                img = self.t(image=img)["image"]
             if len(img.shape) < 3:
                 img = tf.expand_dims(img, axis=-1)
+            if self.t:
+                img = self.t(image=img)["image"]
             if img.shape[-1] != 3:
                 img = tf.image.grayscale_to_rgb(img)
             img = tf.image.resize_with_pad(img, self.config["data"]["image_height"], self.config["data"]["image_width"])
