@@ -100,12 +100,12 @@ def train_model(config, print_console=True):
     metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                       from_logits=False)
 
-    metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
-                                    threshold=config["test"]["F1_threshold"], average='macro')
+    """metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
+                                    threshold=config["test"]["F1_threshold"], average='macro')"""
 
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=config["train"]["learning_rate"]),
                   loss='categorical_crossentropy',
-                  metrics=["accuracy", metric_auc, metric_f1])
+                  metrics=["accuracy", metric_auc])
 
     # Model Training
     history = model.fit(mura_data.train_loader,
