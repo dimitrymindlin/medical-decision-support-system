@@ -19,6 +19,8 @@ from utils.training_utils import get_model_name_from_cli_to_config, print_runnin
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d--%H.%M")
 MODEL_NAME = get_model_name_from_cli_to_config(sys.argv, hp_config)
+if MODEL_NAME == "densenet":
+    hp_config["train"]["batch_size"] = 8
 TRAIN_MODE = hp_config["train"]["prefix"]  # one of: [pretrain, finetune, frozen]
 TF_LOG_DIR = f'tensorboard_logs/logs_{TRAIN_MODE}/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + "/"
 print_running_on_gpu(tf)
