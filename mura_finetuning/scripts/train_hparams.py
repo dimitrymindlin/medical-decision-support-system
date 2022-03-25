@@ -7,7 +7,7 @@ from sklearn.utils import compute_class_weight
 
 from configs.hp_config import hp_config
 
-from models.mura_model import WristPredictNetHP, get_working_mura_model_hp
+from models.mura_model import get_working_mura_model_hp
 
 import keras_tuner as kt
 import sys
