@@ -20,13 +20,7 @@ from utils.training_utils import get_model_name_from_cli_to_config, print_runnin
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d--%H.%M")
 MODEL_NAME = get_model_name_from_cli_to_config(sys.argv, hp_config)
 TRAIN_MODE = hp_config["train"]["prefix"]  # one of: [pretrain, finetune, frozen]
-ckp_stage = hp_config["train"]["checkpoint_stage"]
-ckp_name = hp_config['train']['checkpoint_name']
-PRETRAINED_CKP_PATH = f"checkpoints/{ckp_stage}_{MODEL_NAME}/{ckp_name}/cp.ckpt"
 TF_LOG_DIR = f'tensorboard_logs/logs_{TRAIN_MODE}/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + "/"
-checkpoint_path_name = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/cp.ckpt'
-checkpoint_path = f'checkpoints/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + '/'
-
 print_running_on_gpu(tf)
 
 # Dataset
