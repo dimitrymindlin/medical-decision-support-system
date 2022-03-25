@@ -66,7 +66,6 @@ tuner = kt.Hyperband(
 tuner.search(mura_data.train_loader,
              validation_data=mura_data.valid_loader,
              epochs=hp_config["train"]["epochs"],
-             class_weights=d_class_weights,
              callbacks=[tf.keras.callbacks.EarlyStopping(patience=hp_config['train']['early_stopping_patience']),
                         tf.keras.callbacks.ReduceLROnPlateau(monitor='val_auc',
                                                              factor=hp_config["train"]["factor_learning_rate"],
