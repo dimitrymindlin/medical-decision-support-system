@@ -46,12 +46,12 @@ class WristPredictNet(tf.keras.Model):
 class WristPredictNetHP(tf.keras.Model):
     "MuraNet Model Class with various base models"
 
-    def __init__(self, config, hp, weights='imagenet'):
+    def __init__(self, config, hp, weights='imagenet', weight_regularisation_value=0.0004):
         super(WristPredictNetHP, self).__init__(name='WristPredictNetHP')
         self.config = config
-        self.weight_regularisation = regularizers.l2(hp.Choice('weight_regularisation', [0.0004, 0.001]))
+        self.weight_regularisation = regularizers.l2(weight_regularisation_value)
         self.additional_layers = hp.Choice('additional_layers', [1, 4])
-        self.dense_neurons = 128
+        self.dense_neurons = hp.Choice('dense_neurons', [128, 64])
         self.dropout_value = hp.Choice('dropout_value', [0.4, 0.6])
         self._input_shape = get_input_shape_from_config(self.config)
         self.img_input = tf.keras.Input(shape=self._input_shape)

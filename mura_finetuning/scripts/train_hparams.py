@@ -36,7 +36,9 @@ d_class_weights = dict(zip(np.unique(y_integers), class_weights))
 # Model Definition
 def build_model(hp):
     # Model Definition
-    model = WristPredictNetHP(hp_config, hp=hp)
+    weight_regularisation_value = hp.Choice("weight_regularisation", [0.0004, 0.002])
+    print(f"weight regu value: {weight_regularisation_value}")
+    model = WristPredictNetHP(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
     # Training params
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(hp_config["data"]["class_names"]),
