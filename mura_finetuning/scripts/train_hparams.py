@@ -7,7 +7,7 @@ from sklearn.utils import compute_class_weight
 
 from configs.hp_config import hp_config
 
-from models.mura_model import WristPredictNetHP
+from models.mura_model import WristPredictNetHP, get_working_mura_model_hp
 
 import keras_tuner as kt
 import sys
@@ -25,11 +25,11 @@ print_running_on_gpu(tf)
 
 # Dataset
 mura_data = MuraGeneratorDataset(hp_config)
-y_integers = np.argmax(mura_data.train_y, axis=1)
+"""y_integers = np.argmax(mura_data.train_y, axis=1)
 class_weights = compute_class_weight(class_weight="balanced",
                                      classes=np.unique(y_integers),
                                      y=y_integers)
-d_class_weights = dict(zip(np.unique(y_integers), class_weights))
+d_class_weights = dict(zip(np.unique(y_integers), class_weights))"""
 
 
 
@@ -38,7 +38,8 @@ def build_model(hp):
     # Model Definition
     weight_regularisation_value = hp.Choice("weight_regularisation", [0.0004, 0.002])
     print(f"weight regu value: {weight_regularisation_value}")
-    model = WristPredictNetHP(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
+    #model = WristPredictNetHP(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
+    model = get_working_mura_model_hp(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
     # Training params
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(hp_config["data"]["class_names"]),
