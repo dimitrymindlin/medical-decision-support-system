@@ -3,10 +3,6 @@ def get_model_name_from_cli_to_config(sys_argv, config):
     for arg in sys_argv:
         if arg == "--densenet":
             config["model"]["name"] = "densenet"
-        elif arg == "--vgg":
-            config["model"]["name"] = "vgg"
-        elif arg == "--resnet":
-            config["model"]["name"] = "resnet"
         elif arg == "--inception":
             config["model"]["name"] = "inception"
     return config["model"]["name"]
