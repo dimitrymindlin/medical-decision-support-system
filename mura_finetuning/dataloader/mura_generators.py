@@ -53,10 +53,10 @@ class MuraGenerator(Sequence):
         x = []
         for file in batch_x:
             img = imread(file)
-            if len(img.shape) < 3:
-                img = tf.expand_dims(img, axis=-1)
             if self.t:
                 img = self.t(image=img)["image"]
+            if len(img.shape) < 3:
+                img = tf.expand_dims(img, axis=-1)
             if img.shape[-1] != 3:
                 img = tf.image.grayscale_to_rgb(img)
             img = tf.image.resize_with_pad(img, self.config["data"]["image_height"], self.config["data"]["image_width"])
@@ -95,10 +95,10 @@ class MuraValidDataGenerator(Sequence):
         ys = []
         for file in batches:
             img = imread(file)
-            if len(img.shape) < 3:
-                img = tf.expand_dims(img, axis=-1)
             if self.t:
                 img = self.t(image=img)["image"]
+            if len(img.shape) < 3:
+                img = tf.expand_dims(img, axis=-1)
             if img.shape[-1] != 3:
                 img = tf.image.grayscale_to_rgb(img)
             img = tf.image.resize_with_pad(img, self.config["data"]["image_height"], self.config["data"]["image_width"])
