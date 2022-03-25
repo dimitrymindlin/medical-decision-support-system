@@ -69,7 +69,7 @@ class WristPredictNetHP(tf.keras.Model):
         x = self.classifier(x)
         return x
 
-    def model(self):
+    """def model(self):
         x = self.base_model.output
         for layer_count in range(self.additional_layers):
             print("Adding additional layers...")
@@ -77,7 +77,7 @@ class WristPredictNetHP(tf.keras.Model):
                                       kernel_regularizer=self.weight_regularisation)(x)
             x = tf.keras.layers.Dropout(self.dropout_value)(x)
         predictions = self.classifier(x)
-        return tf.keras.Model(inputs=self.img_input, outputs=predictions)
+        return tf.keras.Model(inputs=self.img_input, outputs=predictions)"""
 
 
 def get_working_mura_model():
