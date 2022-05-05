@@ -1,6 +1,7 @@
 direct_training_config = {
     "dataset": {
         "download": True,
+        "transformed": True
     },
     "data": {
         "class_names": ["negative", "positive"],
@@ -23,8 +24,9 @@ direct_training_config = {
         "factor_learning_rate": 0.1,
         "min_learning_rate": 1e-8,
         "early_stopping_patience": 8,
-        "additional_last_layers": 1,
-        "weight_regularisation": 0.0004,
+        "additional_last_layers": 3,
+        "weight_regularisation": 0.002,
+        "dropout_value": 0.4
     },
     "test": {
         "batch_size": 8,
