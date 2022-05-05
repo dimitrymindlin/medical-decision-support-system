@@ -1,8 +1,8 @@
 from keras.callbacks import TensorBoard
-from sklearn.metrics import classification_report
 from tensorboard.plugins.pr_curve import summary as pr_summary
 import tensorflow as tf
 import tensorflow_addons as tfa
+from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, confusion_matrix, classification_report
 import numpy as np
 
 
@@ -88,11 +88,10 @@ class PRTensorBoard(TensorBoard):
 def log_and_pring_evaluation(model, history, data, config, timestamp, file_writer):
     print("Train History")
     print(history)
-    print(f"Kaggel Test Evaluation for {timestamp}")
+    print(f"Test Evaluation for {timestamp}")
     result = model.evaluate(data.test_loader)
     result = dict(zip(model.metrics_names, result))
     result_matrix = [[k, str(w)] for k, w in result.items()]
-
 
     for metric, value in zip(model.metrics_names, result):
         print(metric, ": ", value)
@@ -100,31 +99,33 @@ def log_and_pring_evaluation(model, history, data, config, timestamp, file_write
     m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
     y_pred = model.predict(data.test_loader)
 
-    yp2 = np.argmax(y_pred, axis=1)
-    ya2 = np.argmax(data.test_y, axis=1)
+    y_predicted = np.argmax(y_pred, axis=1)
+    y_true = np.argmax(data.test_y, axis=1)
     print(y_pred.shape, data.test_y.shape)
-    m.update_state(ya2, yp2)
-    print('Kappa score result: ', m.result().numpy())
+    m.update_state(y_true, y_predicted)
+    sk_learn_kapa = cohen_kappa_score(y_true, y_predicted)
+    print('TFA Kappa score result: ', m.result().numpy())
+    print('SKLEARN Kappa score result: ', sk_learn_kapa)
 
-
-
-    vy_data2 = np.argmax(data.test_y, axis=1)
-
-    from sklearn.metrics import confusion_matrix, classification_report
-
-    cm = confusion_matrix(vy_data2, yp2)
-    tn, fp, fn, tp = confusion_matrix(vy_data2, yp2).ravel()
-    result_matrix.append(["Kappa score", str(m.result().numpy())])
+    cm = confusion_matrix(y_true, y_predicted)
+    precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_predicted)
+    tn, fp, fn, tp = confusion_matrix(y_true, y_predicted).ravel()
+    result_matrix.append(["TFA Kappa score", str(m.result().numpy())])
+    result_matrix.append(["SKLEARN Kappa score", str(sk_learn_kapa)])
     result_matrix.append(["TN", str(tn)])
     result_matrix.append(["FP", str(fp)])
     result_matrix.append(["FN", str(fn)])
     result_matrix.append(["TP", str(tp)])
+    result_matrix.append(["Precision", str(precision)])
+    result_matrix.append(["Recall", str(recall)])
+    result_matrix.append(["F1", str(f1_score)])
     with file_writer.as_default():
         tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
     print(cm)
 
-    print(classification_report(vy_data2, yp2))
+    print(classification_report(y_true, y_predicted))
 
+    print("ON TRAIN SET")
     y_pred = model.predict(data.train_loader)
 
     yp3 = np.argmax(y_pred, axis=1)
