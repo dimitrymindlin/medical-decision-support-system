@@ -22,6 +22,15 @@ def get_model_by_name(config, input_shape, weights, img_input=None):
                                                     input_tensor=img_input,
                                                     weights=weights,
                                                     classes=len(config['data']['class_names']))
+    elif config["model"]["name"] == "inceptionResnet":
+        base_model = tf.keras.applications.InceptionResNetV2(
+            include_top=False,
+            weights=weights,
+            input_tensor=img_input,
+            input_shape=input_shape,
+            pooling=config['model']['pooling'],
+            classes=len(config['data']['class_names']),
+        )
 
     else:
         # Inception
