@@ -1,6 +1,7 @@
 hp_config = {
     "dataset": {
         "download": True,
+        "transformed": True
     },
     "data": {
         "class_names": ["negative", "positive"],
