@@ -38,7 +38,7 @@ d_class_weights = dict(zip(np.unique(y_integers), class_weights))"""
 # Model Definition
 def build_model(hp):
     # Model Definition
-    weight_regularisation_value = hp.Choice("weight_regularisation", [0.0004, 0.002])
+    weight_regularisation_value = hp.Choice("weight_regularisation", [0.1, 0.002])
     print(f"weight regu value: {weight_regularisation_value}")
     #model = WristPredictNetHP(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
     model = get_working_mura_model_hp(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
@@ -47,6 +47,7 @@ def build_model(hp):
     auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(hp_config["data"]["class_names"]),
                                from_logits=False, name="auc")
     bin_accuracy = tf.keras.metrics.BinaryAccuracy(name="bin_accuracy")
+    recall = tf.keras.metrics.Recall()
 
     learning_rate = hp.Choice('learning_rate', [0.0001, 0.00001])
 
@@ -58,14 +59,20 @@ def build_model(hp):
     model.compile(
         optimizer=optimizer,
         loss=loss,
-        metrics=[auc, bin_accuracy]
+        metrics=[auc, bin_accuracy, recall]
     )
+
+    # Freeze some layers
+    freeze_layers = hp.Choice('freeze_layers', [0, 148, 249])
+    for layer in model.layers[:freeze_layers]:
+        layer.trainable = False
+
     return model
 
 tuner = kt.Hyperband(
     build_model,
     objective=kt.Objective("val_auc", direction="max"),
-    max_epochs=30,
+    max_epochs=20,
     directory=TF_LOG_DIR)
 
 tuner.search(mura_data.train_loader,
