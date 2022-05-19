@@ -1,5 +1,6 @@
 from typing import List
 
+from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 import tensorflow as tf
@@ -8,22 +9,21 @@ from sklearn.utils import shuffle
 import numpy as np
 from keras.utils.all_utils import Sequence
 from albumentations import (
-    Compose, HorizontalFlip, CLAHE,
-    RandomBrightness, RandomContrast, RandomGamma)
+    Compose, HorizontalFlip, CLAHE, GaussianBlur,
+    RandomBrightness, RandomContrast, RandomGamma, Equalize)
 
 
 class MuraGeneratorDataset():
     def __init__(self, config):
         self.config = config
         self.AUGMENTATIONS_TRAIN = Compose([
-            CLAHE(always_apply=True),
             HorizontalFlip(p=0.5),
             RandomContrast(limit=0.2, p=0.5),
             RandomGamma(gamma_limit=(80, 120), p=0.5),
             RandomBrightness(limit=0.2, p=0.5),
         ])
         self.AUGMENTATIONS_TEST = Compose([
-            CLAHE(always_apply=True)
+            CLAHE(always_apply=False, p=0)
         ])
         self.preprocess_img = preprocess_img
         self.train_loader, self.valid_loader, self.test_loader, self.selected_test_loader, self.train_y, self.test_y = get_mura_loaders(
@@ -234,14 +234,15 @@ def to_categorical(x, y):
     return x, y
 
 
-"""def show_augmentations():
+def show_augmentations():
     albumentation_list = [
         Equalize(always_apply=True),
         CLAHE(always_apply=True),
         HorizontalFlip(p=1),
         RandomContrast(limit=0.6, p=1),
         RandomGamma(gamma_limit=(60, 180), p=1),
-        RandomBrightness(limit=0.5, p=1),
+        RandomBrightness(limit=0.2, p=1),
+        GaussianBlur(p=1),
     ]
     root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
     chosen_image = imread(root + 'MURA-v1.1/train/XR_WRIST/patient00136/study1_positive/image3.png')
@@ -256,7 +257,7 @@ def to_categorical(x, y):
     img_matrix_list.insert(0, chosen_image)
 
     titles_list = ["Original", "Equalize", "CLAHE", "Horizontal Flip", "Random Contrast", "Random Gamma",
-                   "RandomBrightness", "Resizing"]
+                   "RandomBrightness", "Gaussian Blur", "Resizing"]
 
     ncols = 3
     fig, myaxes = plt.subplots(figsize=(20, 15), nrows=3, ncols=ncols, squeeze=True)
@@ -269,6 +270,4 @@ def to_categorical(x, y):
     plt.show()
 
 
-show_augmentations()
-show_augmentations()
-show_augmentations()"""
+#show_augmentations()
