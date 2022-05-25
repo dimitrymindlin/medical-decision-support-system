@@ -107,6 +107,10 @@ def train_model(config, print_console=True):
                   loss='categorical_crossentropy',
                   metrics=["accuracy", metric_auc])
 
+    if config["train"]["freezing_layers"] > 0:
+        for layer in model.layers[:config["train"]["freezing_layers"]]:
+            layer.trainable = False
+
     # Model Training
     history = model.fit(mura_data.train_loader,
                         epochs=config["train"]["epochs"],
