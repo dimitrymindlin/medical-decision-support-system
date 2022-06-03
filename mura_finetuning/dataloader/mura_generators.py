@@ -22,15 +22,12 @@ class MuraGeneratorDataset():
             RandomGamma(gamma_limit=(80, 120), p=0.5),
             RandomBrightness(limit=0.2, p=0.5),
         ])
-        self.AUGMENTATIONS_TEST = Compose([
-            CLAHE(always_apply=False, p=0)
-        ])
+
         self.preprocess_img = preprocess_img
         self.train_loader, self.valid_loader, self.test_loader, self.selected_test_loader, self.train_y, self.test_y = get_mura_loaders(
             config,
             batch_size=self.config["train"]["batch_size"],
             aug_train=self.AUGMENTATIONS_TRAIN,
-            aug_test=self.AUGMENTATIONS_TEST
         )
 
 
@@ -205,6 +202,7 @@ def get_mura_loaders(config, batch_size=32, aug_train=None, aug_test=None):
     valid_x, valid_y = to_categorical(valid_x, valid_y)
     test_x, test_y = to_categorical(test_x, test_y)
 
+
     if not config["train"]["augmentation"]:
         aug_train = aug_test  # Just make CLAHE
     train_gen = MuraGenerator(config, train_x, train_y, batch_size, aug_train)
@@ -236,31 +234,27 @@ def to_categorical(x, y):
 
 def show_augmentations():
     albumentation_list = [
-        Equalize(always_apply=True),
-        CLAHE(always_apply=True),
         HorizontalFlip(p=1),
-        RandomContrast(limit=0.6, p=1),
         RandomGamma(gamma_limit=(60, 180), p=1),
-        RandomBrightness(limit=0.2, p=1),
-        GaussianBlur(p=1),
+        RandomBrightness(limit=0.4, p=1),
     ]
     root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
-    chosen_image = imread(root + 'MURA-v1.1/train/XR_WRIST/patient00136/study1_positive/image3.png')
+    chosen_image = imread(root + 'MURA-v1.1_transformed/train/XR_WRIST/patient00136/study1_positive/image3.png')
     img_matrix_list = []
     for aug_type in albumentation_list:
         img = aug_type(image=chosen_image)['image']
         img_matrix_list.append(img)
-    img_3d = tf.expand_dims(chosen_image, axis=-1)
-    img = tf.image.resize_with_pad(img_3d, 512, 512)
-    img_matrix_list.append(img)
+    #img_3d = tf.expand_dims(img_matrix_list[0], axis=-1)
+    #img = tf.image.resize_with_pad(img_3d, 512, 512)
+    #img_matrix_list.append(img)
 
     img_matrix_list.insert(0, chosen_image)
 
-    titles_list = ["Original", "Equalize", "CLAHE", "Horizontal Flip", "Random Contrast", "Random Gamma",
-                   "RandomBrightness", "Gaussian Blur", "Resizing"]
+    titles_list = ["Original", "Horizontal Flip", "Random Gamma",
+                   "RandomBrightness"]
 
-    ncols = 3
-    fig, myaxes = plt.subplots(figsize=(20, 15), nrows=3, ncols=ncols, squeeze=True)
+    ncols = 2
+    fig, myaxes = plt.subplots(figsize=(20, 15), nrows=2, ncols=ncols, squeeze=True)
     fig.suptitle("Augmentation", fontsize=30)
     # fig.subplots_adjust(wspace=0.3)
     # fig.subplots_adjust(hspace=0.3)
