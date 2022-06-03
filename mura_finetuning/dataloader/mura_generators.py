@@ -170,11 +170,11 @@ def get_mura_loaders(config, batch_size=32, aug_train=None, aug_test=None):
         root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
         #root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
         if train:
-            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
+            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1_transformed/train_image_paths.csv"
             #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
 
         else:
-            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
+            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1_transformed/valid_image_paths.csv"
             #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
 
         with open(csv_path, 'rb') as F:
