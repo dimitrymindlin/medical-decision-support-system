@@ -10,20 +10,20 @@ from mura_finetuning.dataloader.mura_wrist_tfds import MuraWristImages
 
 pretraining_config["dataset"]["download"] = True
 
-"""(train, validation, test), info = tfds.load(
+(train, validation, test), info = tfds.load(
             'MuraWristImages',
             split=['train[:80%]', 'train[80%:]', 'test'],
             shuffle_files=True,
             as_supervised=True,
-            download=mura_config["dataset"]["download"],
+            download=True,
             with_info=True,
         )
 
-fig = tfds.visualization.show_examples(train, info)
-plt.show()
-"""
-dataset = MuraDataset(pretraining_config)
+#fig = tfds.visualization.show_examples(train, info)
+#plt.show()
+
+#dataset = MuraDataset(pretraining_config)
 
 #dataset.benchmark()
 
-get_num_of_samples(dataset)
+#get_num_of_samples(dataset)
