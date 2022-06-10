@@ -14,10 +14,10 @@ direct_training_config = {
     "train": {
         "body_parts": ["XR_WRIST"],
         "prefix": "direct",
-        "train_base": False,
+        "train_base": True,
         "augmentation": True,
-        "use_class_weights": False,
-        "batch_size": 16,
+        "use_class_weights": True,
+        "batch_size": 2,
         "epochs": 60,
         "learning_rate": 0.0001,
         "patience_learning_rate": 2,
