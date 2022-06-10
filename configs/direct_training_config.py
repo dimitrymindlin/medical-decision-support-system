@@ -14,7 +14,7 @@ direct_training_config = {
     "train": {
         "body_parts": ["XR_WRIST"],
         "prefix": "direct",
-        "train_base": True,
+        "train_base": False,
         "augmentation": True,
         "use_class_weights": True,
         "batch_size": 8,
