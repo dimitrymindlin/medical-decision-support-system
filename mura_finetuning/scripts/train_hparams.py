@@ -38,7 +38,10 @@ d_class_weights = dict(zip(np.unique(y_integers), class_weights))"""
 # Model Definition
 def build_model(hp):
     # Model Definition
-    weight_regularisation_value = hp.Choice("weight_regularisation", [0.1, 0.002])
+    batch_size = hp.Choice("weight_regularisation", [1, 2, 8])
+    hp_config["train"]["batch_size"] = batch_size
+    mura_data = MuraGeneratorDataset(hp_config)
+    weight_regularisation_value = hp.Choice("weight_regularisation", [0.1, 0.2])
     print(f"weight regu value: {weight_regularisation_value}")
     #model = WristPredictNetHP(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
     model = get_working_mura_model_hp(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
@@ -49,7 +52,7 @@ def build_model(hp):
     bin_accuracy = tf.keras.metrics.BinaryAccuracy(name="bin_accuracy")
     recall = tf.keras.metrics.Recall()
 
-    learning_rate = hp.Choice('learning_rate', [0.0001, 0.00001])
+    learning_rate = 0.0001
 
     # if optimizer == "adam":
     optimizer = tf.optimizers.Adam(learning_rate)
