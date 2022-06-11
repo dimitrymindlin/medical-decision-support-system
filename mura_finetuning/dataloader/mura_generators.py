@@ -24,7 +24,7 @@ class MuraGeneratorDataset():
         ])
 
         self.preprocess_img = preprocess_img
-        self.train_loader, self.valid_loader, self.test_loader, self.selected_test_loader, self.train_y, self.test_y = get_mura_loaders(
+        self.train_loader, self.valid_loader, self.test_loader, self.selected_test_loader, self.train_y, self.test_y, self.valid_y = get_mura_loaders(
             config,
             batch_size=self.config["train"]["batch_size"],
             aug_train=self.AUGMENTATIONS_TRAIN,
@@ -150,8 +150,6 @@ class Test_img_data_generator(Sequence):
         for i, batch in enumerate(batches):
             for file in batch:
                 img = imread(file)
-                if self.t:
-                    img = self.t(image=img)["image"]
                 if len(img.shape) < 3:
                     img = tf.expand_dims(img, axis=-1)
                 if img.shape[-1] != 3:
@@ -170,11 +168,11 @@ def get_mura_loaders(config, batch_size=32, aug_train=None, aug_test=None):
         root = '../tensorflow_datasets/downloads/cjinny_mura-v11/'
         #root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
         if train:
-            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1_transformed/train_image_paths.csv"
+            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
             #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/train_image_paths.csv"
 
         else:
-            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1_transformed/valid_image_paths.csv"
+            csv_path = "../tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
             #csv_path = "/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/MURA-v1.1/valid_image_paths.csv"
 
         with open(csv_path, 'rb') as F:
@@ -215,7 +213,7 @@ def get_mura_loaders(config, batch_size=32, aug_train=None, aug_test=None):
     print(f"Valid data amount: {len(valid_y)}")
     print(f"Test data amount: {len(test_y)}")
 
-    return train_gen, valid_gen, test_gen, seleted_test_gen, train_y, test_y
+    return train_gen, valid_gen, test_gen, seleted_test_gen, train_y, test_y, valid_y
 
 
 def preprocess_img(img, model_name="inception"):
@@ -235,8 +233,8 @@ def to_categorical(x, y):
 def show_augmentations():
     albumentation_list = [
         HorizontalFlip(p=1),
-        RandomGamma(gamma_limit=(60, 180), p=1),
-        RandomBrightness(limit=0.4, p=1),
+        RandomGamma(gamma_limit=(40, 80), p=1),
+        RandomBrightness(limit=0.7, p=1),
     ]
     root = '/Users/dimitrymindlin/tensorflow_datasets/downloads/cjinny_mura-v11/'
     chosen_image = imread(root + 'MURA-v1.1_transformed/train/XR_WRIST/patient00136/study1_positive/image3.png')
