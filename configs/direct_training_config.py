@@ -26,7 +26,7 @@ direct_training_config = {
         "early_stopping_patience": 5,
         "additional_last_layers": 1,
         "weight_regularisation": 0.2,
-        "dropout_value": 0.6,
+        "dropout_value": 0.4,
         "freezing_layers": 249
     },
     "test": {
