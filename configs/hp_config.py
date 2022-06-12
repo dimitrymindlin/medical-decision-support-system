@@ -17,7 +17,7 @@ hp_config = {
         "train_base": True,
         "augmentation": True,
         "use_class_weights": True,
-        "batch_size": 16,
+        "batch_size": 2,
         "epochs": 60,
         "learning_rate": 0.0001,
         "patience_learning_rate": 3,
