@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def get_model_name_from_cli_to_config(sys_argv, config):
     # set cli arguments
     for arg in sys_argv:
@@ -14,3 +17,7 @@ def print_running_on_gpu(tf):
         print('Default GPU Device:{}'.format(tf.test.gpu_device_name()))
     else:
         print("Please install GPU version of TF")
+
+
+def get_labels_from_tfds(ds):
+    return np.concatenate([y for x, y in ds], axis=0)

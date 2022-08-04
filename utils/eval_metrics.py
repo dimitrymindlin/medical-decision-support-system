@@ -5,6 +5,8 @@ import tensorflow_addons as tfa
 from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, confusion_matrix, classification_report
 import numpy as np
 
+from dataloader.mura_wrist_dataset import MuraDataset
+
 
 def log_confusion_matrix(dataset, model):
     # Use the model to predict the values from the validation dataset.
@@ -85,22 +87,20 @@ class PRTensorBoard(TensorBoard):
         self.writer.flush()
 
 
-def log_and_pring_evaluation(model, history, data, config, timestamp, file_writer):
-    print("Train History")
-    print(history)
-    print(f"Test Evaluation for {timestamp}")
-    result = model.evaluate(data.test_loader)
+def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer):
+    result = model.evaluate(data.A_B_dataset_test)
     result = dict(zip(model.metrics_names, result))
     result_matrix = [[k, str(w)] for k, w in result.items()]
 
-    for metric, value in zip(model.metrics_names, result):
+    for metric, value in result.items():
         print(metric, ": ", value)
 
     m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
-    y_pred = model.predict(data.test_loader)
+    y_pred = model.predict(data.A_B_dataset_test)
 
     y_predicted = np.argmax(y_pred, axis=1)
     y_true = np.argmax(data.test_y, axis=1)
+    print(classification_report(y_true, y_predicted))
     print(y_pred.shape, data.test_y.shape)
     m.update_state(y_true, y_predicted)
     sk_learn_kapa = cohen_kappa_score(y_true, y_predicted)
@@ -123,10 +123,15 @@ def log_and_pring_evaluation(model, history, data, config, timestamp, file_write
         tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
     print(cm)
 
+    print("Result matrix")
+    print(result_matrix)
+
+    print("Classification Report")
+
     print(classification_report(y_true, y_predicted))
 
     print("ON TRAIN SET")
-    y_pred = model.predict(data.train_loader)
+    y_pred = model.predict(data.A_B_dataset)
 
     yp3 = np.argmax(y_pred, axis=1)
     y_true3 = np.argmax(data.train_y, axis=1)

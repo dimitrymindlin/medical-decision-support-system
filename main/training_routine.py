@@ -7,7 +7,7 @@ from sklearn.utils.class_weight import compute_class_weight
 
 from models.finetuning_model import get_finetuning_model_from_pretrained_model
 from models.mura_model import WristPredictNet
-from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
+from dataloader.mura_wrist_dataset import MuraDataset, get_labels_from_tfds
 from utils.eval_metrics import log_and_pring_evaluation
 
 
@@ -31,8 +31,8 @@ def train_model(config, print_console=True):
         tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
 
     # Load data and class weights
-    mura_data = MuraGeneratorDataset(config)
-    y_integers = np.argmax(mura_data.train_y, axis=1)
+    mura_data = MuraDataset(config)
+    y_integers = get_labels_from_tfds(mura_data.A_B_dataset)
     if config["train"]["use_class_weights"]:
         class_weights = compute_class_weight(class_weight="balanced",
                                              classes=np.unique(y_integers),
@@ -112,16 +112,31 @@ def train_model(config, print_console=True):
             layer.trainable = False
 
     # Model Training
-    history = model.fit(mura_data.train_loader,
+    history = model.fit(mura_data.A_B_dataset,
                         epochs=config["train"]["epochs"],
                         verbose=1,
                         class_weight=d_class_weights,
-                        validation_data=mura_data.valid_loader,
+                        validation_data=mura_data.A_B_dataset_val,
                         callbacks=my_callbacks)
 
     # Evaluation
-    log_and_pring_evaluation(model, history, mura_data, config, TIMESTAMP, file_writer)
+    print("Train History")
+    print(history)
+    print(f"Test Evaluation for {TIMESTAMP}")
+    log_and_pring_evaluation(model, mura_data, config, file_writer)
 
     # Save whole model
     model.save(checkpoint_path + 'model')
     return TIMESTAMP
+
+
+def evaluate_model(config):
+    classifier_folder = f"../checkpoints/2022-06-11--00.44/model"
+    metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
+    model = tf.keras.models.load_model(classifier_folder, custom_objects={'f1_score': metric_f1})
+
+    # Load data and class weights
+    mura_data = MuraDataset(config)
+    y_integers = np.argmax(mura_data.train_y, axis=1)
+
+    log_and_pring_evaluation(model, mura_data, config, None)
