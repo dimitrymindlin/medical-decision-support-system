@@ -43,7 +43,7 @@ def get_model_by_name(config, input_shape, weights, img_input=None):
     return base_model
 
 
-def get_preprocessing_by_name(config, _input_shape):
+def get_preprocessing_by_model_name(config):
     if config["model"]["name"] == "densenet":
         preprocessing_layer = tf.keras.applications.densenet.preprocess_input
     elif config["model"]["name"] == "vgg":
