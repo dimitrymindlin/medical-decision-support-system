@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
 from configs.direct_training_config import direct_training_config as config
 from models.mura_model import WristPredictNet
-from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
+from dataloader.mura_wrist_dataset import MuraDataset
 from utils.eval_metrics import log_and_pring_evaluation
 from utils.path_constants import PathConstants
 from utils.training_utils import get_model_name_from_cli_to_config
@@ -21,8 +21,7 @@ checkpoint_path_name = f'checkpoints/{model_prefix}{model_name}/' + timestamp + 
 checkpoint_path = f'checkpoints/{model_prefix}{model_name}/' + timestamp + '/'
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 
-
-mura_data = MuraGeneratorDataset(config)
+mura_data = MuraDataset(config)
 
 y_integers = np.argmax(mura_data.train_y, axis=1)
 
@@ -68,13 +67,11 @@ my_callbacks = [
 
 model = WristPredictNet(config).model()
 
-
 metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                   from_logits=False)
 
 metric_f1 = tfa.metrics.F1Score(num_classes=len(config["data"]["class_names"]),
                                 threshold=config["test"]["F1_threshold"], average='macro')
-
 
 model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001),
               loss='categorical_crossentropy',
@@ -86,14 +83,14 @@ config_matrix = [[k, str(w)] for k, w in config["train"].items()]
 
 with file_writer.as_default():
     tf.summary.text("config", tf.convert_to_tensor(config_matrix), step=0)
-history = model.fit(mura_data.train_loader,
-                              epochs=40,
-                              verbose=1,
-                              class_weight=d_class_weights,  # d_class_weights
-                              validation_data=mura_data.valid_loader,
-                              callbacks=my_callbacks)
+history = model.fit(mura_data.A_B_dataset,
+                    epochs=40,
+                    verbose=1,
+                    class_weight=d_class_weights,  # d_class_weights
+                    validation_data=mura_data.A_B_dataset_val,
+                    callbacks=my_callbacks)
 
-log_and_pring_evaluation(model, history, mura_data, config, timestamp, file_writer)
+log_and_pring_evaluation(model, mura_data, config, file_writer)
 
-#Save whole model
+# Save whole model
 model.save(checkpoint_path + 'model')
