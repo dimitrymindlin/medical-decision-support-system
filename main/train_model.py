@@ -5,6 +5,7 @@ from configs.finetuning_config import finetuning_config
 from configs.frozen_config import frozen_config
 from configs.pretraining_config import pretraining_config
 from main.training_routine import train_model
+import tensorflow as tf
 
 config = direct_training_config
 for arg in sys.argv:
@@ -32,9 +33,8 @@ for arg in sys.argv:
         if config == finetuning_config:
             config["train"]["checkpoint_name"] = "2022-03-21--10.17"
         break
-    elif arg =="inceptionResnet":
+    elif arg == "inceptionResnet":
         config["model"]["name"] = "inceptionResnet"
-
 
 """config = finetuning_config
 config["train"]["prefix"] = "frozen"
@@ -44,4 +44,9 @@ config["train"]["learning_rate"]: 0.001"""
 config["train"]["epochs"] = 1
 
 print(f'Using {config["train"]["prefix"]} config')"""
+if len(tf.config.list_physical_devices('GPU')) == 0:
+    TFDS_PATH = "/Users/dimitrymindlin/tensorflow_datasets"
+else:
+    TFDS_PATH = "../tensorflow_datasets"
+config["data"]["tfds_path"] = TFDS_PATH
 train_model(config)
