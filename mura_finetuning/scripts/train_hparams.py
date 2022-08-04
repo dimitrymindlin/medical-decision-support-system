@@ -3,19 +3,15 @@
 import tensorflow as tf
 from datetime import datetime
 
-from sklearn.utils import compute_class_weight
-
 from configs.hp_config import hp_config
 
 from models.mura_model import get_working_mura_model_hp
 
 import keras_tuner as kt
 import sys
-import numpy as np
 
-from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
+from dataloader.mura_wrist_dataset import MuraDataset
 from utils.training_utils import get_model_name_from_cli_to_config, print_running_on_gpu
-
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d--%H.%M")
 MODEL_NAME = get_model_name_from_cli_to_config(sys.argv, hp_config)
@@ -25,25 +21,17 @@ TRAIN_MODE = hp_config["train"]["prefix"]  # one of: [pretrain, finetune, frozen
 TF_LOG_DIR = f'tensorboard_logs/logs_{TRAIN_MODE}/{TRAIN_MODE}_{MODEL_NAME}/' + TIMESTAMP + "/"
 print_running_on_gpu(tf)
 
-# Dataset
-mura_data = MuraGeneratorDataset(hp_config)
-"""y_integers = np.argmax(mura_data.train_y, axis=1)
-class_weights = compute_class_weight(class_weight="balanced",
-                                     classes=np.unique(y_integers),
-                                     y=y_integers)
-d_class_weights = dict(zip(np.unique(y_integers), class_weights))"""
-
+mura_data = MuraDataset(hp_config)
 
 
 # Model Definition
 def build_model(hp):
     # Model Definition
-    batch_size = hp.Choice("weight_regularisation", [1, 2, 8])
+    batch_size = hp.Choice("batch_size", [2, 8, 16])
     hp_config["train"]["batch_size"] = batch_size
-    mura_data = MuraGeneratorDataset(hp_config)
     weight_regularisation_value = hp.Choice("weight_regularisation", [0.1, 0.2])
     print(f"weight regu value: {weight_regularisation_value}")
-    #model = WristPredictNetHP(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
+    # model = WristPredictNetHP(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
     model = get_working_mura_model_hp(hp_config, hp=hp, weight_regularisation_value=weight_regularisation_value)
     # Training params
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
@@ -52,7 +40,7 @@ def build_model(hp):
     bin_accuracy = tf.keras.metrics.BinaryAccuracy(name="bin_accuracy")
     recall = tf.keras.metrics.Recall()
 
-    learning_rate = 0.0001
+    learning_rate = hp.Choice("lr", [1e-4, 1e-3])
 
     # if optimizer == "adam":
     optimizer = tf.optimizers.Adam(learning_rate)
@@ -72,14 +60,15 @@ def build_model(hp):
 
     return model
 
+
 tuner = kt.Hyperband(
     build_model,
     objective=kt.Objective("val_auc", direction="max"),
     max_epochs=20,
     directory=TF_LOG_DIR)
 
-tuner.search(mura_data.train_loader,
-             validation_data=mura_data.valid_loader,
+tuner.search(mura_data.A_B_dataset,
+             validation_data=mura_data.A_B_dataset_val,
              epochs=hp_config["train"]["epochs"],
              callbacks=[tf.keras.callbacks.EarlyStopping(patience=hp_config['train']['early_stopping_patience']),
                         tf.keras.callbacks.ReduceLROnPlateau(monitor='val_auc',
