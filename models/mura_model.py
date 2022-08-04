@@ -44,14 +44,14 @@ class WristPredictNet(tf.keras.Model):
         return tf.keras.Model(inputs=self.img_input, outputs=predictions)
 
 
-def get_working_mura_model_hp(config, hp, weight_regularisation_value):
+def get_working_mura_model_hp(config, hp, weight_regularisation_value, model_name="imagenet"):
     weight_regularisation = regularizers.l2(weight_regularisation_value)
     additional_layers = hp.Choice('additional_layers', [1, 4])
     dense_neurons = hp.Choice('dense_neurons', [128, 64])
     dropout_value = hp.Choice('dropout_value', [0.4, 0.6])
     _input_shape = get_input_shape_from_config(config)
     img_input = tf.keras.Input(shape=_input_shape)
-    base_model = get_model_by_name(config, _input_shape, "imagenet", img_input)
+    base_model = get_model_by_name(config, _input_shape, model_name, img_input)
     base_model.trainable = config['train']['train_base']
     classifier = tf.keras.layers.Dense(len(config['data']['class_names']), activation="softmax",
                                             name="predictions")

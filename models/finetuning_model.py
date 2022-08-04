@@ -25,12 +25,6 @@ def get_finetuning_model_from_pretrained_model(pre_model, config):
 
 
 def get_finetuning_model_from_pretrained_model_hp(pre_model, config, hp):
-    if not config["train"]["train_base"]:
-        # Freeze all the layers
-        print("Freezing all layers...")
-        for layer in pre_model.layers[:]:
-            layer.trainable = False
-
     weight_regularisation = regularizers.l2(hp.Choice("weight_regularisation", [0.01, 0.0005]))
 
     x = pre_model.layers[-2].output

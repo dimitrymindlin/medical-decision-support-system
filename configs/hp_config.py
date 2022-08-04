@@ -33,8 +33,8 @@ hp_config = {
         "F1_threshold": 0.5,
     },
     "model": {
-        "name": "inception",
+        "name": "densenet",
         "pretrained": True,
-        "pooling": "max",
+        "pooling": "avg",
     }
 }
