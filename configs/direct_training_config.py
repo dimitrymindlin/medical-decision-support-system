@@ -17,7 +17,7 @@ direct_training_config = {
         "train_base": True,
         "augmentation": True,
         "use_class_weights": True,
-        "batch_size": 2,
+        "batch_size": 8,
         "epochs": 60,
         "learning_rate": 0.0001,
         "patience_learning_rate": 2,
@@ -26,7 +26,7 @@ direct_training_config = {
         "early_stopping_patience": 5,
         "additional_last_layers": 1,
         "weight_regularisation": 0.2,
-        "dropout_value": 0.4,
+        "dropout_value": 0.6,
         "freezing_layers": 249
     },
     "test": {
