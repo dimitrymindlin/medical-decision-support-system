@@ -24,7 +24,8 @@ for arg in sys.argv:
         continue
     if arg.startswith("--2022"):
         print(arg)
-        clf_path = arg
+        clf_path = arg.replace("--", "")
+        clf_path = "checkpoints/" + clf_path
 
 
 def evaluate_model(config, clf_path):
