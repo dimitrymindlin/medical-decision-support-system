@@ -119,14 +119,15 @@ def train_model(config, print_console=True):
                         validation_data=mura_data.A_B_dataset_val,
                         callbacks=my_callbacks)
 
+    # Save whole model
+    model.save(checkpoint_path + 'model')
+
     # Evaluation
     print("Train History")
     print(history)
     print(f"Test Evaluation for {TIMESTAMP}")
     log_and_pring_evaluation(model, mura_data, config, file_writer)
 
-    # Save whole model
-    model.save(checkpoint_path + 'model')
     return TIMESTAMP
 
 
