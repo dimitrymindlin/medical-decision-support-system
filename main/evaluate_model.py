@@ -28,6 +28,12 @@ for arg in sys.argv:
         clf_path = arg[2:]
         clf_path = "checkpoints/direct_densenet/" + clf_path  # TODO: Make not fixed
 
+if len(tf.config.list_physical_devices('GPU')) == 0:
+    TFDS_PATH = "/Users/dimitrymindlin/tensorflow_datasets"
+else:
+    TFDS_PATH = "../tensorflow_datasets"
+config["data"]["tfds_path"] = TFDS_PATH
+
 
 def evaluate_model(config, clf_path):
     # clf_path = f"../checkpoints/2022-06-11--00.44/model"
