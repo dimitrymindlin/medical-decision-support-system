@@ -25,7 +25,7 @@ for arg in sys.argv:
     if arg.startswith("--2022"):
         print(arg)
         clf_path = arg[2:]
-        clf_path = "checkpoints/" + clf_path
+        clf_path = "checkpoints/direct_densenet" + clf_path  # TODO: Make not fixed
 
 
 def evaluate_model(config, clf_path):
