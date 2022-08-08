@@ -20,4 +20,5 @@ def print_running_on_gpu(tf):
 
 
 def get_labels_from_tfds(ds):
-    return np.concatenate([y for x, y in ds], axis=0)
+    labels = np.concatenate([y for x, y in ds], axis=0)  # categorical labels [[1,0],[0,1]]
+    return labels[:, 1]
