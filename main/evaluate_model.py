@@ -12,17 +12,18 @@ import tensorflow as tf
 for arg in sys.argv:
     if arg == "--pretrain":
         config = pretraining_config
-        break
+        continue
     elif arg == "--frozen":  # Freeze base and train last layers
         config = frozen_config
-        break
+        continue
     elif arg == "--finetuning":  # Finetune whole model with low lr
         config = finetuning_config
-        break
+        continue
     elif arg == "--direct":
         config = direct_training_config
-        break
+        continue
     if arg.startswith("--2022"):
+        print(arg)
         clf_path = arg
 
 
