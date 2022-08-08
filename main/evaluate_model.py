@@ -29,7 +29,7 @@ for arg in sys.argv:
 
 def evaluate_model(config, clf_path):
     # clf_path = f"../checkpoints/2022-06-11--00.44/model"
-    if not clf_path.contains("/model"):
+    if "/model" not in clf_path:
         clf_path += "/model"
     metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
     model = tf.keras.models.load_model(clf_path, custom_objects={'f1_score': metric_f1})
