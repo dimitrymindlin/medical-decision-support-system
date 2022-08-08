@@ -9,6 +9,7 @@ from models.mura_model import WristPredictNet
 from utils.eval_metrics import log_and_pring_evaluation
 import tensorflow_addons as tfa
 import tensorflow as tf
+import tensorflow.keras as keras
 
 for arg in sys.argv:
     if arg == "--pretrain":
@@ -38,6 +39,11 @@ def evaluate_model(config, clf_path):
         clf_path += "/cp.ckpt"
     pre_model = WristPredictNet(config).model()
     model = pre_model.load_weights(clf_path)
+    metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
+                                      from_logits=False)
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=config["train"]["learning_rate"]),
+                  loss='categorical_crossentropy',
+                  metrics=["accuracy", metric_auc])
     # metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
     # model = tf.keras.models.load_model(clf_path, custom_objects={'f1_score': metric_f1})
 
