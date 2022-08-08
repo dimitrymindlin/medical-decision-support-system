@@ -34,7 +34,7 @@ def evaluate_model(config, clf_path):
         clf_path += "/model"
     metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
     # model = tf.keras.models.load_model(clf_path, custom_objects={'f1_score': metric_f1})
-    model = tf.keras.models.load_model(f"checkpoints/inception_{args.dataset}/2022-06-04--00.05/model", compile=False)
+    model = tf.keras.models.load_model(clf_path, compile=False)
 
     # Load data and class weights
     mura_data = MuraDataset(config)
