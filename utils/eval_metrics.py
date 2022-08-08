@@ -99,7 +99,7 @@ def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer):
     y_pred = model.predict(data.A_B_dataset_test)
 
     y_predicted = np.argmax(y_pred, axis=1)
-    y_true = np.argmax(data.test_y, axis=1)
+    y_true = data.test_y
     print(classification_report(y_true, y_predicted))
     print(y_pred.shape, data.test_y.shape)
     m.update_state(y_true, y_predicted)
@@ -134,7 +134,7 @@ def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer):
     y_pred = model.predict(data.A_B_dataset)
 
     yp3 = np.argmax(y_pred, axis=1)
-    y_true3 = np.argmax(data.train_y, axis=1)
+    y_true3 = data.train_y
 
     cm2 = confusion_matrix(y_true3, yp3)
     print(cm2)

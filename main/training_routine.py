@@ -137,6 +137,5 @@ def evaluate_model(config):
 
     # Load data and class weights
     mura_data = MuraDataset(config)
-    y_integers = np.argmax(mura_data.train_y, axis=1)
 
     log_and_pring_evaluation(model, mura_data, config, None)
