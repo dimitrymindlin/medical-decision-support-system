@@ -22,7 +22,7 @@ for arg in sys.argv:
     elif arg == "--direct":
         config = direct_training_config
         break
-    if arg.startswith("2022"):
+    if arg.startswith("--2022"):
         clf_path = arg
 
 
@@ -37,6 +37,6 @@ def evaluate_model(config, clf_path):
     mura_data = MuraDataset(config)
 
     log_and_pring_evaluation(model, mura_data, config, None)
-    
+
 
 evaluate_model(config, clf_path)
