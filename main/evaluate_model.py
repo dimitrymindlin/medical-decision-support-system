@@ -32,7 +32,7 @@ for arg in sys.argv:
 def evaluate_model(config, clf_path):
     # clf_path = f"../checkpoints/2022-06-11--00.44/model"
     if "/model" not in clf_path:
-        clf_path += "/model"
+        clf_path += "/cp.ckpt"
     pre_model = WristPredictNet(config).model()
     model = pre_model.load_weights(clf_path)
     # metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
