@@ -36,19 +36,10 @@ config["data"]["tfds_path"] = TFDS_PATH
 def evaluate_model(config, clf_path):
     # clf_path = f"../checkpoints/2022-06-11--00.44/model"
     if "/model" not in clf_path:
-        clf_path += "/cp.ckpt"
-    model = WristPredictNet(config).model()
-    model.load_weights(clf_path)
-    model.save(clf_path + 'model')
-    print("SAVED")
-    quit()
-    metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
-                                      from_logits=False)
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=config["train"]["learning_rate"]),
-                  loss='categorical_crossentropy',
-                  metrics=["accuracy", metric_auc])
-    # metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
-    # model = tf.keras.models.load_model(clf_path, custom_objects={'f1_score': metric_f1})
+        clf_path += "/model"
+
+    metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
+    model = tf.keras.models.load_model(clf_path, custom_objects={'f1_score': metric_f1})
 
     # Load data and class weights
     mura_data = MuraDataset(config)
