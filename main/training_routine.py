@@ -129,14 +129,3 @@ def train_model(config, print_console=True):
     log_and_pring_evaluation(model, mura_data, config, file_writer)
 
     return TIMESTAMP
-
-
-def evaluate_model(config):
-    classifier_folder = f"../checkpoints/2022-06-11--00.44/model"
-    metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
-    model = tf.keras.models.load_model(classifier_folder, custom_objects={'f1_score': metric_f1})
-
-    # Load data and class weights
-    mura_data = MuraDataset(config)
-
-    log_and_pring_evaluation(model, mura_data, config, None)
