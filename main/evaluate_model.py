@@ -38,9 +38,14 @@ def evaluate_model(config, clf_path):
     if "/model" not in clf_path:
         clf_path += "/model"
 
-    metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
-    model = tf.keras.models.load_model(clf_path, custom_objects={'f1_score': metric_f1})
-
+    # metric_f1 = tfa.metrics.F1Score(num_classes=2, threshold=0.5, average='macro')
+    metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
+                                      from_logits=False)
+    model = tf.keras.models.load_model(clf_path)
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=config["train"]["learning_rate"]),
+                  loss='categorical_crossentropy',
+                  metrics=["accuracy", metric_auc])
+    model.compile()
     # Load data and class weights
     mura_data = MuraDataset(config)
 
