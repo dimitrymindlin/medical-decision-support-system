@@ -39,6 +39,9 @@ def evaluate_model(config, clf_path):
         clf_path += "/cp.ckpt"
     pre_model = WristPredictNet(config).model()
     model = pre_model.load_weights(clf_path)
+    model.save(clf_path + 'model')
+    print("SAVED")
+    quit()
     metric_auc = tf.keras.metrics.AUC(curve='ROC', multi_label=True, num_labels=len(config["data"]["class_names"]),
                                       from_logits=False)
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=config["train"]["learning_rate"]),
@@ -51,7 +54,6 @@ def evaluate_model(config, clf_path):
     mura_data = MuraDataset(config)
 
     log_and_pring_evaluation(model, mura_data, config, None)
-    model.save(clf_path + 'model')
 
 
 evaluate_model(config, clf_path)
