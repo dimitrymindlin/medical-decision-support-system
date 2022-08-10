@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
 from configs.pretraining_config import pretraining_config as config
 from models.mura_model import WristPredictNet
-from mura_finetuning.dataloader.mura_generators import MuraGeneratorDataset
+from dataloader.mura_wrist_dataset import MuraDataset
 from utils.eval_metrics import log_and_pring_evaluation
 from utils.path_constants import PathConstants
 from utils.training_utils import get_model_name_from_cli_to_config
@@ -21,8 +21,7 @@ checkpoint_path_name = f'checkpoints/{model_prefix}{model_name}/' + timestamp + 
 checkpoint_path = f'checkpoints/{model_prefix}{model_name}/' + timestamp + '/'
 file_writer = tf.summary.create_file_writer(TF_LOG_DIR)
 
-
-mura_data = MuraGeneratorDataset(config)
+mura_data = MuraDataset(config)
 
 y_integers = np.argmax(mura_data.train_y, axis=1)
 
@@ -79,14 +78,14 @@ model.compile(optimizer=keras.optimizers.Adam(learning_rate=config["train"]["lea
               metrics=["accuracy", metric_auc, metric_f1])
 
 # Model Training
-history = model.fit(mura_data.train_loader,
-                              epochs=config["train"]["epochs"],
-                              verbose=1,
-                              class_weight=d_class_weights,
-                              validation_data=mura_data.valid_loader,
-                              callbacks=my_callbacks)
+history = model.fit(mura_data.A_B_dataset,
+                    epochs=config["train"]["epochs"],
+                    verbose=1,
+                    class_weight=d_class_weights,
+                    validation_data=mura_data.A_B_dataset_val,
+                    callbacks=my_callbacks)
 
-log_and_pring_evaluation(model, history, mura_data, config, timestamp, file_writer)
+log_and_pring_evaluation(model, mura_data, config, file_writer)
 
-#Save whole model
+# Save whole model
 model.save(checkpoint_path + 'model')
