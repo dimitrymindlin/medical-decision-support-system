@@ -18,5 +18,6 @@ class MuraDataset():
                 "image_height"],
             special_normalisation=get_preprocessing_by_model_name(config))
         self.train_y = get_labels_from_tfds(self.A_B_dataset)
-        self.test_y = get_labels_from_tfds(self.A_B_dataset_test)
         self.valid_y = get_labels_from_tfds(self.A_B_dataset_val)
+        self.test_y = get_labels_from_tfds(self.A_B_dataset_test)
+

@@ -32,12 +32,11 @@ def train_model(config, print_console=True):
 
     # Load data and class weights
     mura_data = MuraDataset(config)
-    y_integers = get_labels_from_tfds(mura_data.A_B_dataset)
     if config["train"]["use_class_weights"]:
         class_weights = compute_class_weight(class_weight="balanced",
-                                             classes=np.unique(y_integers),
-                                             y=y_integers)
-        d_class_weights = dict(zip(np.unique(y_integers), class_weights))
+                                             classes=np.unique(mura_data.train_y),
+                                             y=mura_data.train_y)
+        d_class_weights = dict(zip(np.unique(mura_data.train_y), class_weights))
     else:
         d_class_weights = None
 

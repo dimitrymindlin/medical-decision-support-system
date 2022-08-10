@@ -87,7 +87,7 @@ class PRTensorBoard(TensorBoard):
         self.writer.flush()
 
 
-def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer):
+def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer=None):
     result = model.evaluate(data.A_B_dataset_test)
     result = dict(zip(model.metrics_names, result))
     result_matrix = [[k, str(w)] for k, w in result.items()]
@@ -95,19 +95,19 @@ def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer):
     for metric, value in result.items():
         print(metric, ": ", value)
 
-    m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=False)
+    m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=True)
     y_pred = model.predict(data.A_B_dataset_test)
 
     y_predicted = np.argmax(y_pred, axis=1)
     y_true = data.test_y
     print(classification_report(y_true, y_predicted))
-    print(y_pred.shape, data.test_y.shape)
+    print(y_predicted.shape, data.test_y.shape)
+    print(confusion_matrix(y_true, y_predicted))
     m.update_state(y_true, y_predicted)
     sk_learn_kapa = cohen_kappa_score(y_true, y_predicted)
     print('TFA Kappa score result: ', m.result().numpy())
     print('SKLEARN Kappa score result: ', sk_learn_kapa)
 
-    cm = confusion_matrix(y_true, y_predicted)
     precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_predicted)
     tn, fp, fn, tp = confusion_matrix(y_true, y_predicted).ravel()
     result_matrix.append(["TFA Kappa score", str(m.result().numpy())])
@@ -119,9 +119,9 @@ def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer):
     result_matrix.append(["Precision", str(precision)])
     result_matrix.append(["Recall", str(recall)])
     result_matrix.append(["F1", str(f1_score)])
-    with file_writer.as_default():
-        tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
-    print(cm)
+    if file_writer:
+        with file_writer.as_default():
+            tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
 
     print("Result matrix")
     print(result_matrix)
@@ -130,7 +130,7 @@ def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer):
 
     print(classification_report(y_true, y_predicted))
 
-    print("ON TRAIN SET")
+    """print("ON TRAIN SET")
     y_pred = model.predict(data.A_B_dataset)
 
     yp3 = np.argmax(y_pred, axis=1)
@@ -139,4 +139,4 @@ def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer):
     cm2 = confusion_matrix(y_true3, yp3)
     print(cm2)
 
-    print(classification_report(y_true3, yp3))
+    print(classification_report(y_true3, yp3))"""
