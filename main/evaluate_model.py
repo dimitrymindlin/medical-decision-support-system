@@ -5,9 +5,7 @@ from configs.finetuning_config import finetuning_config
 from configs.frozen_config import frozen_config
 from configs.pretraining_config import pretraining_config
 from dataloader.mura_wrist_dataset import MuraDataset
-from models.mura_model import WristPredictNet
 from utils.eval_metrics import log_and_pring_evaluation
-import tensorflow_addons as tfa
 import tensorflow as tf
 import tensorflow.keras as keras
 
@@ -29,7 +27,10 @@ for arg in sys.argv:
         clf_path = arg[2:]
         clf_path = "checkpoints/direct_densenet/" + clf_path  # TODO: Make not fixed
 
-TFDS_PATH = "../tensorflow_datasets"
+# TFDS_PATH = "../tensorflow_datasets"
+TFDS_PATH = "/Users/dimitrymindlin/tensorflow_datasets"
+clf_path = "../checkpoints/2022-08-05--15.17/model"
+config = direct_training_config
 config["data"]["tfds_path"] = TFDS_PATH
 
 
@@ -45,7 +46,6 @@ def evaluate_model(config, clf_path):
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=config["train"]["learning_rate"]),
                   loss='categorical_crossentropy',
                   metrics=["accuracy", metric_auc])
-    model.compile()
     # Load data and class weights
     mura_data = MuraDataset(config)
 

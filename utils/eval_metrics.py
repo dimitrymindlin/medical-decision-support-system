@@ -6,6 +6,7 @@ from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, 
 import numpy as np
 
 from dataloader.mura_wrist_dataset import MuraDataset
+from utils.training_utils import get_labels_from_tfds
 
 
 def log_confusion_matrix(dataset, model):
@@ -99,9 +100,9 @@ def log_and_pring_evaluation(model, data: MuraDataset, config, file_writer=None)
     y_pred = model.predict(data.A_B_dataset_test)
 
     y_predicted = np.argmax(y_pred, axis=1)
-    y_true = data.test_y
+    y_true = get_labels_from_tfds(data.A_B_dataset_test)
     print(classification_report(y_true, y_predicted))
-    print(y_predicted.shape, data.test_y.shape)
+    print(y_predicted.shape, y_true.shape)
     print(confusion_matrix(y_true, y_predicted))
     m.update_state(y_true, y_predicted)
     sk_learn_kapa = cohen_kappa_score(y_true, y_predicted)
