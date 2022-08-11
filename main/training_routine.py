@@ -8,7 +8,7 @@ from sklearn.utils.class_weight import compute_class_weight
 from models.finetuning_model import get_finetuning_model_from_pretrained_model
 from models.mura_model import WristPredictNet
 from dataloader.mura_wrist_dataset import MuraDataset, get_labels_from_tfds
-from utils.eval_metrics import log_and_pring_evaluation
+from utils.eval_metrics import log_and_print_evaluation
 
 
 def train_model(config, print_console=True):
@@ -125,6 +125,6 @@ def train_model(config, print_console=True):
     print("Train History")
     print(history)
     print(f"Test Evaluation for {TIMESTAMP}")
-    log_and_pring_evaluation(model, mura_data, config, file_writer)
+    log_and_print_evaluation(model, mura_data, config, file_writer)
 
     return TIMESTAMP

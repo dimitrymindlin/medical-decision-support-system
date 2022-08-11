@@ -9,7 +9,7 @@ from sklearn.utils.class_weight import compute_class_weight
 from configs.pretraining_config import pretraining_config as config
 from models.mura_model import WristPredictNet
 from dataloader.mura_wrist_dataset import MuraDataset
-from utils.eval_metrics import log_and_pring_evaluation
+from utils.eval_metrics import log_and_print_evaluation
 from utils.path_constants import PathConstants
 from utils.training_utils import get_model_name_from_cli_to_config
 
@@ -85,7 +85,7 @@ history = model.fit(mura_data.A_B_dataset,
                     validation_data=mura_data.A_B_dataset_val,
                     callbacks=my_callbacks)
 
-log_and_pring_evaluation(model, mura_data, config, file_writer)
+log_and_print_evaluation(model, mura_data, config, file_writer)
 
 # Save whole model
 model.save(checkpoint_path + 'model')

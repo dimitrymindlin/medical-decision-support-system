@@ -88,15 +88,11 @@ class PRTensorBoard(TensorBoard):
         self.writer.flush()
 
 
-def log_and_pring_evaluation(model, data, config, file_writer=None):
-    #result = model.evaluate(data.A_B_dataset_test)
-    result = model.evaluate(data.test_loader)
-    #result = dict(zip(model.metrics_names, result))
-    #result_matrix = [[k, str(w)] for k, w in result.items()]
-    result_matrix = dict(zip(model.metrics_names, result))
-
-    for metric, value in result.items():
-        print(metric, ": ", value)
+def log_and_print_evaluation(model, data, config, file_writer=None):
+    result = model.evaluate(data.A_B_dataset_test)
+    result = dict(zip(model.metrics_names, result))
+    result_matrix = [[k, str(w)] for k, w in result.items()]
+    print(result_matrix)
 
     m = tfa.metrics.CohenKappa(num_classes=2, sparse_labels=True)
     y_pred = model.predict(data.A_B_dataset_test)

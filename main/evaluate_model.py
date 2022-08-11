@@ -4,9 +4,8 @@ from configs.direct_training_config import direct_training_config
 from configs.finetuning_config import finetuning_config
 from configs.frozen_config import frozen_config
 from configs.pretraining_config import pretraining_config
-from dataloader.mura_generators import MuraGeneratorDataset
 from dataloader.mura_wrist_dataset import MuraDataset
-from utils.eval_metrics import log_and_pring_evaluation
+from utils.eval_metrics import log_and_print_evaluation
 import tensorflow as tf
 import tensorflow.keras as keras
 
@@ -30,10 +29,11 @@ for arg in sys.argv:
 
 # TFDS_PATH = "../tensorflow_datasets"
 TFDS_PATH = "/Users/dimitrymindlin/tensorflow_datasets"
-#clf_path = "../checkpoints/2022-03-24--12.42/model"  # Inception
-clf_path = "../checkpoints/2022-08-10--03.04/model" # DenseNet
+clf_path = "../checkpoints/2022-03-24--12.42/model"  # Inception
+# clf_path = "../checkpoints/2022-08-10--03.04/model" # DenseNet
 config = direct_training_config
 config["data"]["tfds_path"] = TFDS_PATH
+config["model"]["name"] = "inception"
 
 
 def evaluate_model(config, clf_path):
@@ -49,10 +49,10 @@ def evaluate_model(config, clf_path):
                   loss='categorical_crossentropy',
                   metrics=["accuracy", metric_auc])
     # Load data and class weights
-    #mura_data = MuraDataset(config)
-    mura_data = MuraGeneratorDataset(config)
+    mura_data = MuraDataset(config)
+    # mura_data = MuraGeneratorDataset(config)
 
-    log_and_pring_evaluation(model, mura_data, config, None)
+    log_and_print_evaluation(model, mura_data, config, None)
 
 
 evaluate_model(config, clf_path)
