@@ -118,9 +118,8 @@ def log_and_print_evaluation(model, data, config, file_writer=None):
     result_matrix.append(["Precision", str(precision)])
     result_matrix.append(["Recall", str(recall)])
     result_matrix.append(["F1", str(f1_score)])
-    if file_writer:
-        with file_writer.as_default():
-            tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
+    with file_writer.as_default():
+        tf.summary.text(f"{config['model']['name']}_evaluation", tf.convert_to_tensor(result_matrix), step=0)
 
     print("Result matrix")
     print(result_matrix)

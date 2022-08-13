@@ -33,7 +33,7 @@ for arg in sys.argv:
         if config == finetuning_config:
             config["train"]["checkpoint_name"] = "2022-03-21--10.17"
         break
-    elif arg == "inceptionResnet":
+    elif arg == "--inceptionResnet":
         config["model"]["name"] = "inceptionResnet"
 
 """config = finetuning_config
