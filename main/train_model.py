@@ -47,6 +47,7 @@ print(f'Using {config["train"]["prefix"]} config')"""
 if len(tf.config.list_physical_devices('GPU')) == 0:
     TFDS_PATH = "/Users/dimitrymindlin/tensorflow_datasets"
 else:
-    TFDS_PATH = "../tensorflow_datasets"
+    pass
+TFDS_PATH = "../tensorflow_datasets"
 config["data"]["tfds_path"] = TFDS_PATH
 train_model(config)
